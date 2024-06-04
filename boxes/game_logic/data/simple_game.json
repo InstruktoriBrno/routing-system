@@ -1,0 +1,31 @@
+{
+    "routers": {
+        "0": {},
+        "1": {},
+        "2": {}
+    },
+    "links": [
+        [0, 1],
+        [1, 2],
+        [2, 0]
+    ],
+    "packets": {
+        "0": {
+            "type": "standard",
+            "source": 0,
+            "destination": 2
+        }
+    },
+    "events": [
+        {
+            "type": "linkdown",
+            "timestamp": 3,
+            "edge": [0, 1]
+        },
+        {
+            "type": "linkup",
+            "timestamp": 4,
+            "edge": [0, 1]
+        }
+    ]
+}
