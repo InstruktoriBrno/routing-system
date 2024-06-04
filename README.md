@@ -1,2 +1,2 @@
-# routing-system-front
-Frontend for the game system of The Routing Game
+# routing-system
+Game system of The Routing Game
