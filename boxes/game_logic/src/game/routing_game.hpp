@@ -6,6 +6,7 @@
 #include <string>
 #include <optional>
 #include <cassert>
+#include <bitset>
 
 namespace rg {
 
@@ -169,6 +170,9 @@ public:
     virtual int visit_count() = 0;
     virtual PacketVisit get_visit(int idx) = 0;
     virtual void mark_visit(PacketVisit) = 0;
+
+    virtual std::bitset<32> get_metadata() = 0;
+    virtual void set_metadata(std::bitset<32>) = 0;
 };
 
 UiAction handle_packet_visit(const RoundSetup& setup, CardCommInterface& card);
