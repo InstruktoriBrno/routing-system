@@ -3,6 +3,7 @@
 #include <map>
 #include <set>
 #include <cstdint>
+#include <algorithm>
 #include <string>
 #include <optional>
 #include <cassert>
@@ -33,16 +34,16 @@ public:
     }
 
     void add_connection(RouterId from, RouterId to) {
-        assert(_routers.contains(from));
-        assert(_routers.contains(to));
+        assert(_routers.count(from));
+        assert(_routers.count(to));
 
         _edges[from].insert(to);
         _edges[to].insert(from);
     }
 
     void remove_connection(RouterId from, RouterId to) {
-        assert(_routers.contains(from));
-        assert(_routers.contains(to));
+        assert(_routers.count(from));
+        assert(_routers.count(to));
 
         _edges[from].erase(to);
         _edges[to].erase(from);
@@ -53,16 +54,16 @@ public:
     }
 
     const std::set<RouterId>& neighbors(RouterId router_id) const {
-        assert(_routers.contains(router_id));
+        assert(_routers.count(router_id));
 
         return _edges.find(router_id)->second;
     }
 
     const bool are_neighbors(RouterId from, RouterId to) const {
-        assert(_routers.contains(from));
-        assert(_routers.contains(to));
+        assert(_routers.count(from));
+        assert(_routers.count(to));
 
-        return _edges.find(from)->second.contains(to);
+        return _edges.find(from)->second.count(to);
     }
 };
 
