@@ -11,16 +11,16 @@
 
 namespace rg {
 
-using TeamId = uint8_t;
+using TeamId = uint16_t;
 
-using RouterId = int;
+using RouterId = uint8_t;
 
 using CardPhysicalId = uint64_t;
 
-using CardSeqNum = uint8_t;
+using CardSeqNum = uint16_t;
 
 struct CardLogicalId {
-    TeamId color;
+    TeamId team_id;
     CardSeqNum seq;
 };
 
