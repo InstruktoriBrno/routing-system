@@ -94,6 +94,15 @@ struct TopologyEvent {
 
 void apply_topology_event(Network& network, const TopologyEvent& event);
 
+/**
+ * The Routing game is played in independent rounds. This class represents the
+ * game setup of a single round. Therefore, it contains the initial network, the
+ * events to topology, and the packet information.
+ *
+ * The round setup also carries a time information and this should be the time
+ * source for the game logic. The time can be externally advanced by calling the
+ * advance_time_to method.
+ */
 class RoundSetup {
 private:
     int _who_am_i;
@@ -117,8 +126,16 @@ public:
             [](const auto& a, const auto& b){ return a.timestamp < b.timestamp; });
     }
 
+    const Network& initial_network() const {
+        return _initial_network;
+    }
+
     const Network& network() const {
         return _current_network;
+    }
+
+    const std::vector<TopologyEvent>& topology_events() const {
+        return _topology_events;
     }
 
     PacketInfo packet_info(CardSeqNum seq) const {
@@ -150,6 +167,10 @@ public:
     }
 };
 
+/**
+ * Structure describing a visit of a card to a router. This structure is
+ * preserved on the card's memory.
+ */
 struct PacketVisit {
     RouterId where;
     int timestamp;
@@ -157,11 +178,24 @@ struct PacketVisit {
     int points;
 };
 
+/**
+ * Structure describing UI screen/action after a card was processed.
+ */
 struct UiAction {
     bool valid;
     // TBA add more expressions
 };
 
+/**
+ * Interface for communication with a card.
+ *
+ * The card:
+ * - has a logical logical ID,
+ * - carries a list of router visits; you can index it from the first to the
+ *   last (when using positive index) or from last to the first (when using
+ *   negative index),
+ * - has a 32-bit metadata field that can be read and written.
+ */
 class CardCommInterface {
 public:
     virtual ~CardCommInterface() = default;
@@ -175,6 +209,16 @@ public:
     virtual void set_metadata(std::bitset<32>) = 0;
 };
 
+/**
+ * The main entrypoint of the game logic. This function is called when a card
+ * visits a router. The game logic can then decide what to do with the card.
+ *
+ * It is expected that the game logic will:
+ * - mark the visit on the card (if the visit is valid), and
+ * - update the card's metadata if necessary.
+ *
+ * The function returns a description of the action that the UI should take.
+ */
 UiAction handle_packet_visit(const RoundSetup& setup, CardCommInterface& card);
 
 } // namespace rg

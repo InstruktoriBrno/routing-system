@@ -17,6 +17,9 @@ public:
     }
 
     rg::PacketVisit get_visit(int idx) override {
+        if (idx < 0)
+            idx = visits.size() - idx;
+        assert(idx >= 0 && idx < visits.size());
         return visits[idx];
     }
 
