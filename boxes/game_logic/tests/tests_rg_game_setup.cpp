@@ -65,3 +65,31 @@ TEST_CASE("Basic game setup") {
 
 
 }
+
+TEST_CASE("Check card type") {
+    auto json = nlohmann::json::parse(R"(
+        {
+            "routers": {
+                "0": {"A"},
+                "1": {"B"}
+            },
+            "links": [
+                ["A", "B"]
+            ],
+            "packets": {
+                "15": {
+                    "type": "standard",
+                    "source": "A",
+                    "destination": "B"
+                }
+            },
+            "events": [
+            ]
+        }
+    )");
+
+    auto setup = rg::io::round_setup_from_json(0, json);
+
+    CHECK(setup.network().are_neighbors('A', 'B'));
+    CHECK(!setup.network().are_neighbors('A', 'C'));
+}
