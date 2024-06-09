@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
+include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
 
 add_executable(routing_game_tests
     tests_main.cpp
@@ -9,3 +10,5 @@ target_link_libraries(routing_game_tests PRIVATE
     rg::game
     rg::io
     doctest::doctest)
+
+doctest_discover_tests(routing_game_tests)
