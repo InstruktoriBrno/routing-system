@@ -74,15 +74,13 @@ Successful response to this call means the whole network has applied the new rou
 
 `POST` at `/v1/game/start`
 
-Starts the game, which was previously set up with `POST` to `/v1/game/round`.
+Starts the game, which was previously set up with `POST` to `/v1/game/round`. The game starts immediately.
 
 Request body:
 ```json
 {
     "roundId": <round-id>,
-    "password": "<password>",
-    "currentTime": "<current-time>",
-    "startTime": "<start-time>"
+    "password": "<password>"
 }
 ```
 * `<round-id>` integer
@@ -91,10 +89,20 @@ Request body:
     * needs to be the same as with the prior `POST` to `/v1/game/round`; any box having a different round set will reject to start, and the whole request will fail
 * `<password>` string
     * a password to be used for the HTTP Basic Auth with any subsequent calls from the gateway to the server, together with `<round-id>`
-* `<current-time>` string - UTC date/time formatted as `YYYY-MM-DDThh:mm:ssZ`
-    * the date/time as currently set on the server
-* `<start-time>`  string - UTC date/time formatted as `YYYY-MM-DDThh:mm:ssZ`
-    * the date/time (from the server's perspective) at which the round should start
+
+
+## Pause the game
+
+`POST` at `/v1/game/pause`
+
+Pauses the game. The game time stops.
+
+
+## Resume the game
+
+`POST` at `/v1/game/resume`
+
+Resumes the game previously paused by `POST` to `/v1/game/pause`. The game resumes immediately. The game time continues from where it stopped when paused.
 
 
 ## Diagnostics: gateway + router status
