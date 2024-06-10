@@ -5,85 +5,37 @@
 TEST_CASE("Basic game setup") {
     auto json = nlohmann::json::parse(R"(
         {
+            "round_id": 42,
             "routers": {
-                "0": {},
-                "1": {},
-                "2": {}
+                "A": {
+                    "mac": "xx:xx:xx:xx:xx:xx"
+                },
+                "B": {
+                    "mac": "xx:xx:xx:xx:xx:xx"
+                },
+                "C": {
+                    "mac": "xx:xx:xx:xx:xx:xx"
+                }
             },
-            "links": [
-                [0, 1],
-                [1, 2],
-                [2, 0]
-            ],
+            "links": [ "AB", "BC", "CA" ],
             "packets": {
                 "0": {
                     "type": "standard",
-                    "source": 0,
-                    "destination": 2
+                    "source": "A",
+                    "destination": "C"
                 }
             },
             "events": [
                 {
                     "type": "linkdown",
-                    "timestamp": 3,
-                    "edge": [0, 1]
+                    "time": 3,
+                    "edge": "AB"
                 },
                 {
                     "type": "linkup",
-                    "timestamp": 4,
-                    "edge": [0, 1]
+                    "time": 4,
+                    "edge": "AB"
                 }
-            ]
-        }
-    )");
-
-    auto setup = rg::io::round_setup_from_json(0, json);
-
-    CHECK(setup.network().are_neighbors(0, 1));
-    CHECK(setup.network().are_neighbors(1, 2));
-    CHECK(setup.network().are_neighbors(2, 0));
-
-    setup.advance_time_to(1);
-    CHECK(setup.network().are_neighbors(0, 1));
-    CHECK(setup.network().are_neighbors(1, 2));
-    CHECK(setup.network().are_neighbors(2, 0));
-
-    setup.advance_time_to(2);
-    CHECK(setup.network().are_neighbors(0, 1));
-    CHECK(setup.network().are_neighbors(1, 2));
-    CHECK(setup.network().are_neighbors(2, 0));
-
-    setup.advance_time_to(3);
-    CHECK(!setup.network().are_neighbors(0, 1));
-    CHECK(setup.network().are_neighbors(1, 2));
-    CHECK(setup.network().are_neighbors(2, 0));
-
-    setup.advance_time_to(4);
-    CHECK(setup.network().are_neighbors(0, 1));
-    CHECK(setup.network().are_neighbors(1, 2));
-    CHECK(setup.network().are_neighbors(2, 0));
-
-
-}
-
-TEST_CASE("Check card type") {
-    auto json = nlohmann::json::parse(R"(
-        {
-            "routers": {
-                "0": {"A"},
-                "1": {"B"}
-            },
-            "links": [
-                ["A", "B"]
-            ],
-            "packets": {
-                "15": {
-                    "type": "standard",
-                    "source": "A",
-                    "destination": "B"
-                }
-            },
-            "events": [
             ]
         }
     )");
@@ -91,5 +43,28 @@ TEST_CASE("Check card type") {
     auto setup = rg::io::round_setup_from_json(0, json);
 
     CHECK(setup.network().are_neighbors('A', 'B'));
-    CHECK(!setup.network().are_neighbors('A', 'C'));
+    CHECK(setup.network().are_neighbors('B', 'C'));
+    CHECK(setup.network().are_neighbors('C', 'A'));
+
+    setup.advance_time_to(1);
+    CHECK(setup.network().are_neighbors('A', 'B'));
+    CHECK(setup.network().are_neighbors('B', 'C'));
+    CHECK(setup.network().are_neighbors('C', 'A'));
+
+    setup.advance_time_to(2);
+    CHECK(setup.network().are_neighbors('A', 'B'));
+    CHECK(setup.network().are_neighbors('B', 'C'));
+    CHECK(setup.network().are_neighbors('C', 'A'));
+
+    setup.advance_time_to(3);
+    CHECK(!setup.network().are_neighbors('A', 'B'));
+    CHECK(setup.network().are_neighbors('B', 'C'));
+    CHECK(setup.network().are_neighbors('C', 'A'));
+
+    setup.advance_time_to(4);
+    CHECK(setup.network().are_neighbors('A', 'B'));
+    CHECK(setup.network().are_neighbors('B', 'C'));
+    CHECK(setup.network().are_neighbors('C', 'A'));
+
+
 }

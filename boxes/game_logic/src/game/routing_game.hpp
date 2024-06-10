@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <algorithm>
 #include <string>
+#include <array>
 #include <optional>
 #include <cassert>
 #include <bitset>
@@ -13,9 +14,9 @@ namespace rg {
 
 using TeamId = uint16_t;
 
-using RouterId = uint8_t;
+using RouterId = char;
 
-using CardPhysicalId = uint64_t;
+using CardPhysicalId = std::array<uint8_t, 7>;
 
 using CardSeqNum = uint16_t;
 
@@ -89,7 +90,7 @@ enum class TopologyEventType {
 
 struct TopologyEvent {
     TopologyEventType type;
-    int timestamp;
+    int time;
     std::optional<std::tuple<RouterId, RouterId>> edge;
 };
 
@@ -106,7 +107,7 @@ void apply_topology_event(Network& network, const TopologyEvent& event);
  */
 class RoundSetup {
 private:
-    int _who_am_i;
+    RouterId _who_am_i;
 
     Network _initial_network;
     Network _current_network;
@@ -114,17 +115,17 @@ private:
     std::vector<TopologyEvent> _topology_events;
     std::map<CardSeqNum, PacketInfo> _packet_infos;
 
-    int _current_timestamp = 0;
+    int _current_time = 0;
     int _current_event_idx = 0;
 public:
-    RoundSetup(int who_am_i, const Network& network,
+    RoundSetup(RouterId who_am_i, const Network& network,
         const std::vector<TopologyEvent>& events, const std::map<CardSeqNum,
         PacketInfo> _packet_infos)
     : _who_am_i(who_am_i), _initial_network(network), _current_network(_initial_network),
       _topology_events(events), _packet_infos(_packet_infos)
     {
         std::sort(_topology_events.begin(), _topology_events.end(),
-            [](const auto& a, const auto& b){ return a.timestamp < b.timestamp; });
+            [](const auto& a, const auto& b){ return a.time < b.time; });
     }
 
     const Network& initial_network() const {
@@ -148,19 +149,19 @@ public:
     }
 
     int time() const {
-        return _current_timestamp;
+        return _current_time;
     }
 
-    int who_am_i() const {
+    RouterId who_am_i() const {
         return _who_am_i;
     }
 
-    void advance_time_to(int target_timestamp) {
-        assert(target_timestamp > _current_timestamp);
-        _current_timestamp = target_timestamp;
+    void advance_time_to(int target_time) {
+        assert(target_time > _current_time);
+        _current_time = target_time;
         while (_current_event_idx < _topology_events.size()) {
             const TopologyEvent& event = _topology_events[_current_event_idx];
-            if (event.timestamp > target_timestamp)
+            if (event.time > target_time)
                 return;
             apply_topology_event(_current_network, event);
             _current_event_idx++;
@@ -174,7 +175,7 @@ public:
  */
 struct PacketVisit {
     RouterId where;
-    int timestamp;
+    int time;
     bool points_awarded;
     bool flag2;
     bool flag3;

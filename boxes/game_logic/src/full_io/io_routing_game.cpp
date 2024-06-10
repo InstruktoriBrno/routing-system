@@ -6,13 +6,13 @@ std::string rg::io::to_dot(const rg::Network& network) {
     std::string dot = "graph {\n";
 
     for (const auto& router : network.routers()) {
-        dot += std::to_string(router) + ";\n";
+        dot += std::string(1, router) + ";\n";
     }
 
     for (const auto& router : network.routers()) {
         for (const auto& neighbor : network.neighbors(router)) {
             if (router < neighbor) {
-                dot += std::to_string(router) + " -- " + std::to_string(neighbor) + ";\n";
+                dot += std::string(1, router) + " -- " + std::string(1, neighbor) + ";\n";
             }
         }
     }
@@ -21,6 +21,30 @@ std::string rg::io::to_dot(const rg::Network& network) {
 
     return dot;
 }
+
+template <>
+rg::RouterId rg::io::from_json(const nlohmann::json& json) {
+    if (!json.is_string() || json.get<std::string>().size() != 1) {
+        throw std::invalid_argument("RouterId has to be a single character, got '" + json.dump() + "'");
+    }
+
+    std::string s;
+    json.get_to(s);
+
+    return s[0];
+}
+
+std::tuple<rg::RouterId, rg::RouterId> rg::io::link_from_json(const nlohmann::json& json) {
+    if (!json.is_string() || json.get<std::string>().size() != 2) {
+        throw std::invalid_argument("Link has to be a string of length 2, got '" + json.dump() + "'");
+    }
+
+    std::string s;
+    json.get_to(s);
+
+    return std::make_tuple(s[0], s[1]);
+}
+
 
 template<>
 rg::Network rg::io::from_json(const nlohmann::json& json) {
@@ -40,22 +64,15 @@ rg::Network rg::io::from_json(const nlohmann::json& json) {
     rg::Network network;
 
     for (auto it : json["routers"].items()) {
-        try {
-            rg::RouterId id = std::stoi(it.key());
-            network.add_router(id);
+        if (it.key().size() != 1) {
+            throw std::invalid_argument("Invalid JSON - router ID must be a single character, got '" + it.key() + "'");
         }
-        catch (std::invalid_argument& e) {
-            throw std::invalid_argument("Invalid JSON - router ID must be an integer, got '" + it.key() + "'");
-        }
+        rg::RouterId id = it.key()[0];
+        network.add_router(id);
     }
 
     for (auto it : json["links"].items()) {
-        if (!it.value().is_array() || it.value().size() != 2 || !it.value()[0].is_number() || !it.value()[1].is_number()) {
-            throw std::invalid_argument("Invalid JSON - expected link to be an array of 2 integers, got '" + it.value().dump() + "'");
-        }
-        rg::RouterId from, to;
-        it.value()[0].get_to(from);
-        it.value()[1].get_to(to);
+        auto [from, to] = link_from_json(it.value());
 
         if (!network.routers().contains(from)) {
             throw std::invalid_argument("Invalid JSON - router ID " + std::to_string(from) + " not found in edge '" + it.value().dump() + "'");
@@ -104,19 +121,16 @@ rg::PacketInfo rg::io::from_json(const nlohmann::json& json) {
     if (!json.contains("type")) {
         throw std::invalid_argument("Invalid JSON - expected 'type' key");
     }
-    if (!json.contains("source") || !json["source"].is_number()) {
-        throw std::invalid_argument("Invalid JSON - expected 'source' to be a number");
+    if (!json.contains("source") || !json["source"].is_string()) {
+        throw std::invalid_argument("Invalid JSON - expected 'source' to be a single letter");
     }
 
     rg::PacketInfo info;
     info.type = from_json<rg::PacketType>(json["type"]);
-    info.source = json["source"].get<rg::RouterId>();
+    info.source = from_json<rg::RouterId>(json["source"]);
 
     if (json.contains("destination")) {
-        if (!json["destination"].is_number()) {
-            throw std::invalid_argument("Invalid JSON - expected 'destination' to be a number");
-        }
-        info.destination = json["destination"].get<rg::RouterId>();
+        info.destination = from_json<rg::RouterId>(json["destination"]);
     }
 
     if (json.contains("points")) {
@@ -161,19 +175,16 @@ rg::TopologyEvent rg::io::from_json(const nlohmann::json& json) {
     if (!json.contains("type")) {
         throw std::invalid_argument("Invalid JSON - expected 'type' key");
     }
-    if (!json.contains("timestamp") || !json["timestamp"].is_number()) {
-        throw std::invalid_argument("Invalid JSON - expected 'timestamp' to be a number");
+    if (!json.contains("time") || !json["time"].is_number()) {
+        throw std::invalid_argument("Invalid JSON - expected 'time' to be a number");
     }
 
     rg::TopologyEvent event;
     event.type = from_json<rg::TopologyEventType>(json["type"]);
-    event.timestamp = json["timestamp"].get<int>();
+    event.time = json["time"].get<int>();
 
     if (json.contains("edge")) {
-        if (!json["edge"].is_array() || json["edge"].size() != 2 || !json["edge"][0].is_number() || !json["edge"][1].is_number()) {
-            throw std::invalid_argument("Invalid JSON - expected 'edge' to be an array of 2 numbers");
-        }
-        event.edge = std::make_tuple(json["edge"][0].get<rg::RouterId>(), json["edge"][1].get<rg::RouterId>());
+        event.edge = link_from_json(json["edge"]);
     }
 
     return event;
