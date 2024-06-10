@@ -176,7 +176,7 @@ public:
 struct PacketVisit {
     RouterId where;
     int time;
-    bool points_awarded;
+    bool flag1;
     bool flag2;
     bool flag3;
     bool flag4;

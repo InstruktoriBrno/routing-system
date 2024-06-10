@@ -24,7 +24,6 @@ rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommIn
     card.mark_visit({
         .where = setup.who_am_i(),
         .time = setup.time(),
-        .points_awarded = false,
         .points = 0
     });
 

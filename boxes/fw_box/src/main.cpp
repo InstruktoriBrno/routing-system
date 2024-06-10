@@ -120,8 +120,6 @@ void loop() {
             Serial.print(visit.timestamp);
             Serial.print(" points ");
             Serial.print(visit.points);
-            Serial.print(" ");
-            Serial.print(visit.points_awarded ? "awarded" : "not awarded");
             Serial.println();
         }
 
