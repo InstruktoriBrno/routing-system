@@ -56,12 +56,12 @@ Request body example:
     "events": [
         {
             "type": "linkdown",
-            "timestamp": 3,
+            "time": 3,
             "edge": "AB"
         },
         {
             "type": "linkup",
-            "timestamp": 4,
+            "time": 4,
             "edge": "AB"
         }
     ]
@@ -128,15 +128,27 @@ Response body: same as Gateway API `GET` at `/v1/status`
 
 Request body:
 ```json
-[
-    { "time": 15, "card": "A015", "bearer": "fe:d3:4c:aa:72:11:23" },
-    { "time": 25, "card": "Z999", "bearer": "fe:de:33:ab:cd:ef:00", "score": 10 }
-]
+{
+    "routerMac": "<router-mac>",
+    "source": "<event-source>",
+    "events": [
+        { "time": 15, "card": "A015", "bearer": "fe:d3:4c:aa:72:11:23" },
+        { "time": 25, "card": "Z999", "bearer": "fe:de:33:ab:cd:ef:00", "score": 10 }
+    ]
+}
 ```
 * `<round-id>`: round ID for which to record the event
     * integer: the same as specified by the most recent `POST` to `/v1/game/start`
 * `<router-id>`: router ID which emitted the event
     * string: identifier of the router as specified in the round specs by the most recent `PUT` to `/v1/game/round`
+* `<router-mac>`: physical address of the box which emitted the event
+    * string: MAC address in the notation like `"fe:d3:4c:aa:72:11"`
+* `<event-source>`: from what source the events were reported
+    * string, one of:
+        * `"online"`: reported online from the router through the network
+        * `"offline_box"`: (TODO: clarify)
+        * `"offline_card"`: (TODO: clarify)
+        * `"ui"`: entered manually through the server UI
 * `time`: timestamp, relative to the start of the round
     * non-negative integer: number of seconds after round start
 * `card`: identifier of the card which beeped

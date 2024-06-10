@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS subteam, round_spec_lib, game, game_round, game_round_team, game_round_event;
 DROP DOMAIN IF EXISTS round_time, team_ident, router_ident;
-
+DROP TYPE IF EXISTS event_source;
 
 
 CREATE DOMAIN round_time AS SMALLINT
@@ -11,6 +11,13 @@ CREATE DOMAIN team_ident AS CHAR(1)
 
 CREATE DOMAIN router_ident AS CHAR(1)
     CHECK (VALUE BETWEEN 'A' AND 'Z');
+
+CREATE TYPE event_source AS ENUM (
+    'online',
+    'offline_box',
+    'offline_card',
+    'ui'
+);
 
 
 CREATE TABLE subteam (
@@ -63,6 +70,7 @@ CREATE TABLE game_round_event (
     game_round_id BIGINT NOT NULL REFERENCES game_round ON DELETE RESTRICT,
     event JSON NOT NULL,
     server_time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    source event_source NOT NULL,
     team_ident team_ident NOT NULL,
     router_ident router_ident,
     router_mac_address macaddr,
