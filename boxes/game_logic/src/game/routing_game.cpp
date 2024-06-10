@@ -28,6 +28,6 @@ rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommIn
     });
 
     return {
-        .valid = true
+        .result = PacketVisitResult::Invalid
     };
 }

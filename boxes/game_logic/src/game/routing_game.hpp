@@ -183,12 +183,19 @@ struct PacketVisit {
     int points;
 };
 
+enum class PacketVisitResult {
+    Invalid = 0,
+    Continue = 1,
+    Finished = 2
+};
+
 /**
  * Structure describing UI screen/action after a card was processed.
  */
 struct UiAction {
-    bool valid;
-    // TBA add more expressions
+    PacketVisitResult result;
+    std::optional<std::string> instructions;
+    std::optional<std::string> score;
 };
 
 /**
