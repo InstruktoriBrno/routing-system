@@ -11,6 +11,11 @@ std::string to_dot(const rg::Network& network);
 template <typename T>
 T from_json(const nlohmann::json& json);
 
+template <>
+RouterId from_json(const nlohmann::json& json);
+
+std::tuple<rg::RouterId, rg::RouterId> link_from_json(const nlohmann::json& json);
+
 template<>
 Network from_json(const nlohmann::json& json);
 

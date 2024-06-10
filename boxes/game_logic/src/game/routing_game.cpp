@@ -23,12 +23,11 @@ rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommIn
 
     card.mark_visit({
         .where = setup.who_am_i(),
-        .timestamp = setup.time(),
-        .points_awarded = false,
+        .time = setup.time(),
         .points = 0
     });
 
     return {
-        .valid = true
+        .result = PacketVisitResult::Invalid
     };
 }

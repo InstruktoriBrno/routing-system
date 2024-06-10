@@ -219,7 +219,7 @@ public:
             rg::PacketVisit visit = {
                 .where = buffer[0],
                 .timestamp = (buffer[2] << 8 | buffer[1]) & 0xFFF,
-                .points_awarded = buffer[2] & (1 << 4),
+                .flag1 = buffer[2] & (1 << 4),
                 .flag2 = buffer[2] & (1 << 5),
                 .flag3 = buffer[2] & (1 << 6),
                 .flag4 = buffer[2] & (1 << 7),
@@ -324,7 +324,7 @@ public:
             uint8_t(visit.timestamp & 0xFF),
             uint8_t(
                 visit.timestamp >> 8 && 0xF |
-                (int(visit.points_awarded) << 4) |
+                (int(visit.flag1) << 4) |
                 (int(visit.flag2) << 5) |
                 (int(visit.flag3) << 6) |
                 (int(visit.flag4) << 7)),
