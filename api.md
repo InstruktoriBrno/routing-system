@@ -1,10 +1,10 @@
 # Common
 
-**Router ID:** integer 0-127
+**Router ID:** single uppercase letter A-Z
 
 **Team ID:** single uppercase letter A-Z
 
-**Round ID:** integer 1-2147483647
+**Round ID:** integer 1-32767
 
 **Card ID:** string
 * example: `"A015"`
@@ -31,26 +31,23 @@ Request body example:
 {
     "round_id": 42,
     "routers": {
-        "0": {
-            "mac": "xx:xx:xx:xx:xx:xx",
-            "nickname": "A"
+        "A": {
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
-        "1": {
-            "mac": "xx:xx:xx:xx:xx:xx",
-            "nickname": "B"
+        "B": {
+            "mac": ["xx:xx:xx:xx:xx:xx", "yy:yy:yy:yy:yy:yy"]
         },
-        "2": {
-            "mac": "xx:xx:xx:xx:xx:xx",
-            "nickname": "C"
+        "C": {
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         }
     },
     "links": [
-        [0, 1],
-        [1, 2],
-        [2, 0]
+        "AB",
+        "BC",
+        "AC"
     ],
     "packets": {
-        "0": {
+        "035": {
             "type": "standard",
             "source": 0,
             "destination": 2
@@ -60,12 +57,12 @@ Request body example:
         {
             "type": "linkdown",
             "timestamp": 3,
-            "edge": [0, 1]
+            "edge": "AB"
         },
         {
             "type": "linkup",
             "timestamp": 4,
-            "edge": [0, 1]
+            "edge": "AB"
         }
     ]
 }

@@ -9,8 +9,8 @@ CREATE DOMAIN round_time AS SMALLINT
 CREATE DOMAIN team_ident AS CHAR(1)
     CHECK (VALUE BETWEEN 'A' AND 'Z');
 
-CREATE DOMAIN router_ident AS SMALLINT
-    CHECK (VALUE BETWEEN 0 AND 127);
+CREATE DOMAIN router_ident AS CHAR(1)
+    CHECK (VALUE BETWEEN 'A' AND 'Z');
 
 
 CREATE TABLE subteam (
@@ -37,14 +37,17 @@ CREATE TABLE game_round (
     spec JSON NOT NULL,
     duration round_time NOT NULL,
     server_start_time TIMESTAMPTZ,
+    api_ident SMALLINT CHECK (api_ident > 0) GENERATED ALWAYS AS IDENTITY,
     api_username VARCHAR(20),
     api_password VARCHAR(20)
 );
+COMMENT ON COLUMN game_round.api_ident IS 'Identifier of the round as exchanged through the REST API. Extra column besides id due to limited range supported by the gateway.';
 COMMENT ON COLUMN game_round.server_start_time IS 'Time when the round is supposed to start, as specified to the gateway.';
 COMMENT ON COLUMN game_round.api_username IS 'Username to provide with REST API requests';
 COMMENT ON COLUMN game_round.api_password IS 'Password to provide with REST API requests';
 COMMENT ON COLUMN game_round.duration IS 'How long the round will run. Any game_round_event.round_time must be less than game_round.duration to be valid.';
 CREATE INDEX ON game_round (game_id);
+CREATE INDEX ON game_round (api_ident);
 
 CREATE TABLE game_round_team (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
