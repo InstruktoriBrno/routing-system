@@ -84,7 +84,8 @@ Request body:
 * `<packet-type>`: type of the packet the card represents:
     * `"checkin"`: packet for tracking players checking in to the routers before the game round starts
         * no impact on the game
-    * `"standard"`: packet to be delivered from one router to another. Points are awarded based on shortest path length.
+    * `"standard"`: packet to be delivered from one router to another
+        * score defined by the `"points"` attribute (usually based on shortest path length)
 * `...packet-params`: attributes according to the packet type:
     * `"checkin"`:
         * `"destination": "<router-id>"`
@@ -140,7 +141,7 @@ Request body example:
             "type": "standard",
             "source": "A",
             "destination": "C",
-            "points" : 10
+            "points": 10
         }
     },
     "events": [
