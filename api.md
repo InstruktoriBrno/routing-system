@@ -172,6 +172,7 @@ Uniqueness: there can only be one event per (`<round-id>`, `time`, `card`) combi
 * Why: protects from the same events being accidentally posted repeatedly, e.g., in case of manual logs upload.
 
 ## Ad hoc points awarded to a team
+
 `POST` at `/v1/game/round/<round-id>/team/<team-id>`, using HTTP Basic auth.
 
 Request body:
@@ -185,6 +186,31 @@ Request body:
     * integer (even negative to award a penalty, or to correct previous mistake awarding extra points)
 * `reason`: why the points were awareded
     * optional string
+
+## Router check-in status
+
+`GET` at `/v1/game/round/<round-id>/checkin`
+
+Retrieves the status of players checking in to routers before the round is started.
+
+Response body:
+```json
+{
+    "roundId": <round-id>,
+    "checkedIn": [
+        { "router": "<router-id>", "teamId": "<team-id>", "card": "<card-id>" },
+        ...
+    ],
+    "missing": [
+        { "router": "<router-id>", "teamId": "<team-id>" },
+        ...
+    ]
+}
+```
+* `<router-id>`: ID of router which has (not yet) been checked in by the given team
+* `<team-id>`: team who have (not yet) checked in on the given router
+* `<card-id>`: card used for checking in
+
 
 ## Scoreboard for a team
 
