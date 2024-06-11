@@ -28,7 +28,7 @@ CREATE TABLE subteam (
 CREATE TABLE round_spec_lib (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     name VARCHAR(50) NOT NULL,
-    specs JSON NOT NULL,
+    spec JSON NOT NULL,
     is_deleted BOOL NOT NULL DEFAULT FALSE
 );
 COMMENT ON TABLE round_spec_lib IS 'Library of specifications of game rounds. Only used to define specs ahead. For an actual record of a game round, the specs get copied, and are stored independently, so that any later change to round_spec_lib does not affect any already defined game rounds.';
