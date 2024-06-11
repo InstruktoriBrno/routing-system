@@ -154,8 +154,8 @@ Request body:
 * `<event-source>`: from what source the events were reported
     * string, one of:
         * `"online"`: reported online from the router through the network
-        * `"offline_box"`: (TODO: clarify)
-        * `"offline_card"`: (TODO: clarify)
+        * `"offline_box"`: downloaded from the persistent storage of the box
+        * `"offline_card"`: downloaded from the card
         * `"ui"`: entered manually through the server UI
 * `time`: timestamp, relative to the start of the round
     * non-negative integer: number of seconds after round start
