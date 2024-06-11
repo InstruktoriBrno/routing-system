@@ -30,6 +30,7 @@ Request body:
 ```json
 {
     "roundId": <round-id>,
+    "duration": <duration>,
     "routers": {
         "<router-id>": {
             "mac": [
@@ -63,6 +64,9 @@ Request body:
 * `<round-id>`: ID of round which will be played
     * only present for this API endpoint; omitted in the round specs library
     * useful for boxes to check, upon game start (`POST` at `/v1/game/start`), whether the box has the correct round specification
+* `<duration>`: how long the round will take
+    * non-negative integer: number of seconds
+    * any events occurring in the game must have their `<time>` less than `<duration>`
 * `<router-id>`: ID of router being active in the network
 * `<router-mac>`: physical address of a box representing router `<router-id>`
     * there may be multiple boxes representing the same router (useful in case of replacing a malfunctioning box)
@@ -74,6 +78,8 @@ Request body:
     * string containing a non-negative integer less than 1000, left-padded with zeroes
     * example: `"035"`
     * essentially the same as _card ID_, except the first letter (identifying a team) is ommitted - leveraging the fact each team is supposed to play with an equivalent set of packets
+* `events`: list of events affecting the topology
+    * order of elements in the list does not matter, their `<event-time>` is relevant; for readability, though, events should be sorted by `<event-time>` in ascending order
 * `<packet-type>`: type of the packet the card represents:
     * `"checkin"`: packet for tracking players checking in to the routers before the game round starts
         * no impact on the game
@@ -106,6 +112,7 @@ Request body example:
 ```json
 {
     "roundId": 42,
+    "duration": 600,
     "routers": {
         "A": {
             "mac": ["xx:xx:xx:xx:xx:xx"]
@@ -136,12 +143,12 @@ Request body example:
     "events": [
         {
             "type": "linkdown",
-            "time": 3,
+            "time": 180,
             "link": "AB"
         },
         {
             "type": "linkup",
-            "time": 4,
+            "time": 240,
             "link": "AB"
         }
     ]
