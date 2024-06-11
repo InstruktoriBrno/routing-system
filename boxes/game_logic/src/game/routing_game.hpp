@@ -64,7 +64,7 @@ public:
         assert(_routers.count(from));
         assert(_routers.count(to));
 
-        return _edges.find(from)->second.count(to);
+        return from == to || _edges.find(from)->second.count(to);
     }
 };
 
@@ -195,7 +195,7 @@ enum class PacketVisitResult {
 struct UiAction {
     PacketVisitResult result;
     std::optional<std::string> instructions;
-    std::optional<std::string> score;
+    std::optional<int> points;
 };
 
 /**
@@ -213,6 +213,7 @@ public:
     virtual ~CardCommInterface() = default;
 
     virtual CardLogicalId get_id() = 0;
+    virtual CardSeqNum get_seq() = 0;
     virtual int visit_count() = 0;
     virtual PacketVisit get_visit(int idx) = 0;
     virtual void mark_visit(PacketVisit) = 0;

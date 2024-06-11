@@ -1,18 +1,20 @@
 #include <doctest/doctest.h>
 #include <routing_game.hpp>
+#include <io_routing_game.hpp>
+#include "topology_samples.hpp"
 
-TEST_CASE("Basic network") {
-    rg::Network network;
+TEST_CASE("Network: Check Square topology") {
+    auto json = rg::jsonSquareTopology();
 
-    for (int i = 0; i < 3; i++) {
-        network.add_router(i);
-    }
+    auto setup = rg::io::round_setup_from_json('A', json);
 
-    network.add_connection(0, 1);
-    CHECK(network.are_neighbors(0, 1));
-    CHECK(network.are_neighbors(1, 0));
+    CHECK(setup.network().are_neighbors('A', 'B'));
+    CHECK(setup.network().are_neighbors('B', 'A'));
+    CHECK(setup.network().are_neighbors('B', 'C'));
+    CHECK(setup.network().are_neighbors('C', 'B'));
+    CHECK(!setup.network().are_neighbors('A', 'C'));
+    CHECK(!setup.network().are_neighbors('C', 'A'));
 
-    network.add_connection(1, 2);
-    CHECK(network.are_neighbors(1, 2));
-    CHECK(network.are_neighbors(2, 1));
+    CHECK(setup.network().are_neighbors('A', 'D'));
+    CHECK(setup.network().are_neighbors('D', 'A'));    
 }
