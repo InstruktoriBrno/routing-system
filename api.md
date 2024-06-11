@@ -62,6 +62,7 @@ Request body:
 }
 ```
 * `<round-id>`: ID of round which will be played
+    * integer 1-32767
     * only present for this API endpoint; omitted in the round specs library
     * useful for boxes to check, upon game start (`POST` at `/v1/game/start`), whether the box has the correct round specification
 * `<duration>`: how long the round will take
@@ -170,8 +171,8 @@ Request body:
     "password": "<password>"
 }
 ```
-* `<round-id>` integer
-    * a unique identifier of the round, decided by the caller
+* `<round-id>`: a unique identifier of the round, decided by the caller
+    * integer 1-32767
     * to be used as the URL parameter and as the username for the HTTP Basic Auth with any subsequent calls from the gateway to the server, together with `<password>`
     * needs to be the same as with the prior `POST` to `/v1/game/round`; any box having a different round set will reject to start, and the whole request will fail
 * `<password>` string
