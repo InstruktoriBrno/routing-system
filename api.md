@@ -26,10 +26,86 @@
 
 Defines the round of the game which will be started with the following `POST` to `/v1/game/start`.
 
+Request body:
+```json
+{
+    "roundId": <round-id>,
+    "routers": {
+        "<router-id>": {
+            "mac": [
+                "<router-mac>",
+                ...
+            ]
+        },
+        ...
+    },
+    "links": [
+        "<link-from-router-id><link-to-router-id>",
+        ...
+    ],
+    "packets": {
+        "<card-number>": {
+            "type": "<packet-type>",
+            ...packet-params
+        },
+        ...
+    },
+    "events": [
+        {
+            "type": "<event-type>",
+            "time": "<event-time>",
+            ...event-params
+        },
+        ...
+    ]
+}
+```
+* `<round-id>`: ID of round which will be played
+    * only present for this API endpoint; omitted in the round specs library
+    * useful for boxes to check, upon game start (`POST` at `/v1/game/start`), whether the box has the correct round specification
+* `<router-id>`: ID of router being active in the network
+* `<router-mac>`: physical address of a box representing router `<router-id>`
+    * there may be multiple boxes representing the same router (useful in case of replacing a malfunctioning box)
+    * example: `"fe:d3:4c:aa:72:11:23"`
+    * string; format: 6 lowercase hexadecimal digit pairs separated with `:`
+* `<link-from-router-id>`, `<link-to-router-id>`: IDs of routers being linked
+    * the link is bi-directional (e.g., `"AB"` is equivalent to `"BA"`); for readability, lexicographical order should be maintained (e.g., specify `"AB"` rather than `"BA"`)
+* `<card-number>`: identifier of the cards which can play in the game round
+    * string containing a non-negative integer less than 1000, left-padded with zeroes
+    * example: `"035"`
+    * essentially the same as _card ID_, except the first letter (identifying a team) is ommitted - leveraging the fact each team is supposed to play with an equivalent set of packets
+* `<packet-type>`: type of the packet the card represents:
+    * `"checkin"`: packet for tracking players checking in to the routers before the game round starts
+        * no impact on the game
+    * `"standard"`: packet to be delivered from one router to another
+        * score: 10 points for successful delivery to the destination router
+* `...packet-params`: attributes according to the packet type:
+    * `"checkin"`:
+        * `"destination": "<router-id>"`
+            * ID of router to check in
+    * `"standard"`:
+        * `"source": "<router-id>"`
+            * ID of router where the packet gets added to the network
+        * `"destination": "<router-id>"`
+            * ID of router where the packet is to be delivered
+* `<event-type>`: type of the event:
+    * `"linkdown"`: a link gets deactivated at `<event-time>`
+        * since `<event-time>`, the routers stop accepting packets being transmitted between these routers
+        * corresponding physical action (disabling the link box) should be performed >30 seconds before `<event-time>` to prevent race conditions (e.g., a player picking up a packet from the link and bringing it to the router - then the router should accept the packet if within 30 seconds of the physical closure of the link box)
+    * `"linkup"`: new link gets activated at `<event-time>`
+        * since `<event-time>`, the routers being linked start accepting packets being transmitted between these routers
+        * corresponding physical action (enabling the link box) can be performed exactly at `<event-time>` or with a minor delay (by the time players might want to deliver packets using the new link, the routers should have already applied the event on the topology)
+* `<event-time>`: when the event happens
+    * non-negative integer: number of seconds after round start
+* `...event-params`: attributes according to the event type:
+    * `"linkdown"`, `"linkup"`:
+        * `"link": "<from-router-id><to-router-id>"`
+            * the affected link
+
 Request body example:
 ```json
 {
-    "round_id": 42,
+    "roundId": 42,
     "routers": {
         "A": {
             "mac": ["xx:xx:xx:xx:xx:xx"]
@@ -47,22 +123,26 @@ Request body example:
         "AC"
     ],
     "packets": {
+        "001": {
+            "type": "checkin",
+            "destination": "A"
+        },
         "035": {
             "type": "standard",
-            "source": 0,
-            "destination": 2
+            "source": "A",
+            "destination": "C"
         }
     },
     "events": [
         {
             "type": "linkdown",
             "time": 3,
-            "edge": "AB"
+            "link": "AB"
         },
         {
             "type": "linkup",
             "time": 4,
-            "edge": "AB"
+            "link": "AB"
         }
     ]
 }
