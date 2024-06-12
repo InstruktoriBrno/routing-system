@@ -98,6 +98,7 @@ result_handle_internal handle_standard_packet(const rg::RoundSetup& setup, rg::C
 }
 
 result_handle_internal handle_priority_packet(const rg::RoundSetup& setup, rg::CardCommInterface& card) {
+
     result_handle_internal result = handle_standard_packet(setup, card);
 
     if (result.log.has_value() && result.log.value().points > 0) {
@@ -114,6 +115,51 @@ result_handle_internal handle_priority_packet(const rg::RoundSetup& setup, rg::C
     }
 
     return result;
+}
+
+result_handle_internal handle_hopper_packet(const rg::RoundSetup& setup, rg::CardCommInterface& card) {
+    char me = setup.who_am_i();
+
+    if (card.visit_count() == 0) {
+        rg::PacketVisit log = {
+            .where = me,
+            .time = setup.time(),
+        };
+
+        return {
+            .action = {
+                .result = PacketVisitResult::Continue,
+                .instructions = std::to_string(card.visit_count()),
+            },
+            .log = log
+        };
+    }
+
+    if (card.get_visit(-1).where == me) {
+        return {
+            .action = {
+                .result = PacketVisitResult::Continue,
+                .instructions = std::to_string(card.visit_count() - 1),
+            }
+        };
+    }
+
+    auto packet = setup.packet_info(card.get_seq());
+
+    rg::PacketVisit log = {
+        .where = me,
+        .time = setup.time(),
+        .points = packet.pointsPerHop,
+    };
+
+    return {
+        .action = {
+            .result = PacketVisitResult::Continue,
+            .instructions = std::to_string(card.visit_count()),
+            .points = packet.pointsPerHop,
+        },
+        .log = log
+    };  
 }
 
 rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommInterface& card) {
@@ -149,6 +195,9 @@ rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommIn
             break;
         case PacketType::Priority:
             result = handle_priority_packet(setup, card);
+            break;
+        case PacketType::Hopper:
+            result = handle_hopper_packet(setup, card);
             break;
         default: 
             return {

@@ -73,6 +73,7 @@ enum class PacketType {
     Nonexistent,
     Standard,
     Priority,
+    Hopper,
     VisitAll
 };
 
@@ -84,6 +85,7 @@ struct PacketInfo {
     int points = 10;
     int pointsPerMinuteLeft = 4;
     int minutesToDeliver = 5;
+    int pointsPerHop = 1;
 };
 
 enum class TopologyEventType {

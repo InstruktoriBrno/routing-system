@@ -95,7 +95,8 @@ rg::PacketType rg::io::from_json(const nlohmann::json& json) {
         {"nonexistent"sv, rg::PacketType::Nonexistent},
         {"standard"sv, rg::PacketType::Standard},
         {"visitall"sv, rg::PacketType::VisitAll},
-        {"priority"sv, rg::PacketType::Priority}
+        {"priority"sv, rg::PacketType::Priority},
+        {"hopper"sv, rg::PacketType::Hopper},
     };
 
     if (!json.is_string()) {

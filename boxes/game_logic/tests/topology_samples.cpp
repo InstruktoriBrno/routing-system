@@ -32,6 +32,10 @@ nlohmann::json rg::jsonSquareTopology() {
                     "type": "priority",
                     "source": "A",
                     "destination": "C"
+                },
+                "3": {
+                    "type": "hopper",
+                    "source": "A"
                 }
             },
             "events": [
