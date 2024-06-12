@@ -97,6 +97,10 @@ result_handle_internal handle_standard_packet(const rg::RoundSetup& setup, rg::C
     };
 }
 
+/**
+ * Analogy to standard packet, but the points are awarded based on the time the packet took to get delivered.
+ * The reward is packet.basePoints * (<minutes before deadline>+1)
+ */
 result_handle_internal handle_priority_packet(const rg::RoundSetup& setup, rg::CardCommInterface& card) {
 
     result_handle_internal result = handle_standard_packet(setup, card);
@@ -117,6 +121,9 @@ result_handle_internal handle_priority_packet(const rg::RoundSetup& setup, rg::C
     return result;
 }
 
+/**
+ * This packet awards packet.pointsPerHop points for every hop it takes. Going back counts as well.
+ */
 result_handle_internal handle_hopper_packet(const rg::RoundSetup& setup, rg::CardCommInterface& card) {
     char me = setup.who_am_i();
 
@@ -162,16 +169,80 @@ result_handle_internal handle_hopper_packet(const rg::RoundSetup& setup, rg::Car
     };  
 }
 
+/**
+ * This packet awards packet.points points (default is 10, but 50 is standard)
+ * after it has visited every router in the network.
+ * The visited routers are stored in metadata[<routerName>-'A'].
+ */
+result_handle_internal handle_visitall_packet(const rg::RoundSetup& setup, rg::CardCommInterface& card) {
+    auto me = setup.who_am_i();
+
+    int routerCount = setup.network().routers().size();
+
+    auto metadata = card.get_metadata();
+
+    if (metadata.count() >= routerCount) {
+        // card is already completed
+        return {
+            .action = {.result = PacketVisitResult::Finished}
+        };
+    }
+
+    metadata.set(me - 'A', true);
+    card.set_metadata(metadata);
+
+    if (metadata.count() < routerCount) {
+        // this is not the last router
+        if (card.visit_count() > 0 && card.get_visit(-1).where == me) {
+            // don't log repeated beep
+            return {
+                .action = {
+                    .result = PacketVisitResult::Continue,
+                    .instructions = std::to_string(metadata.count())
+                }
+            };
+        } else {
+            // log visit
+            rg::PacketVisit log = {
+                .where = me,
+                .time = setup.time(),
+            };
+            return {
+                .action = {
+                    .result = PacketVisitResult::Continue,
+                    .instructions = std::to_string(metadata.count())
+                },
+                .log = log
+            };
+
+        }
+    }
+
+    // this is the finishing beep => award points!
+    int points = setup.packet_info(card.get_seq()).points;
+
+    rg::PacketVisit log = {
+        .where = me,
+        .time = setup.time(),
+        .points = points
+    };
+    return {
+        .action = {
+            .result = PacketVisitResult::Finished,
+            .instructions = std::to_string(metadata.count()),
+            .points = points
+        },
+        .log = log
+    };
+}
+
 rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommInterface& card) {
 
     auto packet = setup.packet_info(card.get_seq());
     auto me = setup.who_am_i();
 
-    std::cout << "Handling packet\n";
-
     if (card.visit_count() == 0) {
         if (packet.source != me) {
-            std::cout << "Invalid start location " << me << ": expected " << packet.source << "\n";
             return {
                 .result = PacketVisitResult::Invalid
             };
@@ -179,7 +250,6 @@ rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommIn
     } else {
         auto previous = card.get_visit(-1).where;
         if (! setup.network().are_neighbors(previous, me)) {
-            std::cout << "Invalid hop " << previous << "->" << me << "\n";
             return {
                 .result = PacketVisitResult::Invalid
             };
@@ -199,7 +269,9 @@ rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommIn
         case PacketType::Hopper:
             result = handle_hopper_packet(setup, card);
             break;
-        default: 
+        case PacketType::VisitAll:
+            result = handle_visitall_packet(setup, card);
+            break;        default: 
             return {
                 .result = PacketVisitResult::Invalid
             };

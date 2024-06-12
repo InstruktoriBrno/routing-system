@@ -36,6 +36,11 @@ nlohmann::json rg::jsonSquareTopology() {
                 "3": {
                     "type": "hopper",
                     "source": "A"
+                },
+                "4": {
+                    "type": "visitall",
+                    "source": "A",
+                    "points": 50
                 }
             },
             "events": [
