@@ -7,6 +7,7 @@ add_executable(routing_game_tests
     tests_rg_network.cpp
     tests_rg_game_setup.cpp
     tests_rg_standard_packet.cpp
+    tests_rg_priority_packet.cpp
 )
 target_link_libraries(routing_game_tests PRIVATE
     rg::game

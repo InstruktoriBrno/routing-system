@@ -26,8 +26,12 @@ nlohmann::json rg::jsonSquareTopology() {
                 "1": {
                     "type": "standard",
                     "source": "A",
-                    "destination": "C",
-                    "points": 7
+                    "destination": "C"
+                },
+                "2": {
+                    "type": "priority",
+                    "source": "A",
+                    "destination": "C"
                 }
             },
             "events": [

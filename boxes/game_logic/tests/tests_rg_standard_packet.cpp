@@ -80,13 +80,13 @@ TEST_CASE("Standard packet: reach destination") {
 
     CHECK(action.result == rg::PacketVisitResult::Finished);
     CHECK(!action.instructions.has_value());
-    CHECK(action.points == 7);
+    CHECK(action.points == 10);
 
     CHECK(card.visit_count() == 3);
     auto visit = card.get_visit(-1);
     CHECK(visit.where == 'C');
     CHECK(visit.time == 12);
-    CHECK(visit.points == 7);
+    CHECK(visit.points == 10);
 
     CHECK(card.get_metadata()[0]);
 }

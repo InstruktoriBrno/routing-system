@@ -9,6 +9,7 @@
 #include <optional>
 #include <cassert>
 #include <bitset>
+#include <tuple>
 
 namespace rg {
 
@@ -71,8 +72,8 @@ public:
 enum class PacketType {
     Nonexistent,
     Standard,
-    VisitAll,
-    Priority
+    Priority,
+    VisitAll
 };
 
 struct PacketInfo {
@@ -80,7 +81,9 @@ struct PacketInfo {
     RouterId source;
 
     std::optional<RouterId> destination = std::nullopt;
-    std::optional<int> points = std::nullopt;
+    int points = 10;
+    int pointsPerMinuteLeft = 4;
+    int minutesToDeliver = 5;
 };
 
 enum class TopologyEventType {

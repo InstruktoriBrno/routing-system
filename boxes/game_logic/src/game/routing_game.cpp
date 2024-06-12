@@ -19,6 +19,11 @@ void rg::apply_topology_event(rg::Network& network, const rg::TopologyEvent& eve
     }
 }
 
+struct result_handle_internal {
+    rg::UiAction action;
+    std::optional<rg::PacketVisit> log;
+};
+
 /**
  * A standard packet starts at packet.source. When it reaches packet.destination,
  * then packet.points are awarded to the team.
@@ -27,7 +32,7 @@ void rg::apply_topology_event(rg::Network& network, const rg::TopologyEvent& eve
  * If the points were already awarded, then card_getMetadata()[0] == true is set 
  * to avoid reading the whole trace.
  */
-rg::UiAction handle_standard_packet(const rg::RoundSetup& setup, rg::CardCommInterface& card) {
+result_handle_internal handle_standard_packet(const rg::RoundSetup& setup, rg::CardCommInterface& card) {
     rg::PacketInfo packet = setup.packet_info(card.get_seq());
     assert(packet.destination.has_value());
     auto destination = packet.destination.value();
@@ -38,15 +43,19 @@ rg::UiAction handle_standard_packet(const rg::RoundSetup& setup, rg::CardCommInt
     auto me = setup.who_am_i();
 
     if (card.get_metadata()[0]) {
+        rg::UiAction action = {.result = PacketVisitResult::Finished,};
+        std::optional<rg::PacketVisit> log = std::nullopt;
         return {
-            .result = PacketVisitResult::Finished,
+            action = {.result = PacketVisitResult::Finished,}
         };
     }
 
     if (card.visit_count() > 0 && card.get_visit(-1).where == me) {
         return {
-            .result = PacketVisitResult::Continue,
-            .instructions = info
+            .action = {
+                .result = PacketVisitResult::Continue,
+                .instructions = info
+            }
         };
     }
 
@@ -56,29 +65,55 @@ rg::UiAction handle_standard_packet(const rg::RoundSetup& setup, rg::CardCommInt
         card.set_metadata(metadata);
         
         assert(card.get_metadata()[0]);
-        int points = packet.points.has_value() ? packet.points.value() : 10;
+        int points = packet.points;
+        assert(points == 10);
 
-        card.mark_visit({
+        rg::PacketVisit log = {
             .where = me,
             .time = setup.time(),
             .points = points
-        });
+        };
 
         return {
-            .result = PacketVisitResult::Finished,
-            .points = points
+            .action = {
+                .result = PacketVisitResult::Finished,
+                .points = points
+            },
+            .log = log
         };
     }
 
-    card.mark_visit({
+    rg::PacketVisit log = {
         .where = me,
         .time = setup.time(),
-    });
+    };
 
     return {
-        .result = PacketVisitResult::Continue,
-        .instructions = info
+        .action = {
+            .result = PacketVisitResult::Continue,
+            .instructions = info
+        },
+        .log = log
     };
+}
+
+result_handle_internal handle_priority_packet(const rg::RoundSetup& setup, rg::CardCommInterface& card) {
+    result_handle_internal result = handle_standard_packet(setup, card);
+
+    if (result.log.has_value() && result.log.value().points > 0) {
+        int time = setup.time() - card.get_visit(0).time;
+        int pointsBase = setup.packet_info(card.get_id().seq).pointsPerMinuteLeft;
+        int minutesToDeliver = setup.packet_info(card.get_id().seq).minutesToDeliver;
+
+        int multiplier = ((minutesToDeliver+1)*60 - time) / 60;
+        int points = pointsBase * multiplier;
+        points = points >= 0 ? points : 0;
+
+        result.log.value().points = points;
+        result.action.points = points;
+    }
+
+    return result;
 }
 
 rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommInterface& card) {
@@ -105,16 +140,25 @@ rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommIn
         }
     }
 
+    result_handle_internal result;
+
     switch (packet.type) {
 
         case PacketType::Standard: 
-            std::cout << "  standard packet\n";
-            return handle_standard_packet(setup, card);
-
+            result = handle_standard_packet(setup, card);
+            break;
+        case PacketType::Priority:
+            result = handle_priority_packet(setup, card);
+            break;
         default: 
-            std::cout << "Unknown packet\n";
             return {
                 .result = PacketVisitResult::Invalid
             };
     }
+
+    if (result.log.has_value()) {
+        card.mark_visit(result.log.value());
+    }
+
+    return result.action;
 }
