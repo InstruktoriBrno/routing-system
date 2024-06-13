@@ -9,6 +9,7 @@
 #include <optional>
 #include <cassert>
 #include <bitset>
+#include <tuple>
 
 namespace rg {
 
@@ -64,15 +65,16 @@ public:
         assert(_routers.count(from));
         assert(_routers.count(to));
 
-        return _edges.find(from)->second.count(to);
+        return from == to || _edges.find(from)->second.count(to);
     }
 };
 
 enum class PacketType {
     Nonexistent,
     Standard,
-    VisitAll,
-    Priority
+    Priority,
+    Hopper,
+    VisitAll
 };
 
 struct PacketInfo {
@@ -80,7 +82,10 @@ struct PacketInfo {
     RouterId source;
 
     std::optional<RouterId> destination = std::nullopt;
-    std::optional<int> points = std::nullopt;
+    int points = 10;
+    int pointsPerMinuteLeft = 4;
+    int minutesToDeliver = 5;
+    int pointsPerHop = 1;
 };
 
 enum class TopologyEventType {
@@ -195,7 +200,7 @@ enum class PacketVisitResult {
 struct UiAction {
     PacketVisitResult result;
     std::optional<std::string> instructions;
-    std::optional<std::string> score;
+    std::optional<int> points;
 };
 
 /**
@@ -213,6 +218,7 @@ public:
     virtual ~CardCommInterface() = default;
 
     virtual CardLogicalId get_id() = 0;
+    virtual CardSeqNum get_seq() = 0;
     virtual int visit_count() = 0;
     virtual PacketVisit get_visit(int idx) = 0;
     virtual void mark_visit(PacketVisit) = 0;

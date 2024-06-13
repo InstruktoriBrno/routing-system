@@ -1,6 +1,7 @@
 #pragma once
 
 #include <routing_game.hpp>
+#include <iostream>
 
 class MockCardInterface : public rg::CardCommInterface {
 public:
@@ -12,13 +13,17 @@ public:
         return id;
     }
 
+    rg::CardSeqNum get_seq() override {
+        return id.seq;
+    }
+
     int visit_count() override {
         return visits.size();
     }
 
     rg::PacketVisit get_visit(int idx) override {
         if (idx < 0)
-            idx = visits.size() - idx;
+            idx = visits.size() + idx;
         assert(idx >= 0 && idx < visits.size());
         return visits[idx];
     }

@@ -1,70 +1,35 @@
 #include <doctest/doctest.h>
 #include <routing_game.hpp>
 #include <io_routing_game.hpp>
+#include "mock_card_interface.hpp"
+#include "topology_samples.hpp"
 
-TEST_CASE("Basic game setup") {
-    auto json = nlohmann::json::parse(R"(
-        {
-            "round_id": 42,
-            "routers": {
-                "A": {
-                    "mac": "xx:xx:xx:xx:xx:xx"
-                },
-                "B": {
-                    "mac": "xx:xx:xx:xx:xx:xx"
-                },
-                "C": {
-                    "mac": "xx:xx:xx:xx:xx:xx"
-                }
-            },
-            "links": [ "AB", "BC", "CA" ],
-            "packets": {
-                "0": {
-                    "type": "standard",
-                    "source": "A",
-                    "destination": "C"
-                }
-            },
-            "events": [
-                {
-                    "type": "linkdown",
-                    "time": 3,
-                    "edge": "AB"
-                },
-                {
-                    "type": "linkup",
-                    "time": 4,
-                    "edge": "AB"
-                }
-            ]
-        }
-    )");
+TEST_CASE("Any packet: Wrong starting point") {
+    auto setup = rg::io::round_setup_from_json('B', rg::jsonSquareTopology());
 
-    auto setup = rg::io::round_setup_from_json(0, json);
+    MockCardInterface card;
+    card.id.seq = 1;
+    
+    auto action = rg::handle_packet_visit(setup, card);
 
-    CHECK(setup.network().are_neighbors('A', 'B'));
-    CHECK(setup.network().are_neighbors('B', 'C'));
-    CHECK(setup.network().are_neighbors('C', 'A'));
+    CHECK(action.result == rg::PacketVisitResult::Invalid);
+    CHECK(card.visit_count() == 0);
+    CHECK(card.get_metadata() == 0b00000000000000000000000000000000);
+}
 
-    setup.advance_time_to(1);
-    CHECK(setup.network().are_neighbors('A', 'B'));
-    CHECK(setup.network().are_neighbors('B', 'C'));
-    CHECK(setup.network().are_neighbors('C', 'A'));
+TEST_CASE("Any packet: invalid hop") {
+    auto setup = rg::io::round_setup_from_json('C', rg::jsonSquareTopology());
+    setup.advance_time_to(12);
 
-    setup.advance_time_to(2);
-    CHECK(setup.network().are_neighbors('A', 'B'));
-    CHECK(setup.network().are_neighbors('B', 'C'));
-    CHECK(setup.network().are_neighbors('C', 'A'));
+    MockCardInterface card;
+    card.id.seq = 1;
+    card.visits.push_back({
+        .where = 'A'
+    });
+    
+    auto action = rg::handle_packet_visit(setup, card);
 
-    setup.advance_time_to(3);
-    CHECK(!setup.network().are_neighbors('A', 'B'));
-    CHECK(setup.network().are_neighbors('B', 'C'));
-    CHECK(setup.network().are_neighbors('C', 'A'));
-
-    setup.advance_time_to(4);
-    CHECK(setup.network().are_neighbors('A', 'B'));
-    CHECK(setup.network().are_neighbors('B', 'C'));
-    CHECK(setup.network().are_neighbors('C', 'A'));
-
-
+    CHECK(action.result == rg::PacketVisitResult::Invalid);
+    CHECK(card.visit_count() == 1);
+    CHECK(card.get_metadata() == 0b00000000000000000000000000000000);
 }
