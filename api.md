@@ -98,6 +98,9 @@ Request body:
     * `"source": "<router-id>"`
         * Mandatory for all game packet types.
         * ID of router where the packet gets added to the network
+    * `"releaseTime"`: <number>
+        * Time when the packet should be delivered to the Router box by organisers
+        * Not enforced by the game. This is for the game itinerary automation tool
     * `"checkin"`:
         * `"destination": "<router-id>"`
             * ID of router to check in
