@@ -1,24 +1,13 @@
 {
-    "name": "slim/slim-skeleton",
-    "description": "A Slim Framework skeleton application for rapid development",
-    "keywords": [
-        "microframework",
-        "rest",
-        "router",
-        "psr7"
-    ],
-    "homepage": "http://github.com/slimphp/Slim-Skeleton",
+    "name": "routing-game/server",
+    "description": "Webserver handling the routing game",
+    "homepage": "https://routing.instruktori.cz/",
     "license": "MIT",
     "authors": [
         {
-            "name": "Josh Lockhart",
-            "email": "info@joshlockhart.com",
-            "homepage": "http://www.joshlockhart.com/"
-        },
-        {
-            "name": "Pierre Berube",
-            "email": "pierre@lgse.com",
-            "homepage": "http://www.lgse.com/"
+            "name": "Ondrej Bouda",
+            "email": "obouda@email.cz",
+            "homepage": "https://github.com/ondrej-bouda"
         }
     ],
     "require": {
@@ -27,7 +16,8 @@
         "monolog/monolog": "^2.8",
         "php-di/php-di": "^6.4",
         "slim/psr7": "^1.5",
-        "slim/slim": "^4.10"
+        "slim/slim": "^4.10",
+        "swaggest/json-schema": "~0.12"
     },
     "require-dev": {
         "jangregor/phpstan-prophecy": "^1.0.0",

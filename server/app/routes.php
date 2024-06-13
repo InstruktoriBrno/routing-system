@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Application\Actions\User\ListUsersAction;
-use App\Application\Actions\User\ViewUserAction;
+use App\Application\Actions\NotImplementedAction;
+use App\Application\Actions\V1\Game\LogRouterEventsAction;
+use App\Application\Actions\V1\Status\StatusAction;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
@@ -16,12 +17,22 @@ return function (App $app) {
     });
 
     $app->get('/', function (Request $request, Response $response) {
-        $response->getBody()->write('Hello world!');
+        $response->getBody()->write('See https://github.com/InstruktoriBrno/routing-system/blob/master/api.md');
         return $response;
     });
 
-    $app->group('/users', function (Group $group) {
-        $group->get('', ListUsersAction::class);
-        $group->get('/{id}', ViewUserAction::class);
+    $app->group('/v1/status', function (Group $group) {
+        $group->get('', StatusAction::class);
+    });
+
+    $app->group('/v1/game', function (Group $group) {
+        $group->post('/round/{roundId}/router/{routerId}', LogRouterEventsAction::class);
+        $group->post('/round/{roundId}/team/{teamId}', NotImplementedAction::class);
+        $group->get('/round/{roundId}/checkin', NotImplementedAction::class);
+    });
+
+    $app->group('/v1/score', function (Group $group) {
+        $group->get('/round/{roundId}/team/{teamId}', NotImplementedAction::class);
+        $group->get('/round/{roundId}/overall', NotImplementedAction::class);
     });
 };

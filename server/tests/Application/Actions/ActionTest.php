@@ -15,7 +15,7 @@ class ActionTest extends TestCase
 {
     public function testActionSetsHttpCodeInRespond()
     {
-        $app = $this->getAppInstance();
+        $app = $this->createAppInstance();
         $container = $app->getContainer();
         $logger = $container->get(LoggerInterface::class);
 
@@ -48,7 +48,7 @@ class ActionTest extends TestCase
 
     public function testActionSetsHttpCodeRespondData()
     {
-        $app = $this->getAppInstance();
+        $app = $this->createAppInstance();
         $container = $app->getContainer();
         $logger = $container->get(LoggerInterface::class);
 

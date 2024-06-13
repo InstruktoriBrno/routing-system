@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace Tests;
@@ -24,7 +23,7 @@ class TestCase extends PHPUnit_TestCase
      * @return App
      * @throws Exception
      */
-    protected function getAppInstance(): App
+    protected function createAppInstance(): App
     {
         // Instantiate PHP-DI ContainerBuilder
         $containerBuilder = new ContainerBuilder();
@@ -38,10 +37,6 @@ class TestCase extends PHPUnit_TestCase
         // Set up dependencies
         $dependencies = require __DIR__ . '/../app/dependencies.php';
         $dependencies($containerBuilder);
-
-        // Set up repositories
-        $repositories = require __DIR__ . '/../app/repositories.php';
-        $repositories($containerBuilder);
 
         // Build PHP-DI Container instance
         $container = $containerBuilder->build();

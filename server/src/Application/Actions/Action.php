@@ -10,15 +10,14 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Slim\Exception\HttpBadRequestException;
 use Slim\Exception\HttpNotFoundException;
+use Swaggest\JsonSchema\Schema;
+use Swaggest\JsonSchema\Exception as JsonSchemaException;
 
 abstract class Action
 {
     protected LoggerInterface $logger;
-
     protected Request $request;
-
     protected Response $response;
-
     protected array $args;
 
     public function __construct(LoggerInterface $logger)
@@ -68,6 +67,61 @@ abstract class Action
         }
 
         return $this->args[$name];
+    }
+
+    protected function resolveIntArg(string $name, int $minValue = PHP_INT_MIN, int $maxValue = PHP_INT_MAX): int
+    {
+        $arg = $this->resolveArg($name);
+        $int = filter_var($arg, FILTER_VALIDATE_INT, [
+            'options' => [
+                'min_range' => $minValue,
+                'max_range' => $maxValue,
+            ]
+        ]);
+        if ($int === false) {
+            $message = "Argument `{$name}` is expected to be an integer";
+            if ($minValue > PHP_INT_MIN && $maxValue < PHP_INT_MAX) {
+                $message .= " in range [$minValue, $maxValue]";
+            } elseif ($minValue > PHP_INT_MIN) {
+                $message .= " >= $minValue";
+            } elseif ($maxValue < PHP_INT_MAX) {
+                $message .= " <= $maxValue";
+            }
+            throw new HttpBadRequestException($this->request, $message);
+        }
+
+        return $int;
+    }
+
+    protected function resolveStringArg(string $name, string $pregPattern): string
+    {
+        $arg = $this->resolveArg($name);
+        if (!preg_match($pregPattern, $arg)) {
+            throw new HttpBadRequestException($this->request, "Argument `{$name}` is expected to match PCRE `$pregPattern`");
+        }
+        
+        return $arg;
+    }
+
+    protected function getValidatedBody(string $jsonSchema): \stdClass
+    {
+        try {
+            $schema = Schema::import(json_decode($jsonSchema));
+        } catch (\Exception $e) {
+            throw new \RuntimeException('Error importing the JSON schema', 0, $e);
+        }
+
+        try {
+            $bodyObject = (object)($this->request->getParsedBody());
+            $schema->in($bodyObject);
+        } catch (JsonSchemaException $e) {
+            // NOTE: Catching the generic JsonSchemaException which might be thrown by
+            //       \Swaggest\JsonSchema\RefResolver::preProcessReferences() despite
+            //       \Swaggest\JsonSchema\SchemaContract::in() declares throwing just \Swaggest\JsonSchema\InvalidValue
+            throw new HttpBadRequestException($this->request, 'Invalid payload', $e);
+        }
+
+        return $bodyObject;
     }
 
     /**
