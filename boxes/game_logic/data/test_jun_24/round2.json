@@ -1,0 +1,84 @@
+{
+    "roundId": 3,
+    "roundName": "Test: Round 2",
+    "duration": 900,
+    "routers": {
+        "E": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "H": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "G": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "I": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "M": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "A": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "D": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "F": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "K": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "J": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "L": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "N": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "O": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "B": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "C": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        }
+    },
+    "links": [  
+        "AB", "AD", "AM", "AN", "AO",
+        "BC", "BD", "BO",
+        "CD", "DE", "EF",
+        "DE",
+        "EF", "EH",
+        "FG", "FH", "FI", "FK",
+        "GH", "GI", "GJ",
+        "HI",
+        "IJ", "IK", "IM",
+        "JK", "JL",
+        "KL",
+        "LM", "LN",
+        "MN", "MO",
+        "NO"
+    ],
+    "packets": {
+    },
+    "events": [
+    ]
+}
+
+
+
+
+
+
+
+
+
+
+
+
