@@ -184,8 +184,8 @@ rg::TopologyEvent rg::io::from_json(const nlohmann::json& json) {
     event.type = from_json<rg::TopologyEventType>(json["type"]);
     event.time = json["time"].get<int>();
 
-    if (json.contains("edge")) {
-        event.edge = link_from_json(json["edge"]);
+    if (json.contains("link")) {
+        event.link = link_from_json(json["link"]);
     }
 
     return event;
@@ -195,6 +195,12 @@ rg::RoundSetup rg::io::round_setup_from_json(rg::RouterId who_am_i, const nlohma
     if (!json.is_object()) {
         throw std::invalid_argument("Invalid JSON - expected object");
     }
+
+    if (!json.contains("duration") || !json["duration"].is_number()) {
+        throw std::invalid_argument("Invalid JSON - expected 'duration' to be a number");
+    }
+
+    int duration = json["duration"].get<int>();
 
     auto network = from_json<rg::Network>(json);
 
@@ -224,5 +230,5 @@ rg::RoundSetup rg::io::round_setup_from_json(rg::RouterId who_am_i, const nlohma
         packet_infos[seq] = from_json<rg::PacketInfo>(it.value());
     }
 
-    return rg::RoundSetup(who_am_i, network, events, packet_infos);
+    return rg::RoundSetup(who_am_i, duration, network, events, packet_infos);
 }

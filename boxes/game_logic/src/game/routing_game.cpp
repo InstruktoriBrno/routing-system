@@ -6,14 +6,14 @@ using namespace rg;
 void rg::apply_topology_event(rg::Network& network, const rg::TopologyEvent& event) {
     switch (event.type) {
         case TopologyEventType::LinkUp: {
-            assert(event.edge.has_value());
-            auto [from, to] = *event.edge;
+            assert(event.link.has_value());
+            auto [from, to] = *event.link;
             network.add_connection(from, to);
         } break;
 
         case TopologyEventType::LinkDown: {
-            assert(event.edge.has_value());
-            auto [from, to] = *event.edge;
+            assert(event.link.has_value());
+            auto [from, to] = *event.link;
             network.remove_connection(from, to);
         }  break;
     }
@@ -29,7 +29,7 @@ struct result_handle_internal {
  * then packet.points are awarded to the team.
  * After the points are awarded, a PacketVisitResult::Finished with no points
  * is returned by all routers.
- * If the points were already awarded, then card_getMetadata()[0] == true is set 
+ * If the points were already awarded, then card_getMetadata()[0] == true is set
  * to avoid reading the whole trace.
  */
 result_handle_internal handle_standard_packet(const rg::RoundSetup& setup, rg::CardCommInterface& card) {
@@ -62,7 +62,7 @@ result_handle_internal handle_standard_packet(const rg::RoundSetup& setup, rg::C
         auto metadata = card.get_metadata();
         metadata.set(0, 1);
         card.set_metadata(metadata);
-        
+
         assert(card.get_metadata()[0]);
         int points = packet.points;
         assert(points == 10);
@@ -174,7 +174,7 @@ result_handle_internal handle_hopper_packet(const rg::RoundSetup& setup, rg::Car
             .log = logText,
         },
         .log = log
-    };  
+    };
 }
 
 /**
@@ -275,7 +275,7 @@ rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommIn
 
     switch (packet.type) {
 
-        case PacketType::Standard: 
+        case PacketType::Standard:
             result = handle_standard_packet(setup, card);
             break;
         case PacketType::Priority:
@@ -286,7 +286,7 @@ rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommIn
             break;
         case PacketType::VisitAll:
             result = handle_visitall_packet(setup, card);
-            break;        default: 
+            break;        default:
             return {
                 .result = PacketVisitResult::Invalid,
                 .log = "Unrecognized packet type: " + std::to_string(static_cast<int>(packet.type)),

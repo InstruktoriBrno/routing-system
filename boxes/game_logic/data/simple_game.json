@@ -23,12 +23,12 @@
         {
             "type": "linkdown",
             "time": 3,
-            "edge": "AB"
+            "link": "AB"
         },
         {
             "type": "linkup",
             "time": 4,
-            "edge": "AB"
+            "link": "AB"
         }
     ]
 }

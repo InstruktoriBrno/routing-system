@@ -96,7 +96,7 @@ enum class TopologyEventType {
 struct TopologyEvent {
     TopologyEventType type;
     int time;
-    std::optional<std::tuple<RouterId, RouterId>> edge;
+    std::optional<std::tuple<RouterId, RouterId>> link;
 };
 
 void apply_topology_event(Network& network, const TopologyEvent& event);
@@ -122,11 +122,13 @@ private:
 
     int _current_time = 0;
     int _current_event_idx = 0;
+
+    int _duration = 0;
 public:
-    RoundSetup(RouterId who_am_i, const Network& network,
+    RoundSetup(RouterId who_am_i, int duration, const Network& network,
         const std::vector<TopologyEvent>& events, const std::map<CardSeqNum,
         PacketInfo> _packet_infos)
-    : _who_am_i(who_am_i), _initial_network(network), _current_network(_initial_network),
+    : _who_am_i(who_am_i), _duration(duration), _initial_network(network), _current_network(_initial_network),
       _topology_events(events), _packet_infos(_packet_infos)
     {
         std::sort(_topology_events.begin(), _topology_events.end(),
