@@ -3,49 +3,49 @@
     "roundName": "Test: Round 1",
     "duration": 900,
     "routers": {
+        "L": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
         "A": {
-            "mac": "xx:xx:xx:xx:xx:xx"
-        },
-        "B": {
-            "mac": "xx:xx:xx:xx:xx:xx"
-        },
-        "C": {
             "mac": "xx:xx:xx:xx:xx:xx"
         },
         "D": {
             "mac": "xx:xx:xx:xx:xx:xx"
         },
-        "E": {
-            "mac": "xx:xx:xx:xx:xx:xx"
-        },
-        "F": {
-            "mac": "xx:xx:xx:xx:xx:xx"
-        },
-        "G": {
-            "mac": "xx:xx:xx:xx:xx:xx"
-        },
-        "H": {
-            "mac": "xx:xx:xx:xx:xx:xx"
-        },
-        "I": {
+        "C": {
             "mac": "xx:xx:xx:xx:xx:xx"
         },
         "J": {
             "mac": "xx:xx:xx:xx:xx:xx"
         },
-        "K": {
+        "E": {
             "mac": "xx:xx:xx:xx:xx:xx"
         },
-        "L": {
+        "B": {
             "mac": "xx:xx:xx:xx:xx:xx"
         },
         "M": {
             "mac": "xx:xx:xx:xx:xx:xx"
         },
+        "O": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
         "N": {
             "mac": "xx:xx:xx:xx:xx:xx"
         },
-        "O": {
+        "F": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "K": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "G": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "I": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "H": {
             "mac": "xx:xx:xx:xx:xx:xx"
         }
     },
@@ -62,22 +62,10 @@
                 "NO"],
     "packets": {
         "000": {"type": "standard", "releaseTime":60, "source": "A", "destination": "C", "points": 10},
-        "050": {"type": "priority", "releaseTime":60, "source": "A", "destination": "C", "pointsPerMinuteLeft": 4, "minutesToDeliver": 5},
-        "080": {"type": "hopper", "releaseTime":60, "source": "A", "pointsPerHop": 1},
-        "090": {"type": "visitall", "releaseTime":60, "source": "A", "points": 50}
+        "050": {"type": "priority", "releaseTime":120, "source": "A", "destination": "C", "pointsPerMinuteLeft": 4, "minutesToDeliver": 5},
+        "080": {"type": "hopper", "releaseTime":180, "source": "A", "pointsPerHop": 1},
+        "090": {"type": "visitall", "releaseTime":210, "source": "A", "points": 50}
     },
     "events": [
     ]
 }
-
-
-
-
-
-
-
-
-
-
-
-

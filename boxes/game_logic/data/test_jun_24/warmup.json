@@ -1,0 +1,84 @@
+{
+    "roundId": 1,
+    "roundName": "Test: Warmup",
+    "duration": 600,
+    "routers": {
+        "A": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "B": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "C": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "D": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "E": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "F": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "G": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "H": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "I": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "J": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "K": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "L": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "M": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "N": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "O": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        }
+    },
+    "links": [ "AB", "BC", "CD", "DE", "EF", "FG", "GA", "HI", "IJ", "JK", "KL", "LM", "MN", "NO", "OH"],
+    "packets": {
+        "000": {"type": "standard", "releaseTime":0, "source": "A", "destination": "C", "points": 10},
+        "001": {"type": "standard", "releaseTime":0, "source": "B", "destination": "D", "points": 10},
+        "002": {"type": "standard", "releaseTime":0, "source": "C", "destination": "E", "points": 10},
+        "003": {"type": "standard", "releaseTime":0, "source": "D", "destination": "F", "points": 10},
+        "004": {"type": "standard", "releaseTime":0, "source": "E", "destination": "G", "points": 10},
+        "005": {"type": "standard", "releaseTime":0, "source": "F", "destination": "A", "points": 10},
+        "006": {"type": "standard", "releaseTime":0, "source": "G", "destination": "B", "points": 10},
+        "007": {"type": "standard", "releaseTime":0, "source": "H", "destination": "J", "points": 10},
+        "008": {"type": "standard", "releaseTime":0, "source": "I", "destination": "O", "points": 10},
+        "009": {"type": "standard", "releaseTime":0, "source": "J", "destination": "L", "points": 10},
+        "010": {"type": "standard", "releaseTime":0, "source": "K", "destination": "I", "points": 10},
+        "011": {"type": "standard", "releaseTime":0, "source": "L", "destination": "N", "points": 10},
+        "012": {"type": "standard", "releaseTime":0, "source": "M", "destination": "K", "points": 10},
+        "013": {"type": "standard", "releaseTime":0, "source": "N", "destination": "H", "points": 10},
+        "014": {"type": "standard", "releaseTime":0, "source": "O", "destination": "M", "points": 10}
+    },
+    "events": [
+    ]
+}
+
+
+
+
+
+
+
+
+
+
+
+
