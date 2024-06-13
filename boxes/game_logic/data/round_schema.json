@@ -13,9 +13,15 @@
         },
         "routers": {
             "type": "object",
-            "description": "Default assignment of pipaky to Router labels. Any pipak can assume any Label (for redundancy purposes). These values are defaults, so we don't need to update each of them manually pre-game.",
             "additionalProperties": {
-                "type": "string"
+                "type": "object",
+                "description": "Default assignment of pipaky to Router labels. Any pipak can assume any Label (for redundancy purposes). These values are defaults, so we don't need to update each of them manually pre-game.",
+                "properties": {
+                    "mac": {
+                        "type": "string",
+                        "description": "MAC address of the router that should assume this logical address"
+                    }
+                }
             }
         },
         "links": {
@@ -23,52 +29,54 @@
             "description": "List of all links in the network. The links are bi-directional. Only one of the directions is listed here.",
             "items": [
                 {
-                    "type": "array",
-                    "description": "Array of exactly two Router labels, designing the two routers this link connects.",
-                    "items": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
+                    "type": "string",
+                    "description": "String of exactly two Router label chars."
                 }
             ]
         },
         "packets": {
             "type": "object",
-            "properties": {
-                "type": {
-                    "enum": [
-                        "standard",
-                        "priority",
-                        "hopper",
-                        "visitall"
-                    ]
+            "additionalProperties": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "enum": [
+                            "standard",
+                            "priority",
+                            "hopper",
+                            "visitall"
+                        ]
+                    },
+                    "releaseTime": {
+                        "type": "integer",
+                        "description": "Gametime when this packet should be released. Not enforced, value is for itinerary generator tool"
+                    },
+                    "source": {
+                        "type": "string"
+                    },
+                    "destination": {
+                        "type": "string"
+                    },
+                    "points": {
+                        "type": "integer"
+                    },
+                    "pointsPerMinuteLeft": {
+                        "type": "integer"
+                    },
+                    "minutesToDeliver": {
+                        "type": "integer"
+                    },
+                    "pointsPerHop": {
+                        "type": "integer"
+                    }
                 },
-                "releaseTime": {
-                    "type": "integer",
-                    "description": "Gametime when this packet should be released. Not enforced, value is for itinerary tooling automation"
-                },
-                "source": {
-                    "type": "string"
-                },
-                "destination": {
-                    "type": "string",
-                    "description": "Optional designation of Router label, E.g. for standard packets"
-                },
-                "points": {
-                    "type": "integer",
-                    "description": "Optional. E.g. for priority packets of different importance levels"
-                }
-            },
-            "required": [
-                "type",
-                "releaseTime",
-                "source"
-            ],
-            "additionalProperties": true
+                "required": [
+                    "type",
+                    "releaseTime",
+                    "source"
+                ],
+                "additionalProperties": false
+            }
         },
         "events": {
             "type": "array",
@@ -103,5 +111,6 @@
         "links",
         "packets",
         "events"
-    ]
+    ],
+    "additionalProperties": false
 }
