@@ -1,0 +1,107 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+        "roundId": {
+            "type": "integer"
+        },
+        "roundName": {
+            "type": "string"
+        },
+        "duration": {
+            "type": "integer"
+        },
+        "routers": {
+            "type": "object",
+            "description": "Default assignment of pipaky to Router labels. Any pipak can assume any Label (for redundancy purposes). These values are defaults, so we don't need to update each of them manually pre-game.",
+            "additionalProperties": {
+                "type": "string"
+            }
+        },
+        "links": {
+            "type": "array",
+            "description": "List of all links in the network. The links are bi-directional. Only one of the directions is listed here.",
+            "items": [
+                {
+                    "type": "array",
+                    "description": "Array of exactly two Router labels, designing the two routers this link connects.",
+                    "items": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            ]
+        },
+        "packets": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "enum": [
+                        "standard",
+                        "priority",
+                        "hopper",
+                        "visitall"
+                    ]
+                },
+                "releaseTime": {
+                    "type": "integer",
+                    "description": "Gametime when this packet should be released. Not enforced, value is for itinerary tooling automation"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "destination": {
+                    "type": "string",
+                    "description": "Optional designation of Router label, E.g. for standard packets"
+                },
+                "points": {
+                    "type": "integer",
+                    "description": "Optional. E.g. for priority packets of different importance levels"
+                }
+            },
+            "required": [
+                "type",
+                "releaseTime",
+                "source"
+            ],
+            "additionalProperties": true
+        },
+        "events": {
+            "type": "array",
+            "description": "Pre-planned network events that will happen during game",
+            "items": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "category": {
+                            "enum": [
+                                "linkDown"
+                            ]
+                        },
+                        "relativeTimestamp": {
+                            "type": "number",
+                            "description": "When should the event take place, in seconds from game start"
+                        }
+                    },
+                    "required": [
+                        "category",
+                        "relativeTimestamp"
+                    ]
+                }
+            ]
+        }
+    },
+    "required": [
+        "roundId",
+        "roundName",
+        "duration",
+        "routers",
+        "links",
+        "packets",
+        "events"
+    ]
+}

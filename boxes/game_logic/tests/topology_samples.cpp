@@ -5,7 +5,8 @@
 nlohmann::json rg::jsonSquareTopology() {
     return nlohmann::json::parse(R"(
         {
-            "round_id": 42,
+            "roundId": 42,
+            "roundName": "Test: Round 1",
             "duration": 1200,
             "routers": {
                 "A": {
