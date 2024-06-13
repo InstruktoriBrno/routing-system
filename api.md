@@ -256,7 +256,7 @@ Request body:
     * optional bearer ID
     * for diagnostic purposes only
 * `score`: points awarded for this card beep
-    * optional non-negative integer
+    * optional integer
 
 Uniqueness: there can only be one event per (`<round-id>`, `time`, `card`) combination. Even across multiple POST requests (even across events of different router IDs).
 * Only the first such event will be processed, the rest will get skipped.
