@@ -28,11 +28,11 @@ INSERT INTO round_spec_lib (name, is_deleted, spec) VALUES
                 "000": { "type": "checkin", "destination": "A" },
                 "001": { "type": "checkin", "destination": "B" },
                 "002": { "type": "checkin", "destination": "C" },
-                "010": { "type": "standard", "source": "A", "destination": "B", "points": 10 },
-                "011": { "type": "standard", "source": "A", "destination": "B", "points": 10 },
-                "012": { "type": "standard", "source": "A", "destination": "B", "points": 10 },
-                "020": { "type": "standard", "source": "B", "destination": "A", "points": 10 },
-                "030": { "type": "standard", "source": "B", "destination": "C", "points": 10 }
+                "010": { "type": "standard", "releaseTime": 60, "source": "A", "destination": "B", "points": 10 },
+                "011": { "type": "standard", "releaseTime": 30, "source": "A", "destination": "B", "points": 10 },
+                "012": { "type": "standard", "releaseTime": 90, "source": "A", "destination": "B", "points": 10 },
+                "020": { "type": "standard", "releaseTime": 180, "source": "B", "destination": "A", "points": 10 },
+                "030": { "type": "standard", "releaseTime": 60, "source": "B", "destination": "C", "points": 10 }
             },
             "events": []
         }
@@ -75,15 +75,15 @@ INSERT INTO round_spec_lib (name, is_deleted, spec) VALUES
                 "007": { "type": "checkin", "destination": "H" },
                 "008": { "type": "checkin", "destination": "I" },
                 "009": { "type": "checkin", "destination": "J" },
-                "010": { "type": "standard", "source": "A", "destination": "B", "points": 10 },
-                "011": { "type": "standard", "source": "A", "destination": "C", "points": 20 },
-                "012": { "type": "standard", "source": "A", "destination": "D", "points": 30 },
-                "013": { "type": "standard", "source": "A", "destination": "E", "points": 40 },
-                "014": { "type": "standard", "source": "A", "destination": "F", "points": 50 },
-                "015": { "type": "standard", "source": "A", "destination": "G", "points": 60 },
-                "016": { "type": "standard", "source": "A", "destination": "H", "points": 70 },
-                "017": { "type": "standard", "source": "A", "destination": "I", "points": 80 },
-                "018": { "type": "standard", "source": "A", "destination": "J", "points": 90 }
+                "010": { "type": "standard", "releaseTime": 60, "source": "A", "destination": "B", "points": 10 },
+                "011": { "type": "standard", "releastTime": 120, "source": "A", "destination": "C", "points": 20 },
+                "012": { "type": "standard", "releastTime": 180, "source": "A", "destination": "D", "points": 30 },
+                "013": { "type": "standard", "releastTime": 240, "source": "A", "destination": "E", "points": 40 },
+                "014": { "type": "standard", "releastTime": 300, "source": "A", "destination": "F", "points": 50 },
+                "015": { "type": "standard", "releastTime": 360, "source": "A", "destination": "G", "points": 60 },
+                "016": { "type": "standard", "releastTime": 420, "source": "A", "destination": "H", "points": 70 },
+                "017": { "type": "standard", "releastTime": 480, "source": "A", "destination": "I", "points": 80 },
+                "018": { "type": "standard", "releastTime": 540, "source": "A", "destination": "J", "points": 90 }
             },
             "events": [
                 { "type": "linkup", "time": 60, "link": "AF" },
