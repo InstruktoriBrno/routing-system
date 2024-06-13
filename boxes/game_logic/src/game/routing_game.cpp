@@ -43,10 +43,8 @@ result_handle_internal handle_standard_packet(const rg::RoundSetup& setup, rg::C
     auto me = setup.who_am_i();
 
     if (card.get_metadata()[0]) {
-        rg::UiAction action = {.result = PacketVisitResult::Finished,};
-        std::optional<rg::PacketVisit> log = std::nullopt;
         return {
-            action = {.result = PacketVisitResult::Finished,}
+            .action = {.result = PacketVisitResult::Finished, .log = "Points already awarded"}
         };
     }
 
@@ -54,7 +52,8 @@ result_handle_internal handle_standard_packet(const rg::RoundSetup& setup, rg::C
         return {
             .action = {
                 .result = PacketVisitResult::Continue,
-                .instructions = info
+                .instructions = info,
+                .log = "Multibeep"
             }
         };
     }
@@ -91,7 +90,8 @@ result_handle_internal handle_standard_packet(const rg::RoundSetup& setup, rg::C
     return {
         .action = {
             .result = PacketVisitResult::Continue,
-            .instructions = info
+            .instructions = info,
+            .log = "Packet in transit"
         },
         .log = log
     };
@@ -116,6 +116,8 @@ result_handle_internal handle_priority_packet(const rg::RoundSetup& setup, rg::C
 
         result.log.value().points = points;
         result.action.points = points;
+
+        result.action.log = "Awarded points; mult=" + std::to_string(multiplier) + ", time=" + std::to_string(time);
     }
 
     return result;
@@ -137,6 +139,7 @@ result_handle_internal handle_hopper_packet(const rg::RoundSetup& setup, rg::Car
             .action = {
                 .result = PacketVisitResult::Continue,
                 .instructions = std::to_string(card.visit_count()),
+                .log = "Entering game",
             },
             .log = log
         };
@@ -147,6 +150,7 @@ result_handle_internal handle_hopper_packet(const rg::RoundSetup& setup, rg::Car
             .action = {
                 .result = PacketVisitResult::Continue,
                 .instructions = std::to_string(card.visit_count() - 1),
+                .log = "Multibeep",
             }
         };
     }
@@ -159,11 +163,15 @@ result_handle_internal handle_hopper_packet(const rg::RoundSetup& setup, rg::Car
         .points = packet.pointsPerHop,
     };
 
+    std::string logText = "Hop " + card.get_visit(-1).where;
+    logText += "->" + me;
+
     return {
         .action = {
             .result = PacketVisitResult::Continue,
             .instructions = std::to_string(card.visit_count()),
             .points = packet.pointsPerHop,
+            .log = logText,
         },
         .log = log
     };  
@@ -198,7 +206,8 @@ result_handle_internal handle_visitall_packet(const rg::RoundSetup& setup, rg::C
             return {
                 .action = {
                     .result = PacketVisitResult::Continue,
-                    .instructions = std::to_string(metadata.count())
+                    .instructions = std::to_string(metadata.count()),
+                    .log =  "Bitmap = " + metadata.to_string() + "; Multibeep at " + me,
                 }
             };
         } else {
@@ -210,7 +219,8 @@ result_handle_internal handle_visitall_packet(const rg::RoundSetup& setup, rg::C
             return {
                 .action = {
                     .result = PacketVisitResult::Continue,
-                    .instructions = std::to_string(metadata.count())
+                    .instructions = std::to_string(metadata.count()),
+                    .log = "Bitmap = " + metadata.to_string() + "; Revisiting " + me
                 },
                 .log = log
             };
@@ -230,7 +240,8 @@ result_handle_internal handle_visitall_packet(const rg::RoundSetup& setup, rg::C
         .action = {
             .result = PacketVisitResult::Finished,
             .instructions = std::to_string(metadata.count()),
-            .points = points
+            .points = points,
+            .log =  "Bitmap = " + metadata.to_string(),
         },
         .log = log
     };
@@ -244,14 +255,18 @@ rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommIn
     if (card.visit_count() == 0) {
         if (packet.source != me) {
             return {
-                .result = PacketVisitResult::Invalid
+                .result = PacketVisitResult::Invalid,
+                .log = "Invalid packet entry point"
             };
         }
     } else {
         auto previous = card.get_visit(-1).where;
         if (! setup.network().are_neighbors(previous, me)) {
+            std::string logText = "Invalid hop: " + previous;
+            logText += "->" + me;
             return {
-                .result = PacketVisitResult::Invalid
+                .result = PacketVisitResult::Invalid,
+                .log = logText,
             };
         }
     }
@@ -273,7 +288,8 @@ rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommIn
             result = handle_visitall_packet(setup, card);
             break;        default: 
             return {
-                .result = PacketVisitResult::Invalid
+                .result = PacketVisitResult::Invalid,
+                .log = "Unrecognized packet type: " + std::to_string(static_cast<int>(packet.type)),
             };
     }
 

@@ -201,6 +201,7 @@ struct UiAction {
     PacketVisitResult result;
     std::optional<std::string> instructions;
     std::optional<int> points;
+    std::string log;
 };
 
 /**
