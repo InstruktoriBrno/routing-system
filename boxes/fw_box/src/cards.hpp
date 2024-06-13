@@ -176,9 +176,9 @@ public:
     }
 
     rg::CardPhysicalId get_physical_id() {
-        uint64_t uid = 0;
+        rg::CardPhysicalId uid;
         for (int i = 0; i <7 ; i++) {
-            uid |= uint64_t(mfrc522.uid.uidByte[i])<< (i * 8);
+            uid[i] = mfrc522.uid.uidByte[i];
         }
         return uid;
     }
@@ -198,7 +198,7 @@ public:
         if (idx < 0 || idx >= _visit_count || idx >= 100) {
             return rg::PacketVisit{
                 .where = rg::RouterId(-1),
-                .timestamp = -1
+                .time = -1
             };
         }
 
@@ -218,7 +218,7 @@ public:
             }
             rg::PacketVisit visit = {
                 .where = buffer[0],
-                .timestamp = (buffer[2] << 8 | buffer[1]) & 0xFFF,
+                .time = (buffer[2] << 8 | buffer[1]) & 0xFFF,
                 .flag1 = buffer[2] & (1 << 4),
                 .flag2 = buffer[2] & (1 << 5),
                 .flag3 = buffer[2] & (1 << 6),
@@ -231,7 +231,7 @@ public:
 
         return rg::PacketVisit{
             .where = rg::RouterId(-1),
-            .timestamp = -1
+            .time = -1
         };
     }
 
@@ -321,9 +321,9 @@ public:
 
         uint8_t visit_buffer[4] = {
             uint8_t(visit.where),
-            uint8_t(visit.timestamp & 0xFF),
+            uint8_t(visit.time & 0xFF),
             uint8_t(
-                visit.timestamp >> 8 && 0xF |
+                visit.time >> 8 && 0xF |
                 (int(visit.flag1) << 4) |
                 (int(visit.flag2) << 5) |
                 (int(visit.flag3) << 6) |

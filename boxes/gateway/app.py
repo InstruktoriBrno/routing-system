@@ -1,5 +1,15 @@
+from threading import Thread
+import time
 from flask import Flask, request, jsonify, make_response
-from .gateway import Network
+from .gateway import Network, RoundDefinition
+
+empty_round_def = {
+    "round_id": 0,
+    "routers": {},
+    "links": [],
+    "packets": {},
+    "events": []
+}
 
 
 app = Flask("rg_gateway")
@@ -8,6 +18,18 @@ app.config.from_envvar("GATEWAY_SETTINGS", silent=True)
 
 app.network = Network(app.config["INTERFACE_PORT"])
 app.network.start()
+
+app.current_round = RoundDefinition(empty_round_def)
+
+def round_refresh_routine():
+    while True:
+        try:
+            app.network.broadcast_round_definition(app.current_round)
+        except Exception as e:
+            print(f"Error while broadcasting round definition: {e}")
+        time.sleep(2)
+
+Thread(target=round_refresh_routine, daemon=True).start()
 
 
 @app.route("/boxes")

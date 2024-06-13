@@ -17,6 +17,10 @@ static bool is_mesh_connected = false;
 static mesh_addr_t mesh_parent_addr = {0,};
 static int mesh_layer = 0;
 
+static mesh_addr_t broadcast_address {
+    .addr = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }
+};
+
 
 bool am_i_root() {
     return is_root;
@@ -306,6 +310,7 @@ static void initialize_mesh_network() {
     //          esp_mesh_is_root_fixed() ? "root fixed" : "root not fixed",
     //          esp_mesh_get_topology(), esp_mesh_get_topology() ? "(chain)":"(tree)", esp_mesh_is_ps_enabled());
 
+    esp_mesh_set_group_id(&broadcast_address, 1);
 }
 
 
@@ -323,16 +328,16 @@ uint32_t network_millis() {
     return esp_mesh_get_tsf_time() / 1000;
 }
 
-static bool send_raw_to_root(uint8_t *message, size_t message_size) {
+static bool send_raw_to_root(tcb::span<uint8_t> message) {
     if (am_i_root()) {
         return false;
     }
 
-    assert(message_size <= MESH_MTU);
+    assert(message.size() <= MESH_MTU);
 
     mesh_data_t data = {
-        .data = message,
-        .size = uint16_t(message_size),
+        .data = message.data(),
+        .size = uint16_t(message.size()),
         .proto = MESH_PROTO_BIN,
         .tos = MESH_TOS_P2P
     };
@@ -345,7 +350,29 @@ static bool send_raw_to_root(uint8_t *message, size_t message_size) {
     return true;
 }
 
-void report_box_status(int active_round_id, int round_download_progress) {
+bool broadcast_raw_message(tcb::span<uint8_t> message) {
+    assert(message.size() <= MESH_MTU);
+
+    mesh_data_t data = {
+        .data = message.data(),
+        .size = uint16_t(message.size()),
+        .proto = MESH_PROTO_BIN,
+        .tos = MESH_TOS_P2P
+    };
+
+    const mesh_opt_t opt = {
+        .type = MESH_OPT_SEND_GROUP,
+    };
+
+    auto ret = esp_mesh_send(&broadcast_address, &data, MESH_DATA_P2P | MESH_DATA_NONBLOCK, &opt, 1);
+    if (ret != ESP_OK) {
+        rg_log_e(TAG, "Failed to broadcast message: %s", esp_err_to_name(ret));
+        return false;
+    }
+    return true;
+}
+
+void report_box_status(int active_round_id, const Sha256& active_round_hash, int round_download_progress) {
     assert(!am_i_root());
     if (!is_mesh_connected) {
         rg_log_w(TAG, "Not connected to mesh network, not sending status");
@@ -355,19 +382,32 @@ void report_box_status(int active_round_id, int round_download_progress) {
     mesh_addr_t parent_bssid;
     esp_mesh_get_parent_bssid(&parent_bssid);
 
-    BoxStatusMessage msg = {
-        .network_depth = uint8_t(esp_mesh_get_layer()),
+    NodeStatusMessage msg = {
+        .type = NodeType::Box,
         .parent = MacAddress(parent_bssid),
         .active_round_id = active_round_id,
+        .active_round_hash = active_round_hash,
         .round_download_progress = round_download_progress
     };
 
     static uint8_t tx_buffer[sizeof(msg) + 1];
     SerializationBuffer ser_buffer(tcb::span<uint8_t>(tx_buffer, sizeof(tx_buffer)));
-    ser_buffer.push<uint8_t>(BoxStatusMessage::MESSAGE_TYPE);
+    ser_buffer.push<uint8_t>(NodeStatusMessage::MESSAGE_TYPE);
     msg.serialize(ser_buffer);
 
-    send_raw_to_root(ser_buffer.buffer(), ser_buffer.size());
+    send_raw_to_root(ser_buffer.span());
+}
+
+template <typename Func>
+bool for_each_packet_type(Func&&) {
+    return false;
+}
+
+template <typename Func, typename T, typename... Ts>
+bool for_each_packet_type(Func&& func) {
+    if (func.template operator()<T>())
+        return true;
+    return for_each_packet_type<Func, Ts...>(std::forward<Func>(func));
 }
 
 void handle_incoming_messages(MessageHandler &handler) {
@@ -391,14 +431,37 @@ void handle_incoming_messages(MessageHandler &handler) {
     uint8_t message_type;
     buffer.pop(message_type);
 
-    switch (message_type) {
-        case BoxStatusMessage::MESSAGE_TYPE: {
-            auto msg = BoxStatusMessage::deserialize(buffer);
+    auto handle_message = [&]<typename Message>() {
+        if (message_type == Message::MESSAGE_TYPE) {
+            auto msg = Message::deserialize(buffer);
             handler(MacAddress(from), msg);
-            break;
+            return true;
         }
-        default:
-            rg_log_w(TAG, "Received unknown message type: %d", message_type);
-            break;
+        return false;
+    };
+
+    bool handled = for_each_packet_type<decltype(handle_message),
+        NodeStatusMessage,
+        RoundHeaderMessage,
+        RouterDefinitionMessage,
+        LinkDefinitionMessage,
+        PacketDefinitionMessage,
+        EventDefinitionMessage>(std::move(handle_message));
+
+    if (!handled) {
+        rg_log_w(TAG, "Received unknown message type: %d", message_type);
     }
+}
+
+
+const MacAddress& my_mac_address() {
+    static MacAddress mac;
+    static bool initialized = false;
+    if (!initialized) {
+        mesh_addr_t id;
+        esp_mesh_get_id(&id);
+        mac = MacAddress(id);
+        initialized = true;
+    }
+    return mac;
 }

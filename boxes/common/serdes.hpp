@@ -1,6 +1,8 @@
 #pragma once
+#include "logging.hpp"
 #include <cstdint>
 #include <span.hpp>
+#include <vector>
 
 class SerializationBuffer {
     tcb::span<uint8_t> _buffer;
@@ -25,6 +27,10 @@ public:
     uint8_t *buffer() {
         return _buffer.data();
     }
+
+    tcb::span<uint8_t> span() {
+        return _buffer.subspan(0, _size);
+    }
 };
 
 class DeserializationBuffer {
@@ -48,6 +54,10 @@ public:
 
         memcpy(&value, _buffer.data() + _offset, sizeof(T));
         _offset += sizeof(T);
+    }
+
+    tcb::span<uint8_t> remaining() {
+        return _buffer.subspan(_offset);
     }
 };
 
@@ -176,3 +186,117 @@ private:
     uint8_t _code;
 };
 
+class Base64 {
+public:
+    static const std::string& get_base64_chars() {
+        static const std::string base64_chars =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            "abcdefghijklmnopqrstuvwxyz"
+            "0123456789+/";
+        return base64_chars;
+    }
+
+    static const std::vector<int>& get_base64_index() {
+        static const std::vector<int> base64_index = [](){
+            std::vector<int> index(256, -1);
+            for (int i = 0; i < 64; ++i) {
+                index[Base64::get_base64_chars()[i]] = i;
+            }
+            return index;
+        }();
+        return base64_index;
+    }
+};
+
+template <typename OutputFunction>
+class Base64Encoder {
+public:
+    explicit Base64Encoder(OutputFunction output_func)
+        : output_func_(output_func), buffer_(), buffer_length_(0) {}
+
+    void push_byte(uint8_t byte) {
+        buffer_ = (buffer_ << 8) | byte;
+        buffer_length_ += 8;
+
+        while (buffer_length_ >= 6) {
+            buffer_length_ -= 6;
+            uint8_t b64_char_index = (buffer_ >> buffer_length_) & 0x3F;
+            output_func_(Base64::get_base64_chars()[b64_char_index]);
+        }
+    }
+
+    void finalize() {
+        if (buffer_length_ > 0) {
+            buffer_ <<= (6 - buffer_length_);
+            uint8_t b64_char_index = buffer_ & 0x3F;
+            output_func_(Base64::get_base64_chars()[b64_char_index]);
+
+            while (buffer_length_ < 6) {
+                output_func_('=');
+                buffer_length_ += 2;
+            }
+        }
+    }
+
+    // This makes the encoder compatible with the serialization buffer
+    template<typename T>
+    void push(const T& value) {
+        for (int i = 0; i != sizeof(value); i++) {
+            push_byte(reinterpret_cast<const uint8_t*>(&value)[i]);
+        }
+    }
+
+
+private:
+    OutputFunction output_func_;
+    uint32_t buffer_;
+    int buffer_length_;
+};
+
+template <typename OutputFunction>
+class Base64Decoder {
+public:
+    explicit Base64Decoder(OutputFunction output_func)
+        : output_func_(output_func), buffer_(0), buffer_length_(0), pad_count_(0) {}
+
+    void push_byte(uint8_t byte) {
+        if (byte == '=') {
+            pad_count_++;
+            return;
+        }
+
+        int index = Base64::get_base64_index()[byte];
+        if (index == -1) {
+            rg_log_e("B54", "Invalid base64 character %c", byte);
+            throw std::invalid_argument("Invalid base64 character");
+        }
+
+        buffer_ = (buffer_ << 6) | index;
+        buffer_length_ += 6;
+
+        while (buffer_length_ >= 8) {
+            buffer_length_ -= 8;
+            uint8_t decoded_byte = (buffer_ >> buffer_length_) & 0xFF;
+            output_func_(decoded_byte);
+        }
+    }
+
+    void finalize() {
+        if (pad_count_ > 0) {
+            buffer_ <<= (6 * pad_count_);
+            buffer_length_ -= (8 * pad_count_);
+        }
+
+        while (buffer_length_ >= 8) {
+            buffer_length_ -= 8;
+            uint8_t decoded_byte = (buffer_ >> buffer_length_) & 0xFF;
+            output_func_(decoded_byte);
+        }
+    }
+
+private:
+    OutputFunction output_func_;
+    uint32_t buffer_;
+    int buffer_length_;
+    int pad_count_;
+};

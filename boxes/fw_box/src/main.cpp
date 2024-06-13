@@ -17,6 +17,7 @@
 #include "mesh_net.hpp"
 #include "timer.hpp"
 #include "logging.hpp"
+#include "sys.hpp"
 
 static const char *TAG = "main";
 
@@ -36,13 +37,17 @@ void setup()
     rg_set_log_handler(rg_serial_log_handler, nullptr);
     rg_set_log_severity(Severity::DEBUG);
 
+    smartdisplay_init();
+    setup_gui();
+
     if(!SPIFFS.begin(true)){
         rg_log_e(TAG, "An Error has occurred while mounting SPIFFS");
+        system_trap("Failed to mount SPIFFS");
         return;
     }
 
-    uint8_t mac[6];
-    esp_read_mac(mac, ESP_MAC_WIFI_STA);
+
+    auto mac = my_mac_address();
 
     rg_log_i(TAG, "Board: %s", BOARD_NAME);
     rg_log_i(TAG, "CPU: %s rev%d, CPU Freq: %d Mhz, %d core(s)", ESP.getChipModel(), ESP.getChipRevision(), getCpuFrequencyMhz(), ESP.getChipCores());
@@ -50,30 +55,54 @@ void setup()
     rg_log_i(TAG, "Free PSRAM: %d bytes", ESP.getPsramSize());
     rg_log_i(TAG, "SDK version: %s", ESP.getSdkVersion());
     rg_log_i(TAG, "MAC address: %02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-    if (am_i_root()) {
-        rg_log_i(TAG, "I am the root node");
-    } else {
-        rg_log_i(TAG, "I am a a regular node");
-    }
 
     initialize_mesh_network_as_peer();
     rg_log_i(TAG, "Mesh network initialized");
-
-    smartdisplay_init();
 
     card_reader.init();
     card_reader.debug_connection();
 
     setup_audio();
-    play_wav("/success.wav");
 
-    setup_gui();
     main_screen = std::make_unique<MainScreen>();
     main_screen->activate();
 
-    rg_log_i(TAG, "Free heap: %d", ESP.getFreeHeap());
-    rg_log_i(TAG, "Here we go!");
+    rg_log_i(TAG, "Free heap after setup: %d", ESP.getFreeHeap());
 }
+
+class BoxMessageHandler: public MessageHandler {
+public:
+    void operator()(MacAddress source, const NodeStatusMessage& msg) override {
+        rg_log_i(TAG, "Received NodeStatusMessage from %02x:%02x:%02x:%02x:%02x:%02x",
+            source[0], source[1], source[2], source[3], source[4], source[5]);
+    };
+
+    void operator()(MacAddress source, const RoundHeaderMessage& msg) override {
+        rg_log_i(TAG, "Received RoundHeaderMessage from %02x:%02x:%02x:%02x:%02x:%02x",
+            source[0], source[1], source[2], source[3], source[4], source[5]);
+    }
+
+    void operator()(MacAddress source, const RouterDefinitionMessage& msg) override {
+        rg_log_i(TAG, "Received RouterDefinitionMessage from %02x:%02x:%02x:%02x:%02x:%02x",
+            source[0], source[1], source[2], source[3], source[4], source[5]);
+    }
+
+    void operator()(MacAddress source, const LinkDefinitionMessage& msg) override {
+        rg_log_i(TAG, "Received LinkDefinitionMessage from %02x:%02x:%02x:%02x:%02x:%02x",
+            source[0], source[1], source[2], source[3], source[4], source[5]);
+    }
+
+    void operator()(MacAddress source, const PacketDefinitionMessage& msg) override {
+        rg_log_i(TAG, "Received PacketDefinitionMessage from %02x:%02x:%02x:%02x:%02x:%02x",
+            source[0], source[1], source[2], source[3], source[4], source[5]);
+    }
+
+    void operator()(MacAddress source, const EventDefinitionMessage& msg) override {
+        rg_log_i(TAG, "Received EventDefinitionMessage from %02x:%02x:%02x:%02x:%02x:%02x",
+            source[0], source[1], source[2], source[3], source[4], source[5]);
+    }
+};
+
 
 uint32_t next_update = 0;
 uint32_t clear_card_at = -1;
@@ -92,12 +121,16 @@ PeriodicTimer screen_timer(50);
 PeriodicTimer card_clear_timer(2000);
 
 void loop() {
+    BoxMessageHandler msg_handler;
+    handle_incoming_messages(msg_handler);
+
     if (screen_timer.elapsed()) {
         main_screen->update();
     }
 
     if (status_timer.elapsed()) {
-        report_box_status(0, 0);
+        Sha256 round_id = {0};
+        report_box_status(0, round_id, 0);
     }
 
     if (card_reader.has_new_card() && clear_card_at == -1)
@@ -117,7 +150,7 @@ void loop() {
             Serial.print("  ");
             Serial.print(visit.where);
             Serial.print(" at ");
-            Serial.print(visit.timestamp);
+            Serial.print(visit.time);
             Serial.print(" points ");
             Serial.print(visit.points);
             Serial.println();
@@ -131,7 +164,7 @@ void loop() {
         // }
         // game_interface.mark_visit({
         //     .where = 13,
-        //     .timestamp = 42,
+        //     .time = 42,
         //     .points_awarded = true,
         //     .points = 10
         // });

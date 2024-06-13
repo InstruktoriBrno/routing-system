@@ -1,9 +1,13 @@
 #include "timer.hpp"
+#include "mesh_net.hpp"
+#include "serdes.hpp"
+#include "logging.hpp"
 #include <Arduino.h>
 
 #include <cstdint>
 #include <optional>
 #include <cstring>
+#include <memory>
 
 #include <mesh_net.hpp>
 #include <serdes.hpp>
@@ -31,34 +35,93 @@ void setup()
 }
 
 class RootMessageHandler : public MessageHandler {
+    template <typename Msg>
+    void forward_to_serial(const MacAddress& source, const Msg& msg) {
+        auto encoder = Base64Encoder([](uint8_t byte) {
+            Serial.write(byte);
+        });
+
+        for (auto b : source) {
+            encoder.push_byte(b);
+        }
+        encoder.push(Msg::MESSAGE_TYPE);
+        msg.serialize(encoder);
+        encoder.finalize();
+    }
 public:
-    void operator()(MacAddress source, const BoxStatusMessage& msg) override {
+    void operator()(MacAddress source, const NodeStatusMessage& msg) override {
         Serial.print("D:");
-        Serial.print("BoxStatus");
-        Serial.print(",");
-        for (int i = 0; i < 6; i++) {
-            Serial.print(source[i], HEX);
-            if (i < 5)
-                Serial.print(":");
+        forward_to_serial(source, msg);
+        Serial.print("\n");
+    }
+};
+
+class SerialMessageHandler {
+private:
+    static constexpr int MAX_BUFFER_SIZE = 1500;
+    std::unique_ptr<uint8_t[]> _buffer = std::make_unique<uint8_t[]>(MAX_BUFFER_SIZE);
+    int _buffer_pos = 0;
+    int _command = -1;
+
+    void consume_line() {
+        while (true) {
+            while (!Serial.available())
+                delay(1);
+            auto c = Serial.read();
+            if (c == '\n') {
+                return;
+            }
         }
-        Serial.print(",");
-        for (int i = 0; i < 6; i++) {
-            Serial.print(msg.parent[i], HEX);
-            if (i < 5)
-                Serial.print(":");
+    }
+
+    bool read_base64() {
+        auto decoder = Base64Decoder([&](uint8_t byte) {
+            _buffer[_buffer_pos++] = byte;
+        });
+
+        while (true) {
+            while (!Serial.available())
+                delay(1);
+            auto c = Serial.read();
+            if (c == '\n') {
+                decoder.finalize();
+                return true;
+            }
+
+            if (_buffer_pos >= MAX_BUFFER_SIZE) {
+                rg_log_e(TAG, "Buffer overflow");
+                consume_line();
+                return false;
+            }
+            decoder.push_byte(c);
         }
-        Serial.print(",");
-        Serial.print(msg.network_depth);
-        Serial.print(",");
-        Serial.print(msg.active_round_id);
-        Serial.print(",");
-        Serial.println(msg.round_download_progress);
+    }
+public:
+    SerialMessageHandler() = default;
+
+    void run() {
+        if (Serial.available() < 2) {
+            return;
+        }
+
+        char command = Serial.read();
+        _buffer_pos = 0;
+        if (command == 'B') {
+            Serial.read();
+            if (!read_base64())
+                return;
+            broadcast_raw_message(tcb::span<uint8_t>(_buffer.get(), _buffer_pos));
+            return;
+        }
     }
 };
 
 PeriodicTimer timestamp_notification(1000);
+SerialMessageHandler serial_message_handler;
 
 void loop() {
+    serial_message_handler.run();
+
     RootMessageHandler message_handler;
     handle_incoming_messages(message_handler);
 
