@@ -30,6 +30,7 @@ Request body:
 ```json
 {
     "roundId": <round-id>,
+    "roundName": <round-name>,
     "duration": <duration>,
     "routers": {
         "<router-id>": {
@@ -65,6 +66,7 @@ Request body:
     * integer 1-32767
     * only present for this API endpoint; omitted in the round specs library
     * useful for boxes to check, upon game start (`POST` at `/v1/game/start`), whether the box has the correct round specification
+* `<round-name>`: A label for this round
 * `<duration>`: how long the round will take
     * non-negative integer: number of seconds
     * any events occurring in the game must have their `<time>` less than `<duration>`
@@ -86,17 +88,42 @@ Request body:
         * no impact on the game
     * `"standard"`: packet to be delivered from one router to another
         * score defined by the `"points"` attribute (usually based on shortest path length)
+    * `"priority"`:
+        * Similar to standard packet, only the reward is based on the delivery time. Upon delivery, the point reward is  `pointsPerMinutesLeft * (minutesToDeliver-<timeSpent>+1)`, minimum is `0`.
+    * `"hopper"`:
+        * This packet awards points for every successful hop it takes.
+    * `"visitall"`:
+        * Points are awarded once this packet has visited every single router in the network.
 * `...packet-params`: attributes according to the packet type:
+    * `"source": "<router-id>"`
+        * Mandatory for all game packet types.
+        * ID of router where the packet gets added to the network
     * `"checkin"`:
         * `"destination": "<router-id>"`
             * ID of router to check in
     * `"standard"`:
-        * `"source": "<router-id>"`
-            * ID of router where the packet gets added to the network
         * `"destination": "<router-id>"`
             * ID of router where the packet is to be delivered
-        * `"points": <number>`
+        * `"points": <number> (optional)`
             * Reward for successful delivery
+            * Default = 10
+    * `"priority"`:
+        * `"destination": "<router-id>"`
+            * ID of router where the packet is to be delivered
+        * `"pointsPerMinuteLeft": <number>`
+            * Multiplier for the time left
+            * Default = 4
+        * `"minutesToDeliver": <number>`
+            * Maximum time to deliver. After this time, the reward is 0.
+            * Default = 5
+    * `"hopper"`:
+        * `"pointsPerHop": <number>`
+            * Points awarded for every successful hop
+            * Default = 1
+    * `"visitall"`:
+        * `"points"`:
+            * Points awarded once all routers have been visited
+            * Default = 10 (recommended = 60)
 * `<event-type>`: type of the event:
     * `"linkdown"`: a link gets deactivated at `<event-time>`
         * since `<event-time>`, the routers stop accepting packets being transmitted between these routers
