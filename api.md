@@ -95,12 +95,12 @@ Request body:
     * `"visitall"`:
         * Points are awarded once this packet has visited every single router in the network.
 * `...packet-params`: attributes according to the packet type:
-    * `"source": "<router-id>"`
-        * Mandatory for all game packet types.
-        * ID of router where the packet gets added to the network
     * `"releaseTime"`: <number>
         * Time when the packet should be delivered to the Router box by organisers
         * Not enforced by the game. This is for the game itinerary automation tool
+    * `"source": "<router-id>"`
+        * Mandatory for all game packet types.
+        * ID of router where the packet gets added to the network
     * `"checkin"`:
         * `"destination": "<router-id>"`
             * ID of router to check in
