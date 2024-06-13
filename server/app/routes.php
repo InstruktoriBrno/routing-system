@@ -28,6 +28,7 @@ return function (App $app) {
     $app->group('/v1/game', function (Group $group) {
         $group->post('/round/{roundId}/router/{routerId}', LogRouterEventsAction::class);
         $group->post('/round/{roundId}/team/{teamId}', NotImplementedAction::class);
+        $group->get('/round/{roundId}/instructions', NotImplementedAction::class);
         $group->get('/round/{roundId}/checkin', NotImplementedAction::class);
     });
 

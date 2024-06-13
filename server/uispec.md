@@ -37,6 +37,9 @@
     * Network status, diagnostics
     * Router checkin status
     * Event log
+    * Packet release instructions -> PDF
+        * list packets like "001: A, time 2min 30sec", sorted by releaseTime (nulls first) and cardNumber
+        * list even the packet type
 * Link to scoreboards
     * Subteam scoreboard -> PDF (all subteams)
     * Overall scoreboard -> PDF

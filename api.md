@@ -310,6 +310,26 @@ Request body:
 * `reason`: why the points were awareded
     * optional string
 
+## Game round setup instructions
+
+`GET` at `/v1/game/round/<round-id>/instructions`, using HTTP Basic auth.
+
+Provides instructions on how to organize the round.
+
+Response body (plaintext):
+```
+<card-number>: <router-id>, <time>
+...
+```
+
+Response body example:
+```
+001: A, min 2
+005: C, min 3
+014: H, min 8 sec 30
+```
+
+
 ## Router check-in status
 
 `GET` at `/v1/game/round/<round-id>/checkin`
