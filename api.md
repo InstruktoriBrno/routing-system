@@ -189,7 +189,7 @@ Request body example:
 }
 ```
 
-Successful response to this call means the whole network has applied the new round definition and is ready to start the game.
+Successful response to this call means the gateway accepted the round specification and started to upload it to boxes. Before starting the game, `GET` at `/v1/status` should be used to check readiness.
 
 ## Start the game
 
