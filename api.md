@@ -105,6 +105,9 @@ Request body:
     * `"checkin"`:
         * `"destination": "<router-id>"`
             * ID of router to check in
+    * `"locator"`:
+        * Never awards points
+        * The `"source"` router always shows a "Finished" screen, all other routers show "Invaid" screen
     * `"standard"`:
         * `"destination": "<router-id>"`
             * ID of router where the packet is to be delivered
