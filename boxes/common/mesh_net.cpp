@@ -333,6 +333,26 @@ uint32_t network_millis() {
     return esp_mesh_get_tsf_time() / 1000;
 }
 
+static bool handle_network_error(esp_err_t err) {
+    static int fail_count = 0;
+    if (err == ESP_OK) {
+        fail_count = 0;
+        return true;
+    }
+
+    if (err == ESP_ERR_MESH_TIMEOUT) {
+        fail_count++;
+        if (fail_count > 10) {
+            rg_log_e(TAG, "Too many timeouts, restarting mesh network");
+            esp_mesh_stop();
+            initialize_mesh_network();
+            fail_count = 0;
+        }
+    }
+    rg_log_e(TAG, "Network error: %s", esp_err_to_name(err));
+    return false;
+}
+
 static bool send_raw_to_root(tcb::span<uint8_t> message) {
     if (am_i_root()) {
         return false;
@@ -348,11 +368,7 @@ static bool send_raw_to_root(tcb::span<uint8_t> message) {
     };
 
     auto ret = esp_mesh_send(nullptr, &data, MESH_DATA_P2P, nullptr, 500);
-    if (ret != ESP_OK) {
-        rg_log_e(TAG, "Failed to send message to root: %s", esp_err_to_name(ret));
-        return false;
-    }
-    return true;
+    return handle_network_error(ret);
 }
 
 bool broadcast_raw_message(tcb::span<uint8_t> message) {
@@ -370,11 +386,7 @@ bool broadcast_raw_message(tcb::span<uint8_t> message) {
     };
 
     auto ret = esp_mesh_send(&broadcast_address, &data, MESH_DATA_P2P | MESH_DATA_NONBLOCK, &opt, 1);
-    if (ret != ESP_OK) {
-        rg_log_e(TAG, "Failed to broadcast message: %s", esp_err_to_name(ret));
-        return false;
-    }
-    return true;
+    return handle_network_error(ret);
 }
 
 void report_box_status(int active_round_id, const Sha256& active_round_hash,
@@ -422,12 +434,7 @@ bool send_message(const MacAddress& recipient, tcb::span<uint8_t> message) {
     memcpy(recipient_addr.addr, recipient.data(), 6);
 
     auto ret = esp_mesh_send(&recipient_addr, &data, MESH_DATA_P2P, nullptr, 0);
-    if (ret != ESP_OK) {
-        rg_log_e(TAG, "Failed to send message to %02x:%02x:%02x:%02x:%02x:%02x: %s", MAC2STR(recipient), esp_err_to_name(ret));
-        return false;
-    }
-    return true;
-
+    return handle_network_error(ret);
 }
 
 template <typename Func>
