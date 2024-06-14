@@ -28,7 +28,7 @@ class ActionTest extends TestCase
 
             public function action(): Response
             {
-                return $this->respond(
+                return $this->respondJson(
                     new ActionPayload(
                         202,
                         [
@@ -61,7 +61,7 @@ class ActionTest extends TestCase
 
             public function action(): Response
             {
-                return $this->respondWithData(
+                return $this->respondWithJsonData(
                     [
                         'willBeDoneAt' => (new DateTimeImmutable())->format(DateTimeImmutable::ATOM)
                     ],

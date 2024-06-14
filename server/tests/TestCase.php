@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use App\Application\Handlers\HttpErrorHandler;
 use DI\ContainerBuilder;
 use Exception;
 use PHPUnit\Framework\TestCase as PHPUnit_TestCase;
@@ -10,6 +11,7 @@ use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
 use Slim\Factory\AppFactory;
+use Slim\Middleware\ErrorMiddleware;
 use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Headers;
 use Slim\Psr7\Request as SlimRequest;
@@ -18,6 +20,24 @@ use Slim\Psr7\Uri;
 class TestCase extends PHPUnit_TestCase
 {
     use ProphecyTrait;
+
+    protected App $app;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->app = $this->createAppInstance();
+
+        $callableResolver = $this->app->getCallableResolver();
+        $responseFactory = $this->app->getResponseFactory();
+
+        $errorHandler = new HttpErrorHandler($callableResolver, $responseFactory);
+        $errorMiddleware = new ErrorMiddleware($callableResolver, $responseFactory, true, false, false);
+        $errorMiddleware->setDefaultErrorHandler($errorHandler);
+
+        $this->app->add($errorMiddleware);
+    }
 
     /**
      * @return App

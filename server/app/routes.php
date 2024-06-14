@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Application\Actions\NotImplementedAction;
+use App\Application\Actions\V1\Game\GetRoundInstructionsAction;
 use App\Application\Actions\V1\Game\LogRouterEventsAction;
 use App\Application\Actions\V1\Status\StatusAction;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -28,7 +29,7 @@ return function (App $app) {
     $app->group('/v1/game', function (Group $group) {
         $group->post('/round/{roundId}/router/{routerId}', LogRouterEventsAction::class);
         $group->post('/round/{roundId}/team/{teamId}', NotImplementedAction::class);
-        $group->get('/round/{roundId}/instructions', NotImplementedAction::class);
+        $group->get('/round/{roundId}/instructions', GetRoundInstructionsAction::class);
         $group->get('/round/{roundId}/checkin', NotImplementedAction::class);
     });
 

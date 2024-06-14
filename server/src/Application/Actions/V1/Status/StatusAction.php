@@ -12,7 +12,7 @@ class StatusAction extends Action
     protected function action(): Response
     {
         // TODO: add param to find out gateway host and port
-        return $this->respondWithData([
+        return $this->respondWithJsonData([
             'gateway' => new \stdClass(),
             'routers' => [
                 [

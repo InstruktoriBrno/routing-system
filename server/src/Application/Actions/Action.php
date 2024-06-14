@@ -127,20 +127,36 @@ abstract class Action
     /**
      * @param array|object|null $data
      */
-    protected function respondWithData($data = null, int $statusCode = 200): Response
+    protected function respondWithJsonData($data = null, int $statusCode = 200): Response
     {
         $payload = new ActionPayload($statusCode, $data);
 
-        return $this->respond($payload);
+        return $this->respondJson($payload);
     }
 
-    protected function respond(ActionPayload $payload): Response
+    protected function respondJson(ActionPayload $payload): Response
     {
         $json = json_encode($payload, JSON_PRETTY_PRINT);
         $this->response->getBody()->write($json);
 
         return $this->response
                     ->withHeader('Content-Type', 'application/json')
+                    ->withStatus($payload->getStatusCode());
+    }
+
+    protected function respondWithPlaintextData($data = null, int $statusCode = 200): Response
+    {
+        $payload = new ActionPayload($statusCode, $data);
+
+        return $this->respondPlaintext($payload);
+    }
+
+    protected function respondPlaintext(ActionPayload $payload): Response
+    {
+        $this->response->getBody()->write($payload->getData());
+
+        return $this->response
+                    ->withHeader('Content-Type', 'text/plain')
                     ->withStatus($payload->getStatusCode());
     }
 }

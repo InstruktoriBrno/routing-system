@@ -1,39 +1,17 @@
 <?php
 declare(strict_types=1);
-
 namespace Tests\Application\Actions\V1\Game;
 
-use App\Application\Handlers\HttpErrorHandler;
 use App\Domain\DomainException\DomainRecordNotFoundException;
 use App\Domain\Game\GameRound;
 use App\Domain\Game\GameRoundRepository;
 use DI\Container;
 use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
-use Slim\App;
-use Slim\Middleware\ErrorMiddleware;
 use Tests\TestCase;
 
 class LogRouterEventsActionTest extends TestCase
 {
-    private App $app;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->app = $this->createAppInstance();
-
-        $callableResolver = $this->app->getCallableResolver();
-        $responseFactory = $this->app->getResponseFactory();
-
-        $errorHandler = new HttpErrorHandler($callableResolver, $responseFactory);
-        $errorMiddleware = new ErrorMiddleware($callableResolver, $responseFactory, true, false, false);
-        $errorMiddleware->setDefaultErrorHandler($errorHandler);
-
-        $this->app->add($errorMiddleware);
-    }
-
     private function mockGameRoundRepository(ObjectProphecy $gameRoundRepositoryProphecy): void
     {
         $container = $this->app->getContainer();

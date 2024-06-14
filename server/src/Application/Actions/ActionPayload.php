@@ -11,7 +11,7 @@ class ActionPayload implements JsonSerializable
     private int $statusCode;
 
     /**
-     * @var array|object|null
+     * @var array|object|string|null
      */
     private $data;
 
@@ -33,7 +33,7 @@ class ActionPayload implements JsonSerializable
     }
 
     /**
-     * @return array|null|object
+     * @return array|string|null|object
      */
     public function getData()
     {

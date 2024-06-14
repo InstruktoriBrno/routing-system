@@ -169,8 +169,9 @@ Request body example:
     ],
     "packets": {
         "001": {
-            "type": "checkin",
-            "destination": "A"
+            "type": "locator",
+            "releaseTime": 0,
+            "source": "A"
         },
         "035": {
             "type": "standard",
