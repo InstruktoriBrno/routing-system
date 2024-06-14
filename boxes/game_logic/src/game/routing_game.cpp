@@ -49,7 +49,7 @@ result_handle_internal handle_standard_packet(const rg::RoundSetup& setup, rg::C
     }
 
     if (card.visit_count() > 0 && card.get_visit(-1).where == me) {
-        return {
+        return result_handle_internal {
             .action = {
                 .result = PacketVisitResult::Continue,
                 .instructions = info,
@@ -87,7 +87,7 @@ result_handle_internal handle_standard_packet(const rg::RoundSetup& setup, rg::C
         .time = setup.time(),
     };
 
-    return {
+    return result_handle_internal {
         .action = {
             .result = PacketVisitResult::Continue,
             .instructions = info,
@@ -135,7 +135,7 @@ result_handle_internal handle_hopper_packet(const rg::RoundSetup& setup, rg::Car
             .time = setup.time(),
         };
 
-        return {
+        return result_handle_internal {
             .action = {
                 .result = PacketVisitResult::Continue,
                 .instructions = std::to_string(card.visit_count()),
@@ -146,7 +146,7 @@ result_handle_internal handle_hopper_packet(const rg::RoundSetup& setup, rg::Car
     }
 
     if (card.get_visit(-1).where == me) {
-        return {
+        return result_handle_internal {
             .action = {
                 .result = PacketVisitResult::Continue,
                 .instructions = std::to_string(card.visit_count() - 1),
@@ -203,7 +203,7 @@ result_handle_internal handle_visitall_packet(const rg::RoundSetup& setup, rg::C
         // this is not the last router
         if (card.visit_count() > 0 && card.get_visit(-1).where == me) {
             // don't log repeated beep
-            return {
+            return result_handle_internal {
                 .action = {
                     .result = PacketVisitResult::Continue,
                     .instructions = std::to_string(metadata.count()),
@@ -216,7 +216,7 @@ result_handle_internal handle_visitall_packet(const rg::RoundSetup& setup, rg::C
                 .where = me,
                 .time = setup.time(),
             };
-            return {
+            return result_handle_internal {
                 .action = {
                     .result = PacketVisitResult::Continue,
                     .instructions = std::to_string(metadata.count()),
