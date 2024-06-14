@@ -84,8 +84,9 @@ Request body:
 * `events`: list of events affecting the topology
     * order of elements in the list does not matter, their `<event-time>` is relevant; for readability, though, events should be sorted by `<event-time>` in ascending order
 * `<packet-type>`: type of the packet the card represents:
-    * `"checkin"`: packet for tracking players checking in to the routers before the game round starts
-        * no impact on the game
+    * `"locator"`: Used to locate a predefined router.
+        * The `"source"` router always shows a success screen, all other routers show a fail screen - including pre-game.
+        * Never awards points
     * `"standard"`: packet to be delivered from one router to another
         * score defined by the `"points"` attribute (usually based on shortest path length)
     * `"priority"`:
@@ -106,8 +107,7 @@ Request body:
         * `"destination": "<router-id>"`
             * ID of router to check in
     * `"locator"`:
-        * Never awards points
-        * The `"source"` router always shows a "Finished" screen, all other routers show "Invaid" screen
+        * No optional properties
     * `"standard"`:
         * `"destination": "<router-id>"`
             * ID of router where the packet is to be delivered
