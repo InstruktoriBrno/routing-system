@@ -1,0 +1,83 @@
+{
+    "roundId": 42,
+    "roundName": "Test: Square",
+    "duration": 1200,
+    "routers": {
+        "A": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "B": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "C": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        },
+        "D": {
+            "mac": "xx:xx:xx:xx:xx:xx"
+        }
+    },
+    "links": [ "AB", "BC", "CD", "DA" ],
+    "packets": {
+        "0": {
+            "type": "admin",
+            "releaseTime": 0,
+            "source": "C"
+        },
+        "1": {
+            "type": "standard",
+            "releaseTime": 0,
+            "source": "A",
+            "destination": "C"
+        },
+        "2": {
+            "type": "priority",
+            "releaseTime": 0,
+            "source": "A",
+            "destination": "C"
+        },
+        "3": {
+            "type": "hopper",
+            "releaseTime": 0,
+            "source": "A",
+            "pointsPerHop": 1
+        },
+        "4": {
+            "type": "visitall",
+            "releaseTime": 0,
+            "source": "A",
+            "points": 50
+        },
+        "5": {
+            "type": "locator",
+            "releaseTime": 0,
+            "source": "C"
+        },
+        "6": {
+            "type": "standard",
+            "releaseTime": 0,
+            "source": "A",
+            "destination": "B"
+        },
+        "7": {
+            "type": "priority",
+            "releaseTime": 0,
+            "source": "A",
+            "destination": "B"
+        },
+        "8": {
+            "type": "locator",
+            "releaseTime": 0,
+            "source": "B",
+            "pointsPerHop": 1
+        },
+        "9": {
+            "type": "locator",
+            "releaseTime": 0,
+            "source": "A",
+            "points": 50
+        }
+        
+    },
+    "events": [
+    ]
+}
