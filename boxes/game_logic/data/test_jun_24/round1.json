@@ -100,7 +100,6 @@
  
         "041": {"type": "standard", "releaseTime":900, "source": "A", "destination": "E", "points": 10},
         "042": {"type": "standard", "releaseTime":900, "source": "B", "destination": "N", "points": 10},
-
         "044": {"type": "standard", "releaseTime":900, "source": "D", "destination": "H", "points": 10},
         "045": {"type": "standard", "releaseTime":900, "source": "E", "destination": "M", "points": 10},
         "046": {"type": "standard", "releaseTime":900, "source": "F", "destination": "L", "points": 10},
