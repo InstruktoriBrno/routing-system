@@ -81,7 +81,8 @@
         "012": {"type": "standard", "releaseTime":0, "source": "L", "destination": "I", "points": 10},
         "013": {"type": "standard", "releaseTime":0, "source": "M", "destination": "N", "points": 10},
         "014": {"type": "standard", "releaseTime":0, "source": "N", "destination": "M", "points": 10},
-        "015": {"type": "standard", "releaseTime":0, "source": "O", "destination": "H", "points": 10}
+        "015": {"type": "standard", "releaseTime":0, "source": "O", "destination": "H", "points": 10},
+        "016": {"type": "visitall", "releaseTime":0, "source": "K", "points": 10}
     },
     "events": [
     ]
