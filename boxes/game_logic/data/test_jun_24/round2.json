@@ -113,6 +113,9 @@
         "071": {"type": "hopper", "releaseTime":660, "source": "A", "pointsPerHop": 1},
         "072": {"type": "hopper", "releaseTime":660, "source": "F", "pointsPerHop": 1},
         "073": {"type": "hopper", "releaseTime":660, "source": "L", "pointsPerHop": 1},
+        "074": {"type": "visitall", "releaseTime":660, "source": "A", "points": 50},
+        "075": {"type": "visitall", "releaseTime":660, "source": "F", "points": 50},
+        "076": {"type": "visitall", "releaseTime":660, "source": "L", "points": 50},
 
         "091": {"type": "standard", "releaseTime":900, "source": "A", "destination": "J", "points": 10},
         "092": {"type": "standard", "releaseTime":900, "source": "B", "destination": "C", "points": 10},
@@ -137,15 +140,3 @@
     "events": [
     ]
 }
-
-
-
-
-
-
-
-
-
-
-
-
