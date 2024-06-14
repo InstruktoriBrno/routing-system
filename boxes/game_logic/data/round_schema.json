@@ -41,11 +41,12 @@
                 "properties": {
                     "type": {
                         "enum": [
-                            "locator",
+                            "admin",
                             "standard",
                             "priority",
                             "hopper",
-                            "visitall"
+                            "visitall",
+                            "locator"
                         ]
                     },
                     "releaseTime": {

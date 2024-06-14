@@ -19,13 +19,30 @@ TEST_CASE("Network: Check Square topology") {
     CHECK(setup.network().are_neighbors('D', 'A'));    
 }
 
+TEST_CASE("Admin packet: check displayed info") {
+    auto setup = rg::io::round_setup_from_json('B', rg::jsonSquareTopology());
+    setup.advance_time_to(-1);
+
+    MockCardInterface card;
+    card.id.seq = 0;    
+    auto action = rg::handle_packet_visit(setup, card);
+
+    CHECK(action.result == rg::PacketVisitResult::Continue);
+    CHECK(action.instructions == "B");
+
+    setup.advance_time_to(100);
+    action = rg::handle_packet_visit(setup, card);
+
+    CHECK(action.result == rg::PacketVisitResult::Continue);
+    CHECK(action.instructions == "B");
+}
+
 TEST_CASE("Locator packet: pre-game success") {
     auto setup = rg::io::round_setup_from_json('C', rg::jsonSquareTopology());
     setup.advance_time_to(-1);
 
     MockCardInterface card;
-    card.id.seq = 0;
-    
+    card.id.seq = 5;    
     auto action = rg::handle_packet_visit(setup, card);
 
     CHECK(action.result == rg::PacketVisitResult::Continue);
@@ -37,8 +54,7 @@ TEST_CASE("Locator packet: pre-game fail") {
     setup.advance_time_to(-1);
 
     MockCardInterface card;
-    card.id.seq = 0;
-    
+    card.id.seq = 5;    
     auto action = rg::handle_packet_visit(setup, card);
 
     CHECK(action.result == rg::PacketVisitResult::Invalid);
@@ -50,9 +66,9 @@ TEST_CASE("Locator packet: in-game success") {
     setup.advance_time_to(1);
 
     MockCardInterface card;
-    card.id.seq = 0;
-    
+    card.id.seq = 5;    
     auto action = rg::handle_packet_visit(setup, card);
+    std::cerr << action.log << "\n\n\n";
 
     CHECK(action.result == rg::PacketVisitResult::Finished);
     CHECK(!action.instructions.has_value());
@@ -63,10 +79,23 @@ TEST_CASE("Locator packet: in-game fail") {
     setup.advance_time_to(1);
 
     MockCardInterface card;
-    card.id.seq = 0;
-    
+    card.id.seq = 5;    
     auto action = rg::handle_packet_visit(setup, card);
 
     CHECK(action.result == rg::PacketVisitResult::Invalid);
+    CHECK(!action.instructions.has_value());
+}
+
+TEST_CASE("Arbitrary packet: after game ended") {
+    auto setup = rg::io::round_setup_from_json('B', rg::jsonSquareTopology());
+
+    std::cerr << "WTF??? " << setup.time() << " " << setup.duration() << "\n";
+    setup.advance_time_to(1500);
+
+    MockCardInterface card;
+    card.id.seq = 1;    
+    auto action = rg::handle_packet_visit(setup, card);
+
+    CHECK(action.result == rg::PacketVisitResult::Finished);
     CHECK(!action.instructions.has_value());
 }

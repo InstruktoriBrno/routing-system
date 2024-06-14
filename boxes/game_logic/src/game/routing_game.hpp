@@ -70,11 +70,12 @@ public:
 };
 
 enum class PacketType {
-    Locator,
+    Admin,
     Standard,
     Priority,
     Hopper,
-    VisitAll
+    VisitAll,
+    Locator,
 };
 
 struct PacketInfo {
@@ -157,6 +158,10 @@ public:
 
     int time() const {
         return _current_time;
+    }
+
+    int duration() const {
+        return _duration;
     }
 
     RouterId who_am_i() const {

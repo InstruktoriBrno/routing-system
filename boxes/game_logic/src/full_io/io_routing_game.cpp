@@ -92,11 +92,12 @@ rg::PacketType rg::io::from_json(const nlohmann::json& json) {
     using namespace std::literals;
 
     static const std::map<std::string_view, rg::PacketType> TYPES = {
-        {"locator"sv, rg::PacketType::Locator},
+        {"admin"sv, rg::PacketType::Admin},
         {"standard"sv, rg::PacketType::Standard},
         {"visitall"sv, rg::PacketType::VisitAll},
         {"priority"sv, rg::PacketType::Priority},
         {"hopper"sv, rg::PacketType::Hopper},
+        {"locator"sv, rg::PacketType::Locator},
     };
 
     if (!json.is_string()) {

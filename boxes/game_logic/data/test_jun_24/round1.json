@@ -61,10 +61,61 @@
                 "MO",
                 "NO"],
     "packets": {
-        "000": {"type": "standard", "releaseTime":60, "source": "A", "destination": "C", "points": 10},
-        "050": {"type": "priority", "releaseTime":120, "source": "A", "destination": "C", "pointsPerMinuteLeft": 4, "minutesToDeliver": 5},
-        "080": {"type": "hopper", "releaseTime":180, "source": "A", "pointsPerHop": 1},
-        "090": {"type": "visitall", "releaseTime":210, "source": "A", "points": 50}
+        "000": {"type": "admin", "releaseTime":0, "source": "A"},
+
+        "001": {"type": "standard", "releaseTime":0, "source": "A", "destination": "C", "points": 10},
+        "002": {"type": "standard", "releaseTime":0, "source": "B", "destination": "D", "points": 10},
+        "003": {"type": "standard", "releaseTime":0, "source": "C", "destination": "E", "points": 10},
+        "004": {"type": "standard", "releaseTime":0, "source": "D", "destination": "F", "points": 10},
+        "005": {"type": "standard", "releaseTime":0, "source": "E", "destination": "A", "points": 10},
+        "006": {"type": "standard", "releaseTime":0, "source": "F", "destination": "A", "points": 10},
+        "007": {"type": "standard", "releaseTime":0, "source": "G", "destination": "B", "points": 10},
+        "008": {"type": "standard", "releaseTime":0, "source": "H", "destination": "O", "points": 10},
+        "009": {"type": "standard", "releaseTime":0, "source": "I", "destination": "K", "points": 10},
+        "010": {"type": "standard", "releaseTime":0, "source": "J", "destination": "N", "points": 10},
+        "011": {"type": "standard", "releaseTime":0, "source": "K", "destination": "A", "points": 10},
+        "012": {"type": "standard", "releaseTime":0, "source": "L", "destination": "I", "points": 10},
+        "013": {"type": "standard", "releaseTime":0, "source": "M", "destination": "N", "points": 10},
+        "014": {"type": "standard", "releaseTime":0, "source": "N", "destination": "M", "points": 10},
+        "015": {"type": "standard", "releaseTime":0, "source": "O", "destination": "H", "points": 10},
+
+        "016": {"type": "hopper", "releaseTime":120, "source": "F", "pointsPerHop": 1},
+        "017": {"type": "hopper", "releaseTime":120, "source": "L", "pointsPerHop": 1},
+
+        "021": {"type": "standard", "releaseTime":600, "source": "A", "destination": "J", "points": 10},
+        "022": {"type": "standard", "releaseTime":600, "source": "B", "destination": "C", "points": 10},
+        "023": {"type": "standard", "releaseTime":600, "source": "C", "destination": "I", "points": 10},
+        "024": {"type": "standard", "releaseTime":600, "source": "D", "destination": "B", "points": 10},
+        "025": {"type": "standard", "releaseTime":600, "source": "E", "destination": "A", "points": 10},
+        "026": {"type": "standard", "releaseTime":600, "source": "F", "destination": "M", "points": 10},
+        "027": {"type": "standard", "releaseTime":600, "source": "G", "destination": "L", "points": 10},
+        "028": {"type": "standard", "releaseTime":600, "source": "H", "destination": "K", "points": 10},
+        "029": {"type": "standard", "releaseTime":600, "source": "I", "destination": "O", "points": 10},
+        "030": {"type": "standard", "releaseTime":600, "source": "J", "destination": "H", "points": 10},
+        "031": {"type": "standard", "releaseTime":600, "source": "K", "destination": "D", "points": 10},
+        "032": {"type": "standard", "releaseTime":600, "source": "L", "destination": "J", "points": 10},
+        "033": {"type": "standard", "releaseTime":600, "source": "M", "destination": "G", "points": 10},
+        "034": {"type": "standard", "releaseTime":600, "source": "N", "destination": "B", "points": 10},
+        "035": {"type": "standard", "releaseTime":600, "source": "O", "destination": "H", "points": 10},
+ 
+        "041": {"type": "standard", "releaseTime":900, "source": "A", "destination": "E", "points": 10},
+        "042": {"type": "standard", "releaseTime":900, "source": "B", "destination": "N", "points": 10},
+
+        "044": {"type": "standard", "releaseTime":900, "source": "D", "destination": "H", "points": 10},
+        "045": {"type": "standard", "releaseTime":900, "source": "E", "destination": "M", "points": 10},
+        "046": {"type": "standard", "releaseTime":900, "source": "F", "destination": "L", "points": 10},
+        "048": {"type": "standard", "releaseTime":900, "source": "H", "destination": "N", "points": 10},
+        "049": {"type": "standard", "releaseTime":900, "source": "I", "destination": "F", "points": 10},
+        "050": {"type": "standard", "releaseTime":900, "source": "J", "destination": "H", "points": 10},
+        "051": {"type": "standard", "releaseTime":900, "source": "K", "destination": "A", "points": 10},
+        "052": {"type": "standard", "releaseTime":900, "source": "L", "destination": "F", "points": 10},
+        "053": {"type": "standard", "releaseTime":900, "source": "M", "destination": "K", "points": 10},
+        "054": {"type": "standard", "releaseTime":900, "source": "N", "destination": "E", "points": 10},
+        "055": {"type": "standard", "releaseTime":900, "source": "O", "destination": "G", "points": 10},
+        
+        "056": {"type": "priority", "releaseTime":900, "source": "C", "destination": "I", "pointsPerMinuteLeft": 4, "minutesToDeliver": 5},
+        "057": {"type": "priority", "releaseTime":900, "source": "G", "destination": "A", "pointsPerMinuteLeft": 4, "minutesToDeliver": 5}
+
     },
     "events": [
     ]

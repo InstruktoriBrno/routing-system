@@ -25,7 +25,7 @@ nlohmann::json rg::jsonSquareTopology() {
             "links": [ "AB", "BC", "CD", "DA" ],
             "packets": {
                 "0": {
-                    "type": "locator",
+                    "type": "admin",
                     "releaseTime": 0,
                     "source": "C"
                 },
@@ -52,6 +52,11 @@ nlohmann::json rg::jsonSquareTopology() {
                     "releaseTime": 0,
                     "source": "A",
                     "points": 50
+                },
+                "5": {
+                    "type": "locator",
+                    "releaseTime": 0,
+                    "source": "C"
                 }
             },
             "events": [

@@ -252,6 +252,23 @@ rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommIn
     auto packet = setup.packet_info(card.get_seq());
     auto me = setup.who_am_i();
 
+    if (packet.type == PacketType::Admin) {
+        std::string instructions;
+        instructions.push_back(me);
+        return {
+            .result = PacketVisitResult::Continue,
+            .instructions = instructions,
+            .log = "Admin info provided"
+        };
+    }
+
+    if (setup.time() > setup.duration()) {
+        return {
+            .result = PacketVisitResult::Finished,
+            .log = "Game round has ended"
+        };
+    }
+
     if (setup.time() < 0) {
         if (packet.source == me) {
             return {

@@ -63,6 +63,22 @@
         "LM", "LO"
     ],
     "packets": {
+        "000": {"type": "admin", "releaseTime":0, "source": "A"},
+        "001": {"type": "standard", "releaseTime":0, "source": "A", "destination": "C", "points": 10},
+        "002": {"type": "standard", "releaseTime":0, "source": "B", "destination": "D", "points": 10},
+        "003": {"type": "standard", "releaseTime":0, "source": "C", "destination": "E", "points": 10},
+        "004": {"type": "standard", "releaseTime":0, "source": "D", "destination": "F", "points": 10},
+        "005": {"type": "standard", "releaseTime":0, "source": "E", "destination": "A", "points": 10},
+        "006": {"type": "standard", "releaseTime":0, "source": "F", "destination": "A", "points": 10},
+        "007": {"type": "standard", "releaseTime":0, "source": "G", "destination": "B", "points": 10},
+        "008": {"type": "standard", "releaseTime":0, "source": "H", "destination": "O", "points": 10},
+        "009": {"type": "standard", "releaseTime":0, "source": "I", "destination": "K", "points": 10},
+        "010": {"type": "standard", "releaseTime":0, "source": "J", "destination": "N", "points": 10},
+        "011": {"type": "standard", "releaseTime":0, "source": "K", "destination": "A", "points": 10},
+        "012": {"type": "standard", "releaseTime":0, "source": "L", "destination": "I", "points": 10},
+        "013": {"type": "standard", "releaseTime":0, "source": "M", "destination": "N", "points": 10},
+        "014": {"type": "standard", "releaseTime":0, "source": "N", "destination": "M", "points": 10},
+        "015": {"type": "standard", "releaseTime":0, "source": "O", "destination": "H", "points": 10}
     },
     "events": [
     ]
