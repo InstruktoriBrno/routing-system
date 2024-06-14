@@ -10,7 +10,6 @@ class GetRoundInstructionsAction extends GameAction
     protected function action(): Response
     {
         $roundIdent = $this->resolveIntArg('roundId', 1, 32767);
-
         $round = $this->gameRoundRepository->findByApiIdent($roundIdent);
         
         $packetInstructions = $this->gameRoundRepository->fetchPacketInstructions($round->getId());

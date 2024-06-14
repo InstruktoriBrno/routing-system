@@ -5,6 +5,7 @@ namespace App\Domain\Game;
 
 use App\Domain\DomainException\DomainRecordNotFoundException;
 use Ivory\Connection\IConnection;
+use Ivory\Data\Map\IValueMap;
 
 class GameRoundRepository
 {
@@ -70,5 +71,72 @@ SQL
         }
 
         return $result;
+    }
+
+    public function fetchTeams(int $roundId): array
+    {
+        $this->db->connect();
+
+        $rel = $this->db->query(<<<'SQL'
+            SELECT
+                grt.team_ident,
+                s.name AS subteam_name
+            FROM
+                game_round_team grt
+                JOIN subteam s ON s.id = grt.subteam_id
+            WHERE
+                grt.game_round_id = %int
+            ORDER BY
+                team_ident,
+                subteam_name
+SQL
+            ,
+            $roundId
+        );
+
+        $result = [];
+        foreach ($rel as $t) {
+            if (!isset($result[$t->team_ident])) {
+                $result[$t->team_ident] = [];
+            }
+            $result[$t->team_ident][] = $t->subteam_name;
+        }
+
+        return $result;
+    }
+
+    public function fetchSuccessfulLocatorCheckIns(int $roundId): IValueMap
+    {
+        $this->db->connect();
+
+        $rel = $this->db->query(<<<'SQL'
+            WITH locator_cards (card_num, router_ident) AS (
+                SELECT
+                    card_num,
+                    def->>'source'
+                FROM
+                    game_round,
+                    json_each(spec->'packets') e (card_num, def)
+                WHERE
+                    id = %int AND
+                    def->>'type' = 'locator'
+            )
+            SELECT
+                gre.router_ident,
+                gre.team_ident,
+                gre.event->>'card' AS card
+            FROM
+                game_round_event gre
+                JOIN locator_cards ON gre.event->>'card' = gre.team_ident || locator_cards.card_num
+            WHERE
+                gre.game_round_id = %int AND
+                gre.router_ident = locator_cards.router_ident
+SQL
+            ,
+            $roundId,
+            $roundId
+        );
+
+        return $rel->assoc('router_ident', 'team_ident', 'card');
     }
 }

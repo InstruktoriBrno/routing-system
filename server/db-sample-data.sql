@@ -270,3 +270,36 @@ INSERT INTO game_round_team (game_round_id, team_ident, subteam_id)
         subteam
     WHERE game.name = 'Big game' AND game_round.name = '3. round' AND subteam.name IN ('B-Team', 'Kokokel')
     ;
+
+INSERT INTO game_round_event (game_round_id, event, source, team_ident, router_ident)
+    -- correct locator check-in
+    SELECT game_round.id, JSON '{"time": 0, "card": "A002", "bearer": "fe:d3:4c:aa:72:11:23"}', event_source 'online', 'A', 'B'
+    FROM
+        game JOIN game_round ON game_round.game_id = game.id
+    WHERE game.name = 'Big game' AND game_round.name = '1. round'
+
+    UNION ALL
+
+    -- incorrect locator check-in
+    SELECT game_round.id, '{"time": 0, "card": "B002", "bearer": "ee:d3:4c:aa:72:11:23"}', 'online', 'B', 'A'
+    FROM
+        game JOIN game_round ON game_round.game_id = game.id
+    WHERE game.name = 'Big game' AND game_round.name = '1. round'
+
+    UNION ALL
+
+    -- incorrect locator check-in
+    SELECT game_round.id, '{"time": 0, "card": "A005", "bearer": "ee:d3:4c:aa:72:11:23"}', 'online', 'A', 'D'
+    FROM
+        game JOIN game_round ON game_round.game_id = game.id
+    WHERE game.name = 'Big game' AND game_round.name = '1. round'
+
+    UNION ALL
+
+    -- correct locator check-in
+    SELECT game_round.id, '{"time": 0, "card": "A005", "bearer": "ee:d3:4c:aa:72:11:23"}', 'online', 'A', 'E'
+    FROM
+        game JOIN game_round ON game_round.game_id = game.id
+    WHERE game.name = 'Big game' AND game_round.name = '1. round'
+
+    ;

@@ -61,4 +61,9 @@ class GameRound implements \JsonSerializable
             'apiIdent' => $this->apiIdent,
         ];
     }
+
+    public function listRouters(): array
+    {
+        return array_keys(get_object_vars($this->spec->routers));
+    }
 }
