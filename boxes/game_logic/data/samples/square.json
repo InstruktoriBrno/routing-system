@@ -67,14 +67,12 @@
         "8": {
             "type": "locator",
             "releaseTime": 0,
-            "source": "B",
-            "pointsPerHop": 1
+            "source": "B"
         },
         "9": {
             "type": "locator",
             "releaseTime": 0,
-            "source": "A",
-            "points": 50
+            "source": "A"
         }
 
     },
