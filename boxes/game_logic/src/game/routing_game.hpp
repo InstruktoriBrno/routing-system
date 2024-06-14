@@ -13,6 +13,9 @@
 
 namespace rg {
 
+void log(const char* fmt, ...);
+void set_log_sink(void (*sink)(const char*, va_list));
+
 using TeamId = uint16_t;
 
 using RouterId = char;
@@ -62,6 +65,7 @@ public:
     }
 
     const bool are_neighbors(RouterId from, RouterId to) const {
+        rg::log("Checking if %d is neighbor of %d", from, to);
         assert(_routers.count(from));
         assert(_routers.count(to));
 

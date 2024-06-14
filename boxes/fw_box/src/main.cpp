@@ -43,6 +43,11 @@ void setup()
 
     rg_set_log_handler(rg_serial_log_handler, nullptr);
     rg_set_log_severity(Severity::DEBUG);
+    rg::set_log_sink([](const char* fmt, va_list args) {
+        static char buffer[512];
+        vsnprintf(buffer, sizeof(buffer), fmt, args);
+        Serial.println(buffer);
+    });
 
     smartdisplay_init();
     setup_gui();

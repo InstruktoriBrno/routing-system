@@ -1,7 +1,25 @@
+#include <cstdarg>
 #include <iostream>
+#include <string_view>
 #include "routing_game.hpp"
 
 using namespace rg;
+
+static void (*log_handler)(const char*, va_list) = nullptr;
+
+void rg::log(const char* fmt, ...) {
+    if (!log_handler) {
+        return;
+    }
+    va_list args;
+    va_start(args, fmt);
+    log_handler(fmt, args);
+    va_end(args);
+}
+
+void rg::set_log_sink(void (*sink)(const char*, va_list)) {
+    log_handler = sink;
+}
 
 void rg::apply_topology_event(rg::Network& network, const rg::TopologyEvent& event) {
     switch (event.type) {
@@ -248,6 +266,7 @@ result_handle_internal handle_visitall_packet(const rg::RoundSetup& setup, rg::C
 }
 
 rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommInterface& card) {
+    using namespace std::literals;
 
     auto packet = setup.packet_info(card.get_seq());
     auto me = setup.who_am_i();
@@ -255,7 +274,7 @@ rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommIn
     if (packet.type == PacketType::Admin) {
         std::string instructions;
         instructions.push_back(me);
-        return {
+        return rg::UiAction {
             .result = PacketVisitResult::Continue,
             .instructions = instructions,
             .log = "Admin info provided"
@@ -287,7 +306,7 @@ rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommIn
         if (packet.source != me) {
             return {
                 .result = PacketVisitResult::Invalid,
-                .log = "Invalid packet entry point"
+                .log = "Invalid packet entry point: "s + std::to_string(int(packet.source)) + " != " + std::to_string(int(me))
             };
         }
     } else {
