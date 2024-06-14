@@ -54,6 +54,12 @@ public:
         forward_to_serial(source, msg);
         Serial.print("\n");
     }
+
+    void operator()(MacAddress source, const PacketVisitMessage& msg) override {
+        Serial.print("D:");
+        forward_to_serial(source, msg);
+        Serial.print("\n");
+    }
 };
 
 class SerialMessageHandler {

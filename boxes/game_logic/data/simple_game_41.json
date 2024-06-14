@@ -3,7 +3,7 @@
     "duration": 600,
     "routers": {
         "A": {
-            "mac": ["xx:xx:xx:xx:xx:xx"]
+            "mac": ["48:E7:29:A4:34:FC"]
         },
         "B": {
             "mac": ["xx:xx:xx:xx:xx:xx"]
