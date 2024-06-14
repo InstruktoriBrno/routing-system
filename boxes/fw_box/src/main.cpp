@@ -39,7 +39,7 @@ CardReader card_reader({
 
 void setup()
 {
-    Serial.begin(921600);
+    Serial.begin(115200);
 
     rg_set_log_handler(rg_serial_log_handler, nullptr);
     rg_set_log_severity(Severity::DEBUG);
