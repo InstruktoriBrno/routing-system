@@ -90,10 +90,13 @@ Request body:
         * score defined by the `"points"` attribute (usually based on shortest path length)
     * `"priority"`:
         * Similar to standard packet, only the reward is based on the delivery time. Upon delivery, the point reward is  `pointsPerMinutesLeft * (minutesToDeliver-<timeSpent>+1)`, minimum is `0`.
+        * **Label**: Na doručení tohoto paketu máte 5 minut. Čím rychleji doručíte, tím víc bodů.
     * `"hopper"`:
         * This packet awards points for every successful hop it takes.
+        * **Label**: Za každý hop vám tento paket dá 1 bod.  
     * `"visitall"`:
         * Points are awarded once this packet has visited every single router in the network.
+        * **Label**: Jakmile tento paketnavštíví všechy routery, dostanete 50 bodů.
     * `"locator"`: Used to locate a predefined router.
         * The `"source"` router always shows a success screen, all other routers show a fail screen - including pre-game.
         * Never awards points
