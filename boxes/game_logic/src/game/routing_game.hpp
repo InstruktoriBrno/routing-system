@@ -70,7 +70,7 @@ public:
 };
 
 enum class PacketType {
-    Nonexistent,
+    Locator,
     Standard,
     Priority,
     Hopper,
@@ -150,7 +150,7 @@ public:
     PacketInfo packet_info(CardSeqNum seq) const {
         auto info_it = _packet_infos.find(seq);
         if (info_it == _packet_infos.end())
-            return { .type = PacketType::Nonexistent };
+            return { .type = PacketType::Locator };
         else
             return info_it->second;
     }

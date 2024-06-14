@@ -252,6 +252,20 @@ rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommIn
     auto packet = setup.packet_info(card.get_seq());
     auto me = setup.who_am_i();
 
+    if (setup.time() < 0) {
+        if (packet.source == me) {
+            return {
+                .result = PacketVisitResult::Continue,
+                .log = "Pregame: Successfully located the strting router"
+            };
+        } else {
+            return {
+                .result = PacketVisitResult::Invalid,
+                .log = "Pregame: Wrong start location"
+            };
+        }
+    }
+
     if (card.visit_count() == 0) {
         if (packet.source != me) {
             return {
@@ -274,7 +288,11 @@ rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommIn
     result_handle_internal result;
 
     switch (packet.type) {
-
+        case PacketType::Locator:
+            return {
+                .result = PacketVisitResult::Finished,
+                .log = "Locator packet at correct router"
+            };
         case PacketType::Standard:
             result = handle_standard_packet(setup, card);
             break;
