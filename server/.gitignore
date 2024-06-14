@@ -1,5 +1,10 @@
 .idea/
 .vscode/
+
+/app/config/env.php
+/app/config/env-*.php
+!/app/config/env-*.example.php
+
 /coverage/
 /vendor/
 /logs/*

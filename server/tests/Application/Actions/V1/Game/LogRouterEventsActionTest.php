@@ -24,7 +24,7 @@ class LogRouterEventsActionTest extends TestCase
         $gameRoundRepositoryProphecy = $this->prophesize(GameRoundRepository::class);
         $gameRoundRepositoryProphecy
             ->findByApiIdent(1)
-            ->willReturn(new GameRound(1, 1, 'Test game', '{}', 1, 'pwd'))
+            ->willReturn(new GameRound(1, 1, 'Test game', new \stdClass(), 1, 'pwd'))
             ->shouldBeCalledOnce();
         $gameRoundRepositoryProphecy
             ->logRouterEvents(1, 'C', 'fe:d3:4c:aa:72:11', 'online', Argument::any())
@@ -50,7 +50,7 @@ class LogRouterEventsActionTest extends TestCase
         $gameRoundRepositoryProphecy = $this->prophesize(GameRoundRepository::class);
         $gameRoundRepositoryProphecy
             ->findByApiIdent(1)
-            ->willReturn(new GameRound(1, 1, 'Test game', '{}', 1, 'pwd'))
+            ->willReturn(new GameRound(1, 1, 'Test game', new \stdClass(), 1, 'pwd'))
             ->shouldBeCalledOnce();
         $gameRoundRepositoryProphecy
             ->logRouterEvents(1, 'C', 'fe:d3:4c:aa:72:11', 'online', Argument::any())

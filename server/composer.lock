@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "29e19de7f761137c7349f3332d837070",
+    "content-hash": "dcb4951f02a17c501d2421a35d4d3e13",
     "packages": [
         {
             "name": "fig/http-message-util",
@@ -275,6 +275,76 @@
             "time": "2018-02-13T20:26:39+00:00"
         },
         {
+            "name": "ondrej-bouda/ivory",
+            "version": "0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ondrej-bouda/ivory.git",
+                "reference": "bf7ccb1e4a5ca4b684ab3905c1380699d76a4556"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ondrej-bouda/ivory/zipball/bf7ccb1e4a5ca4b684ab3905c1380699d76a4556",
+                "reference": "bf7ccb1e4a5ca4b684ab3905c1380699d76a4556",
+                "shasum": ""
+            },
+            "require": {
+                "ext-bcmath": "*",
+                "ext-dom": "*",
+                "ext-iconv": "*",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "ext-pgsql": "*",
+                "ext-simplexml": "*",
+                "ext-xmlreader": "*",
+                "php": "^7.2 || ^8.0",
+                "psr/cache": "^1.0"
+            },
+            "require-dev": {
+                "cache/array-adapter": "*",
+                "cache/filesystem-adapter": "*",
+                "dibi/dibi": "*",
+                "doctrine/dbal": "*",
+                "ext-gmp": "*",
+                "ext-pdo": "*",
+                "ext-pdo_pgsql": "*",
+                "illuminate/database": "*",
+                "nategood/commando": "*",
+                "phpunit/phpunit": "^8.0"
+            },
+            "suggest": {
+                "cache/memcached-adapter": "Some PSR-6 compliant cache pool is essential for Ivory to be fast enough. Use \\Ivory\\Ivory::setDefaultCacheImpl()."
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Ivory\\": "src/Ivory/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Ondřej Bouda",
+                    "email": "bouda@edookit.com"
+                }
+            ],
+            "description": "A robust PHP PostgreSQL layer, as complete and correct as possible",
+            "homepage": "https://ivoryphp.net",
+            "keywords": [
+                "access layer",
+                "database",
+                "postgresql"
+            ],
+            "support": {
+                "issues": "https://github.com/ondrej-bouda/ivory/issues",
+                "source": "https://github.com/ondrej-bouda/ivory/tree/0.2.0"
+            },
+            "time": "2021-04-11T23:04:01+00:00"
+        },
+        {
             "name": "php-di/invoker",
             "version": "2.3.4",
             "source": {
@@ -494,6 +564,55 @@
                 "source": "https://github.com/phplang/scope-exit/tree/master"
             },
             "time": "2016-09-17T00:15:18+00:00"
+        },
+        {
+            "name": "psr/cache",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/cache.git",
+                "reference": "d11b50ad223250cf17b86e38383413f5a6764bf8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/cache/zipball/d11b50ad223250cf17b86e38383413f5a6764bf8",
+                "reference": "d11b50ad223250cf17b86e38383413f5a6764bf8",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Cache\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "http://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for caching libraries",
+            "keywords": [
+                "cache",
+                "psr",
+                "psr-6"
+            ],
+            "support": {
+                "source": "https://github.com/php-fig/cache/tree/master"
+            },
+            "time": "2016-08-06T20:24:11+00:00"
         },
         {
             "name": "psr/container",

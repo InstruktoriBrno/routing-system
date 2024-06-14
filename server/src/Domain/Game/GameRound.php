@@ -7,11 +7,11 @@ class GameRound implements \JsonSerializable
     private ?int $id;
     private int $gameId;
     private string $name;
-    private string $spec;
+    private \stdClass $spec;
     private ?int $apiIdent;
     private ?string $apiPassword;
 
-    public function __construct(?int $id, int $gameId, string $name, string $spec, ?int $apiIdent, ?string $apiPassword)
+    public function __construct(?int $id, int $gameId, string $name, \stdClass $spec, ?int $apiIdent, ?string $apiPassword)
     {
         $this->id = $id;
         $this->gameId = $gameId;
@@ -36,7 +36,7 @@ class GameRound implements \JsonSerializable
         return $this->name;
     }
 
-    public function getSpec(): string
+    public function getSpec(): \stdClass
     {
         return $this->spec;
     }

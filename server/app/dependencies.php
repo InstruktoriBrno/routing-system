@@ -1,9 +1,10 @@
 <?php
-
 declare(strict_types=1);
 
 use App\Application\Settings\SettingsInterface;
 use DI\ContainerBuilder;
+use Ivory\Connection\IConnection;
+use Ivory\Ivory;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
@@ -25,6 +26,12 @@ return function (ContainerBuilder $containerBuilder) {
             $logger->pushHandler($handler);
 
             return $logger;
+        },
+
+        IConnection::class => function (ContainerInterface $c) {
+            // TODO: cache
+            $settings = $c->get(SettingsInterface::class);
+            return Ivory::setupNewConnection($settings->get('db'));
         },
     ]);
 };
