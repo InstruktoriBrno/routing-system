@@ -15,6 +15,7 @@ class ServiceInterface {
 
     void _command_finished() {
         _command = "";
+         _display_message = "";
         _busy = false;
     }
 
@@ -28,6 +29,13 @@ class ServiceInterface {
 
         if (!_activated) {
             Serial.println("NOK");
+            _command_finished();
+            return;
+        }
+
+        if ((Serial.available() > 0 && Serial.peek() == 'q') || _command == "q") {
+            if (Serial.peek() == 'q')
+                Serial.read();
             _command_finished();
             return;
         }
@@ -62,12 +70,29 @@ class ServiceInterface {
                 for (int i = 0; i < game_interface.visit_count(); i++) {
                     auto visit = game_interface.get_visit(i);
                     Serial.print("visit:");
-                    Serial.print(visit.where);
-                    Serial.print(":");
+                    // { "time": 15, "card": "A015", "bearer": "fe:d3:4c:aa:72:11:23", "roundId": 10, "routerId": "A", points: 10 }
+                    Serial.print("{\"time\": ");
                     Serial.print(visit.time);
-                    Serial.print(":");
+                    Serial.print(", \"card\": \"");
+                    Serial.print(char(game_interface.get_id().team_id));
+                    if (game_interface.get_id().seq < 100) {
+                        Serial.print("0");
+                    }
+                    if (game_interface.get_id().seq < 10) {
+                        Serial.print("0");
+                    }
+                    Serial.print(int(game_interface.get_id().seq));
+                    Serial.print("\", \"bearer\": \"");
+                    for (uint8_t byte : game_interface.get_physical_id()) {
+                        Serial.print(byte, HEX);
+                    }
+                    Serial.print("\", \"roundId\": ");
+                    Serial.print(game_interface.get_round_id());
+                    Serial.print(", \"routerId\": \"");
+                    Serial.print(char(visit.where));
+                    Serial.print("\", \"points\": ");
                     Serial.print(visit.points);
-                    Serial.println();
+                    Serial.println("}");
                 }
                 Serial.println("OK");
                 play_wav("/beep.wav");

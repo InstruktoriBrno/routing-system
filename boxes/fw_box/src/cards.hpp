@@ -148,7 +148,7 @@ public:
 
             auto status = mfrc522.MIFARE_Read(4, buffer, &buffer_size);
             if (status != MFRC522Constants::STATUS_OK) {
-                rg_log_e(TAG, "Failed to read team ID and card sequence number: %s", MFRC522Debug::GetStatusCodeName(status));
+                // rg_log_e(TAG, "Failed to read team ID and card sequence number: %s", MFRC522Debug::GetStatusCodeName(status));
                 continue;
             }
             _logical_id = rg::CardLogicalId{
@@ -159,7 +159,7 @@ public:
             buffer_size = sizeof(buffer);
             status = mfrc522.MIFARE_Read(5, buffer, &buffer_size);
             if (status != MFRC522Constants::STATUS_OK) {
-                rg_log_e(TAG, "Failed to read round ID and visit count: %s", MFRC522Debug::GetStatusCodeName(status));
+                // rg_log_e(TAG, "Failed to read round ID and visit count: %s", MFRC522Debug::GetStatusCodeName(status));
                 continue;
             }
             _round_id = buffer[1] << 8 | buffer[0];
@@ -168,7 +168,7 @@ public:
             buffer_size = sizeof(buffer);
             status = mfrc522.MIFARE_Read(6, buffer, &buffer_size);
             if (status != MFRC522Constants::STATUS_OK) {
-                rg_log_e(TAG, "Failed to read metadata: %s", MFRC522Debug::GetStatusCodeName(status));
+                // rg_log_e(TAG, "Failed to read metadata: %s", MFRC522Debug::GetStatusCodeName(status));
                 continue;
             }
             _metadata = buffer[3] << 24 | buffer[2] << 16 | buffer[1] << 8 | buffer[0];

@@ -4,49 +4,49 @@
     "duration": 900,
     "routers": {
         "E": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "H": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "G": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "I": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "M": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "A": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "D": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "F": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "K": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "J": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "L": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "N": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "O": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "B": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "C": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         }
     },
     "links": [  
@@ -82,7 +82,19 @@
         "013": {"type": "standard", "releaseTime":0, "source": "M", "destination": "N", "points": 10},
         "014": {"type": "standard", "releaseTime":0, "source": "N", "destination": "M", "points": 10},
         "015": {"type": "standard", "releaseTime":0, "source": "O", "destination": "H", "points": 10},
-        "016": {"type": "visitall", "releaseTime":0, "source": "K", "points": 10}
+        
+        "016": {"type": "visitall", "releaseTime":180, "source": "H", "points": 50},
+        "017": {"type": "visitall", "releaseTime":180, "source": "L", "points": 50},
+        "018": {"type": "priority", "releaseTime":180, "source": "O", "destination": "G", "pointsPerMinuteLeft": 4, "minutesToDeliver": 5},
+
+        "019": {"type": "priority", "releaseTime":240, "source": "D", "destination": "F", "pointsPerMinuteLeft": 4, "minutesToDeliver": 5},
+        "020": {"type": "priority", "releaseTime":240, "source": "D", "destination": "O", "pointsPerMinuteLeft": 4, "minutesToDeliver": 5},
+        "021": {"type": "priority", "releaseTime":240, "source": "D", "destination": "L", "pointsPerMinuteLeft": 4, "minutesToDeliver": 5},
+
+        "022": {"type": "priority", "releaseTime":240, "source": "D", "destination": "F", "pointsPerMinuteLeft": 4, "minutesToDeliver": 5},
+        "023": {"type": "priority", "releaseTime":240, "source": "D", "destination": "O", "pointsPerMinuteLeft": 4, "minutesToDeliver": 5},
+        "024": {"type": "priority", "releaseTime":240, "source": "D", "destination": "L", "pointsPerMinuteLeft": 4, "minutesToDeliver": 5},
+
     },
     "events": [
     ]

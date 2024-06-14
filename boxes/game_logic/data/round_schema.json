@@ -18,8 +18,8 @@
                 "description": "Default assignment of pipaky to Router labels. Any pipak can assume any Label (for redundancy purposes). These values are defaults, so we don't need to update each of them manually pre-game.",
                 "properties": {
                     "mac": {
-                        "type": "string",
-                        "description": "MAC address of the router that should assume this logical address"
+                        "type": "array",
+                        "description": "List of MAC addresses of all routers that will assume this logical address"
                     }
                 }
             }

@@ -10,16 +10,16 @@ nlohmann::json rg::jsonSquareTopology() {
             "duration": 1200,
             "routers": {
                 "A": {
-                    "mac": "xx:xx:xx:xx:xx:xx"
+                    "mac": ["xx:xx:xx:xx:xx:xx"]
                 },
                 "B": {
-                    "mac": "xx:xx:xx:xx:xx:xx"
+                    "mac": ["xx:xx:xx:xx:xx:xx"]
                 },
                 "C": {
-                    "mac": "xx:xx:xx:xx:xx:xx"
+                    "mac": ["xx:xx:xx:xx:xx:xx"]
                 },
                 "D": {
-                    "mac": "xx:xx:xx:xx:xx:xx"
+                    "mac": ["xx:xx:xx:xx:xx:xx"]
                 }
             },
             "links": [ "AB", "BC", "CD", "DA" ],
