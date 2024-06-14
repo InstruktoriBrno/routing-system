@@ -187,6 +187,10 @@ public:
         return _logical_id;
     }
 
+    rg::CardSeqNum get_seq() override {
+        return _logical_id.seq;
+    }
+
     int visit_count() override {
         return _visit_count;
     }

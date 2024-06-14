@@ -73,7 +73,7 @@ result_handle_internal handle_standard_packet(const rg::RoundSetup& setup, rg::C
             .points = points
         };
 
-        return {
+        return result_handle_internal {
             .action = {
                 .result = PacketVisitResult::Finished,
                 .points = points

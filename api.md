@@ -235,15 +235,30 @@ Resumes the game previously paused by `POST` to `/v1/game/pause`. The game resum
 Response body:
 ```json
 {
-    "gateway": {
-        
+    "boxes": {
+        "48:e7:29:a4:34:fc": {
+            "active_round_hash": "0c301d8ceb1960cf70d98bfef2aa1a93b54c5ce7d4e7f065a4119ff7e0965e20",
+            "active_round_id": 0,
+            "game_state": "NOT_RUNNING",
+            "game_time": 0,
+            "last_seen": 1718347098.48914,
+            "node_type": 1,
+            "parent": "24:0a:c4:82:85:a1",
+            "round_download_progress": 100,
+            "router_id": "N/A"
+        }
     },
-    "routers": [
-        { "router": "<router-id>" }
-    ]
+    "gateway": {
+        "game_state": "NOT_RUNNING",
+        "game_time": 0,
+        "round": 0,
+        "round_hash": "0c301d8ceb1960cf70d98bfef2aa1a93b54c5ce7d4e7f065a4119ff7e0965e20",
+        "time": 1718347098.86965
+    }
 }
 ```
-TODO: specify data above according to what the gateway can provide (router/gateway being online, last ping, status of game round definition...). Should provide network diagnostics plus pretty much any of the above `POST` requests should have some visible bits in the status report.
+
+TODO: Write proper specification
 
 
 # Server API

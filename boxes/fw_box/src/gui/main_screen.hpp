@@ -3,7 +3,7 @@
 #include "lvgl.h"
 #include "gui.hpp"
 
-class MainScreen: public BaseScreen {
+class MainScreen: public BaseStatusBarScreen {
     lv_obj_t *milliseconds_label = nullptr;
 
     int counter = 0;

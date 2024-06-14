@@ -1,3 +1,3 @@
 #pragma once
 
-void system_trap(const char* reason);
+[[noreturn]] void system_trap(const char* reason);

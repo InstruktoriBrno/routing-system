@@ -1,13 +1,16 @@
 #include "audio.hpp"
 #include <Arduino.h>
 
+#include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <optional>
 #include <cstring>
 
 #include <esp32_smartdisplay.h>
 #include <gui/gui.hpp>
 #include <gui/main_screen.hpp>
+#include <gui/game.hpp>
 #include <cards.hpp>
 #include <mesh_net.hpp>
 
@@ -18,10 +21,13 @@
 #include "timer.hpp"
 #include "logging.hpp"
 #include "sys.hpp"
+#include "game.hpp"
 
 static const char *TAG = "main";
 
 std::unique_ptr<MainScreen> main_screen;
+
+SET_LOOP_TASK_STACK_SIZE(5 * 1024);
 
 CardReader card_reader({
     .miso = 19, // 35,
@@ -68,10 +74,15 @@ void setup()
     main_screen->activate();
 
     rg_log_i(TAG, "Free heap after setup: %d", ESP.getFreeHeap());
+    delay(1000);
 }
 
 class BoxMessageHandler: public MessageHandler {
+    Game& game;
+    GameUpdater& game_updater;
 public:
+    BoxMessageHandler(Game& game, GameUpdater& game_updater): game(game), game_updater(game_updater) {}
+
     void operator()(MacAddress source, const NodeStatusMessage& msg) override {
         rg_log_i(TAG, "Received NodeStatusMessage from %02x:%02x:%02x:%02x:%02x:%02x",
             source[0], source[1], source[2], source[3], source[4], source[5]);
@@ -80,112 +91,215 @@ public:
     void operator()(MacAddress source, const RoundHeaderMessage& msg) override {
         rg_log_i(TAG, "Received RoundHeaderMessage from %02x:%02x:%02x:%02x:%02x:%02x",
             source[0], source[1], source[2], source[3], source[4], source[5]);
+        if (msg.round_id != game_updater.round_id() || msg.hash != game_updater.round_hash()) {
+            rg_log_i(TAG, "Received new round header, updating game");
+            game_updater.on_round_header(msg.round_id, msg.hash, msg.duration);
+        }
     }
 
     void operator()(MacAddress source, const RouterDefinitionMessage& msg) override {
         rg_log_i(TAG, "Received RouterDefinitionMessage from %02x:%02x:%02x:%02x:%02x:%02x",
             source[0], source[1], source[2], source[3], source[4], source[5]);
+        for (auto byte : msg.data) {
+            Serial.print(byte, HEX);
+        }
+        Serial.println();
+        for (auto byte : msg.data) {
+            if (byte == 0)
+                Serial.print("\\00");
+            else
+                Serial.print(char(byte));
+        }
+        Serial.println();
+        if (msg.round_id == game_updater.round_id() && msg.hash == game_updater.round_hash()) {
+            game_updater.on_router_definition_pack(msg.total_count, msg.initial_idx, msg.final_idx, msg.data);
+        }
     }
 
     void operator()(MacAddress source, const LinkDefinitionMessage& msg) override {
         rg_log_i(TAG, "Received LinkDefinitionMessage from %02x:%02x:%02x:%02x:%02x:%02x",
             source[0], source[1], source[2], source[3], source[4], source[5]);
+        if (msg.round_id == game_updater.round_id() && msg.hash == game_updater.round_hash()) {
+            game_updater.on_link_definition_pack(msg.total_count, msg.initial_idx, msg.final_idx, msg.data);
+        }
     }
 
     void operator()(MacAddress source, const PacketDefinitionMessage& msg) override {
         rg_log_i(TAG, "Received PacketDefinitionMessage from %02x:%02x:%02x:%02x:%02x:%02x",
             source[0], source[1], source[2], source[3], source[4], source[5]);
+        if (msg.round_id == game_updater.round_id() && msg.hash == game_updater.round_hash()) {
+            game_updater.on_packet_definition_pack(msg.total_count, msg.initial_idx, msg.final_idx, msg.data);
+        }
     }
 
     void operator()(MacAddress source, const EventDefinitionMessage& msg) override {
         rg_log_i(TAG, "Received EventDefinitionMessage from %02x:%02x:%02x:%02x:%02x:%02x",
             source[0], source[1], source[2], source[3], source[4], source[5]);
+        if (msg.round_id == game_updater.round_id() && msg.hash == game_updater.round_hash()) {
+            game_updater.on_topology_event_pack(msg.total_count, msg.initial_idx, msg.final_idx, msg.data);
+        }
+    }
+
+    void operator()(MacAddress source, const GameStateMessage& msg) override {
+        rg_log_i(TAG, "Received PrepareGameMessage from %02x:%02x:%02x:%02x:%02x:%02x",
+            source[0], source[1], source[2], source[3], source[4], source[5]);
+        switch (GameState(msg.state)) {
+            case GameState::NotRunning:
+                game.stop_game();
+                break;
+            case GameState::Preparation:
+                game.prepare_game();
+                break;
+            case GameState::Running:
+                game.start_game(msg.time_offset);
+                break;
+            case GameState::Paused:
+                game.pause_game();
+                break;
+            default:
+                rg_log_e(TAG, "Unknown game state %d", msg.state);
+                break;
+        }
     }
 };
-
-
-uint32_t next_update = 0;
-uint32_t clear_card_at = -1;
-
-const int PING_INTERVAL = 1000;
-uint32_t next_ping = millis() + PING_INTERVAL;
-
-uint32_t ping_id_counter = 0;
-
-uint32_t last_received_ping_id = 0;
-uint32_t last_received_ping_duration = 0;
-uint32_t last_received_ping_ts = 0;
 
 PeriodicTimer status_timer(1000);
 PeriodicTimer screen_timer(50);
 PeriodicTimer card_clear_timer(2000);
 
+Game game;
+GameUpdater game_updater;
+BoxMessageHandler msg_handler(game, game_updater);
+
+void game_step() {
+    if (game_updater.is_update_in_progress()) {
+        static UpdateScreen update_screen;
+
+        update_screen.set_progress(game_updater.update_percents());
+        update_screen.set_online_status(is_mesh_connected());
+        update_screen.set_mac_address(my_mac_address());
+        update_screen.activate();
+
+        return;
+    }
+
+    if (game.has_old_round_setup(game_updater.round_hash())) {
+        game.update_round_setup(game_updater.build_round_setup(), game_updater.round_hash());
+    }
+
+    game.update(network_millis());
+
+    GameScreen *activated_game_screen = nullptr;
+    if (game.state() == GameState::NotRunning) {
+        static NotRunningGameScreen not_running_screen;
+        activated_game_screen = &not_running_screen;
+    }
+    if (game.state() == GameState::Preparation) {
+        static PrepareGameScreen prepare_screen;
+        activated_game_screen = &prepare_screen;
+    }
+    if (game.state() == GameState::Running) {
+        static RunningGameScreen running_screen;
+        activated_game_screen = &running_screen;
+    }
+    if (game.state() == GameState::Paused) {
+        static PausedGameScreen paused_screen;
+        activated_game_screen = &paused_screen;
+    }
+    if (game.state() == GameState::Finished) {
+        static FinishedGameScreen finished_screen;
+        activated_game_screen = &finished_screen;
+    }
+
+    activated_game_screen->set_online_status(is_mesh_connected());
+    activated_game_screen->set_mac_address(my_mac_address());
+    activated_game_screen->activate();
+
+    // TBA handle cards
+
+}
+
 void loop() {
-    BoxMessageHandler msg_handler;
+    lv_timer_handler();
+
     handle_incoming_messages(msg_handler);
 
-    if (screen_timer.elapsed()) {
-        main_screen->update();
-    }
-
     if (status_timer.elapsed()) {
-        Sha256 round_id = {0};
-        report_box_status(0, round_id, 0);
+        rg_log_i(TAG, "Free heap: %d", ESP.getFreeHeap());
+        report_box_status(game_updater.round_id(), game_updater.round_hash(),
+                game_updater.update_percents(), uint8_t(game.state()), game.game_time(),
+                game_updater.who_am_i());
     }
 
-    if (card_reader.has_new_card() && clear_card_at == -1)
-    {
-        auto start = millis();
-        auto game_interface = card_reader.game_card_interface();
-        Serial.println("Card detected");
-        Serial.print("Card logical id: ");
-        Serial.print(game_interface.get_id().team_id);
-        Serial.print(":");
-        Serial.println(game_interface.get_id().seq);
-        Serial.print("Card metadata: ");
-        Serial.println(game_interface.get_metadata().to_ulong());
-        Serial.println("Visits:");
-        for (int i = 0; i < game_interface.visit_count(); i++) {
-            auto visit = game_interface.get_visit(i);
-            Serial.print("  ");
-            Serial.print(visit.where);
-            Serial.print(" at ");
-            Serial.print(visit.time);
-            Serial.print(" points ");
-            Serial.print(visit.points);
-            Serial.println();
-        }
+    game_step();
 
-        // if (!game_interface.reset_for_round(42)) {
-        //     rg_log_e(TAG, "Failed to reset card for round");
-        // }
-        // if (!game_interface.write_logic_id({.team_id = 10, .seq = 11})) {
-        //     rg_log_e(TAG, "Failed to write logic ID");
-        // }
-        // game_interface.mark_visit({
-        //     .where = 13,
-        //     .time = 42,
-        //     .points_awarded = true,
-        //     .points = 10
-        // });
-        // if (!game_interface.finish_transaction()) {
-        //     rg_log_e(TAG, "Failed to finish transaction");
-        // }
-        auto end = millis();
-        rg_log_i(TAG, "Card reset and written in %d ms", end - start);
-        play_wav("/success.wav");
+    return;
 
-        delay(2000);
 
-        main_screen->set_card_id(card_reader.card_uid_str());
-        card_clear_timer.reset();
-    }
 
-    if (clear_card_at != -1 && card_clear_timer.elapsed())
-    {
-        clear_card_at = -1;
-        main_screen->set_card_id(nullptr);
-    }
+
+
+    // if (screen_timer.elapsed()) {
+    //     main_screen->update();
+    //     main_screen->set_online_status(is_mesh_connected());
+    //     main_screen->set_mac_address(my_mac_address());
+    // }
+
+
+
+    // if (card_reader.has_new_card() && clear_card_at == -1)
+    // {
+    //     auto start = millis();
+    //     auto game_interface = card_reader.game_card_interface();
+    //     Serial.println("Card detected");
+    //     Serial.print("Card logical id: ");
+    //     Serial.print(game_interface.get_id().team_id);
+    //     Serial.print(":");
+    //     Serial.println(game_interface.get_id().seq);
+    //     Serial.print("Card metadata: ");
+    //     Serial.println(game_interface.get_metadata().to_ulong());
+    //     Serial.println("Visits:");
+    //     for (int i = 0; i < game_interface.visit_count(); i++) {
+    //         auto visit = game_interface.get_visit(i);
+    //         Serial.print("  ");
+    //         Serial.print(visit.where);
+    //         Serial.print(" at ");
+    //         Serial.print(visit.time);
+    //         Serial.print(" points ");
+    //         Serial.print(visit.points);
+    //         Serial.println();
+    //     }
+
+    //     // if (!game_interface.reset_for_round(42)) {
+    //     //     rg_log_e(TAG, "Failed to reset card for round");
+    //     // }
+    //     // if (!game_interface.write_logic_id({.team_id = 10, .seq = 11})) {
+    //     //     rg_log_e(TAG, "Failed to write logic ID");
+    //     // }
+    //     // game_interface.mark_visit({
+    //     //     .where = 13,
+    //     //     .time = 42,
+    //     //     .points_awarded = true,
+    //     //     .points = 10
+    //     // });
+    //     // if (!game_interface.finish_transaction()) {
+    //     //     rg_log_e(TAG, "Failed to finish transaction");
+    //     // }
+    //     auto end = millis();
+    //     rg_log_i(TAG, "Card reset and written in %d ms", end - start);
+    //     play_wav("/success.wav");
+
+    //     delay(2000);
+
+    //     main_screen->set_card_id(card_reader.card_uid_str());
+    //     card_clear_timer.reset();
+    // }
+
+    // if (clear_card_at != -1 && card_clear_timer.elapsed())
+    // {
+    //     clear_card_at = -1;
+    //     main_screen->set_card_id(nullptr);
+    // }
 
     // card_reader.debug();
 
@@ -250,5 +364,5 @@ void loop() {
     //     }
     // }
 
-    lv_timer_handler();
+    // lv_timer_handler();
 }

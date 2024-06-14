@@ -80,8 +80,10 @@ private:
         });
 
         while (true) {
-            while (!Serial.available())
-                delay(1);
+            while (!Serial.available()) {
+                rg_log_i(TAG, "Waiting for data...");
+                delay(100);
+            }
             auto c = Serial.read();
             if (c == '\n') {
                 decoder.finalize();
@@ -95,6 +97,20 @@ private:
             }
             decoder.push_byte(c);
         }
+    }
+
+    MacAddress read_mac_address() {
+        MacAddress addr;
+        while (Serial.available() < 6 * 3 - 1)
+            delay(1);
+        for (int i = 0; i != 6; i++) {
+            char c1 = Serial.read();
+            char c2 = Serial.read();
+            if (i != 5)
+                Serial.read();
+            addr[i] = (c1 >= 'a' ? c1 - 'a' + 10 : c1 - '0') * 16 + (c2 >= 'a' ? c2 - 'a' + 10 : c2 - '0');
+        }
+        return addr;
     }
 public:
     SerialMessageHandler() = default;
@@ -111,6 +127,14 @@ public:
             if (!read_base64())
                 return;
             broadcast_raw_message(tcb::span<uint8_t>(_buffer.get(), _buffer_pos));
+            return;
+        }
+        if (command == 'S') {
+            Serial.read();
+            MacAddress recipient = read_mac_address();
+            if (!read_base64())
+                return;
+            send_message(recipient, tcb::span<uint8_t>(_buffer.get(), _buffer_pos));
             return;
         }
     }

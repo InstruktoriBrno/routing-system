@@ -120,7 +120,7 @@ private:
     std::vector<TopologyEvent> _topology_events;
     std::map<CardSeqNum, PacketInfo> _packet_infos;
 
-    int _current_time = 0;
+    uint32_t _current_time = 0;
     int _current_event_idx = 0;
 
     int _duration = 0;
@@ -128,8 +128,8 @@ public:
     RoundSetup(RouterId who_am_i, int duration, const Network& network,
         const std::vector<TopologyEvent>& events, const std::map<CardSeqNum,
         PacketInfo> _packet_infos)
-    : _who_am_i(who_am_i), _duration(duration), _initial_network(network), _current_network(_initial_network),
-      _topology_events(events), _packet_infos(_packet_infos)
+    : _who_am_i(who_am_i), _initial_network(network), _current_network(_initial_network),
+      _topology_events(events), _packet_infos(_packet_infos), _duration(duration)
     {
         std::sort(_topology_events.begin(), _topology_events.end(),
             [](const auto& a, const auto& b){ return a.time < b.time; });
@@ -163,8 +163,12 @@ public:
         return _who_am_i;
     }
 
-    void advance_time_to(int target_time) {
-        assert(target_time > _current_time);
+    void advance_time_to(uint32_t target_time) {
+        if (target_time < _current_time) {
+            _current_event_idx = 0;
+            _current_network = _initial_network;
+        }
+
         _current_time = target_time;
         while (_current_event_idx < _topology_events.size()) {
             const TopologyEvent& event = _topology_events[_current_event_idx];
@@ -173,6 +177,10 @@ public:
             apply_topology_event(_current_network, event);
             _current_event_idx++;
         }
+    }
+
+    bool is_finished() const {
+        return _current_time >= _duration;
     }
 };
 

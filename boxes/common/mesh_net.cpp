@@ -1,8 +1,11 @@
 #include <Arduino.h>
 
+#include "logging.hpp"
 #include "mesh_net.hpp"
 #include "serdes.hpp"
 #include <logging.hpp>
+#include "esp_mac.h"
+
 
 
 static const char *TAG = "mesh_net";
@@ -13,7 +16,7 @@ static mesh_addr_t root_addr;
 static esp_netif_t *netif_sta = NULL;
 
 
-static bool is_mesh_connected = false;
+static bool is_mesh_connected_flag = false;
 static mesh_addr_t mesh_parent_addr = {0,};
 static int mesh_layer = 0;
 
@@ -40,13 +43,13 @@ static void mesh_event_handler(void *arg, esp_event_base_t event_base,
     case MESH_EVENT_STARTED: {
         esp_mesh_get_id(&id);
         rg_log_i(TAG, "<MESH_EVENT_MESH_STARTED>ID:" MACSTR "", MAC2STR(id.addr));
-        is_mesh_connected = false;
+        is_mesh_connected_flag = false;
         mesh_layer = esp_mesh_get_layer();
     }
     break;
     case MESH_EVENT_STOPPED: {
         rg_log_i(TAG, "<MESH_EVENT_STOPPED>");
-        is_mesh_connected = false;
+        is_mesh_connected_flag = false;
         mesh_layer = esp_mesh_get_layer();
     }
     break;
@@ -55,6 +58,7 @@ static void mesh_event_handler(void *arg, esp_event_base_t event_base,
         rg_log_i(TAG, "<MESH_EVENT_CHILD_CONNECTED>aid:%d, " MACSTR "",
                  child_connected->aid,
                  MAC2STR(child_connected->mac));
+
     }
     break;
     case MESH_EVENT_CHILD_DISCONNECTED: {
@@ -97,7 +101,7 @@ static void mesh_event_handler(void *arg, esp_event_base_t event_base,
                  (mesh_layer == 2) ? "<layer2>" : "", MAC2STR(id.addr), connected->duty);
         // last_layer = mesh_layer;
         // mesh_connected_indicator(mesh_layer);
-        is_mesh_connected = true;
+        is_mesh_connected_flag = true;
         // if (esp_mesh_is_root()) {
         //     esp_netif_dhcpc_stop(netif_sta);
         //     esp_netif_dhcpc_start(netif_sta);
@@ -110,7 +114,7 @@ static void mesh_event_handler(void *arg, esp_event_base_t event_base,
         rg_log_i(TAG,
                  "<MESH_EVENT_PARENT_DISCONNECTED>reason:%d",
                  disconnected->reason);
-        is_mesh_connected = false;
+        is_mesh_connected_flag = false;
         // mesh_disconnected_indicator();
         mesh_layer = esp_mesh_get_layer();
     }
@@ -271,7 +275,7 @@ static void initialize_mesh_network() {
 #else
     /* Disable mesh PS function */
     ESP_ERROR_CHECK(esp_mesh_disable_ps());
-    ESP_ERROR_CHECK(esp_mesh_set_ap_assoc_expire(10));
+    ESP_ERROR_CHECK(esp_mesh_set_ap_assoc_expire(120));
 #endif
     mesh_cfg_t cfg = MESH_INIT_CONFIG_DEFAULT();
     /* mesh ID */
@@ -284,8 +288,8 @@ static void initialize_mesh_network() {
            strlen(CONFIG_MESH_ROUTER_PASSWD));
     /* mesh softAP */
     ESP_ERROR_CHECK(esp_mesh_set_ap_authmode(WIFI_AUTH_WPA2_PSK));
-    cfg.mesh_ap.max_connection = 4;
-    cfg.mesh_ap.nonmesh_max_connection = 4;
+    cfg.mesh_ap.max_connection = 9;
+    cfg.mesh_ap.nonmesh_max_connection = 1;
     memcpy((uint8_t *) &cfg.mesh_ap.password, CONFIG_MESH_AP_PASSWD,
            strlen(CONFIG_MESH_AP_PASSWD));
     ESP_ERROR_CHECK(esp_mesh_set_config(&cfg));
@@ -296,6 +300,8 @@ static void initialize_mesh_network() {
     }
     esp_mesh_fix_root(1);
     esp_mesh_send_block_time(20);
+
+    esp_mesh_set_group_id(&broadcast_address, 1);
 
     /* mesh start */
     ESP_ERROR_CHECK(esp_mesh_start());
@@ -310,7 +316,6 @@ static void initialize_mesh_network() {
     //          esp_mesh_is_root_fixed() ? "root fixed" : "root not fixed",
     //          esp_mesh_get_topology(), esp_mesh_get_topology() ? "(chain)":"(tree)", esp_mesh_is_ps_enabled());
 
-    esp_mesh_set_group_id(&broadcast_address, 1);
 }
 
 
@@ -342,7 +347,7 @@ static bool send_raw_to_root(tcb::span<uint8_t> message) {
         .tos = MESH_TOS_P2P
     };
 
-    auto ret = esp_mesh_send(nullptr, &data, MESH_DATA_P2P | MESH_DATA_NONBLOCK, nullptr, 0);
+    auto ret = esp_mesh_send(nullptr, &data, MESH_DATA_P2P, nullptr, 500);
     if (ret != ESP_OK) {
         rg_log_e(TAG, "Failed to send message to root: %s", esp_err_to_name(ret));
         return false;
@@ -372,9 +377,11 @@ bool broadcast_raw_message(tcb::span<uint8_t> message) {
     return true;
 }
 
-void report_box_status(int active_round_id, const Sha256& active_round_hash, int round_download_progress) {
+void report_box_status(int active_round_id, const Sha256& active_round_hash,
+        uint8_t round_download_progress, uint8_t game_state, uint16_t game_time,
+        int8_t router_id) {
     assert(!am_i_root());
-    if (!is_mesh_connected) {
+    if (!is_mesh_connected_flag) {
         rg_log_w(TAG, "Not connected to mesh network, not sending status");
         return;
     }
@@ -387,7 +394,10 @@ void report_box_status(int active_round_id, const Sha256& active_round_hash, int
         .parent = MacAddress(parent_bssid),
         .active_round_id = active_round_id,
         .active_round_hash = active_round_hash,
-        .round_download_progress = round_download_progress
+        .round_download_progress = round_download_progress,
+        .game_state = game_state,
+        .game_time = game_time,
+        .router_id = router_id
     };
 
     static uint8_t tx_buffer[sizeof(msg) + 1];
@@ -396,6 +406,28 @@ void report_box_status(int active_round_id, const Sha256& active_round_hash, int
     msg.serialize(ser_buffer);
 
     send_raw_to_root(ser_buffer.span());
+}
+
+bool send_message(const MacAddress& recipient, tcb::span<uint8_t> message) {
+    assert(message.size() <= MESH_MTU);
+
+    mesh_data_t data = {
+        .data = message.data(),
+        .size = uint16_t(message.size()),
+        .proto = MESH_PROTO_BIN,
+        .tos = MESH_TOS_DEF
+    };
+
+    mesh_addr_t recipient_addr;
+    memcpy(recipient_addr.addr, recipient.data(), 6);
+
+    auto ret = esp_mesh_send(&recipient_addr, &data, MESH_DATA_P2P, nullptr, 0);
+    if (ret != ESP_OK) {
+        rg_log_e(TAG, "Failed to send message to %02x:%02x:%02x:%02x:%02x:%02x: %s", MAC2STR(recipient), esp_err_to_name(ret));
+        return false;
+    }
+    return true;
+
 }
 
 template <typename Func>
@@ -411,6 +443,8 @@ bool for_each_packet_type(Func&& func) {
 }
 
 void handle_incoming_messages(MessageHandler &handler) {
+    esp_mesh_set_group_id(&broadcast_address, 1);
+
     mesh_addr_t from;
     static uint8_t recv_buffer[MESH_MTU];
     mesh_data_t data {
@@ -420,6 +454,8 @@ void handle_incoming_messages(MessageHandler &handler) {
     int flag;
     auto ret = esp_mesh_recv(&from, &data, 0, &flag, nullptr, 0);
     if (ret != ESP_OK) {
+        if (ret != ESP_ERR_MESH_TIMEOUT)
+            rg_log_e(TAG, "Failed to receive mesh message: %s", esp_err_to_name(ret));
         return;
     }
 
@@ -446,7 +482,10 @@ void handle_incoming_messages(MessageHandler &handler) {
         RouterDefinitionMessage,
         LinkDefinitionMessage,
         PacketDefinitionMessage,
-        EventDefinitionMessage>(std::move(handle_message));
+        EventDefinitionMessage,
+        PrepareGameMessage,
+        GameStateMessage,
+        PrepareGameMessage>(std::move(handle_message));
 
     if (!handled) {
         rg_log_w(TAG, "Received unknown message type: %d", message_type);
@@ -456,12 +495,12 @@ void handle_incoming_messages(MessageHandler &handler) {
 
 const MacAddress& my_mac_address() {
     static MacAddress mac;
-    static bool initialized = false;
-    if (!initialized) {
-        mesh_addr_t id;
-        esp_mesh_get_id(&id);
-        mac = MacAddress(id);
-        initialized = true;
+    if (mac[0] == 0) {
+        esp_read_mac(mac.data(), ESP_MAC_WIFI_STA);
     }
     return mac;
+}
+
+bool is_mesh_connected() {
+    return is_mesh_connected_flag;
 }
