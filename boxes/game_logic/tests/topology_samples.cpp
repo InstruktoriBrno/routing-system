@@ -23,23 +23,33 @@ nlohmann::json rg::jsonSquareTopology() {
                 }
             },
             "links": [ "AB", "BC", "CD", "DA" ],
-            "packets": {    
+            "packets": {
+                "0": {
+                    "type": "locator",
+                    "releaseTime": 0,
+                    "source": "C"
+                },
                 "1": {
                     "type": "standard",
+                    "releaseTime": 0,
                     "source": "A",
                     "destination": "C"
                 },
                 "2": {
                     "type": "priority",
+                    "releaseTime": 0,
                     "source": "A",
                     "destination": "C"
                 },
                 "3": {
                     "type": "hopper",
-                    "source": "A"
+                    "releaseTime": 0,
+                    "source": "A",
+                    "pointsPerHop": 1
                 },
                 "4": {
                     "type": "visitall",
+                    "releaseTime": 0,
                     "source": "A",
                     "points": 50
                 }

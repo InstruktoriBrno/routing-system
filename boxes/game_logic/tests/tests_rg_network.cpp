@@ -18,3 +18,55 @@ TEST_CASE("Network: Check Square topology") {
     CHECK(setup.network().are_neighbors('A', 'D'));
     CHECK(setup.network().are_neighbors('D', 'A'));    
 }
+
+TEST_CASE("Locator packet: pre-game success") {
+    auto setup = rg::io::round_setup_from_json('C', rg::jsonSquareTopology());
+    setup.advance_time_to(-1);
+
+    MockCardInterface card;
+    card.id.seq = 0;
+    
+    auto action = rg::handle_packet_visit(setup, card);
+
+    CHECK(action.result == rg::PacketVisitResult::Continue);
+    CHECK(!action.instructions.has_value());
+}
+
+TEST_CASE("Locator packet: pre-game fail") {
+    auto setup = rg::io::round_setup_from_json('A', rg::jsonSquareTopology());
+    setup.advance_time_to(-1);
+
+    MockCardInterface card;
+    card.id.seq = 0;
+    
+    auto action = rg::handle_packet_visit(setup, card);
+
+    CHECK(action.result == rg::PacketVisitResult::Invalid);
+    CHECK(!action.instructions.has_value());
+}
+
+TEST_CASE("Locator packet: in-game success") {
+    auto setup = rg::io::round_setup_from_json('C', rg::jsonSquareTopology());
+    setup.advance_time_to(1);
+
+    MockCardInterface card;
+    card.id.seq = 0;
+    
+    auto action = rg::handle_packet_visit(setup, card);
+
+    CHECK(action.result == rg::PacketVisitResult::Finished);
+    CHECK(!action.instructions.has_value());
+}
+
+TEST_CASE("Locator packet: in-game fail") {
+    auto setup = rg::io::round_setup_from_json('B', rg::jsonSquareTopology());
+    setup.advance_time_to(1);
+
+    MockCardInterface card;
+    card.id.seq = 0;
+    
+    auto action = rg::handle_packet_visit(setup, card);
+
+    CHECK(action.result == rg::PacketVisitResult::Invalid);
+    CHECK(!action.instructions.has_value());
+}
