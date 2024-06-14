@@ -84,9 +84,8 @@ Request body:
 * `events`: list of events affecting the topology
     * order of elements in the list does not matter, their `<event-time>` is relevant; for readability, though, events should be sorted by `<event-time>` in ascending order
 * `<packet-type>`: type of the packet the card represents:
-    * `"locator"`: Used to locate a predefined router.
-        * The `"source"` router always shows a success screen, all other routers show a fail screen - including pre-game.
-        * Never awards points
+    * `"admin"`: Administrator packet - shows current router ID, even outside round
+        * by convention, packet `"000"` is always an admin packet
     * `"standard"`: packet to be delivered from one router to another
         * score defined by the `"points"` attribute (usually based on shortest path length)
     * `"priority"`:
@@ -95,18 +94,18 @@ Request body:
         * This packet awards points for every successful hop it takes.
     * `"visitall"`:
         * Points are awarded once this packet has visited every single router in the network.
+    * `"locator"`: Used to locate a predefined router.
+        * The `"source"` router always shows a success screen, all other routers show a fail screen - including pre-game.
+        * Never awards points
 * `...packet-params`: attributes according to the packet type:
-    * any packet type except `"checkin"`:
+    * mandatory attributes:
         * `"releaseTime"`: <number>
             * Time when the packet should be delivered to the Router box by organisers
             * Not enforced by the game. This is for the game itinerary automation tool
         * `"source": "<router-id>"`
             * Mandatory for all game packet types.
             * ID of router where the packet gets added to the network
-    * `"checkin"`:
-        * `"destination": "<router-id>"`
-            * ID of router to check in
-    * `"locator"`:
+    * `"admin"`:
         * No optional properties
     * `"standard"`:
         * `"destination": "<router-id>"`
@@ -131,6 +130,8 @@ Request body:
         * `"points"`:
             * Points awarded once all routers have been visited
             * Default = 10 (recommended = 60)
+    * `"locator"`:
+        * No optional properties
 * `<event-type>`: type of the event:
     * `"linkdown"`: a link gets deactivated at `<event-time>`
         * since `<event-time>`, the routers stop accepting packets being transmitted between these routers
