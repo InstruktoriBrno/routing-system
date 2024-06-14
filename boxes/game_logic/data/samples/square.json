@@ -7,13 +7,13 @@
             "mac": "E4:65:B8:76:B6:CC"
         },
         "B": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "C": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "D": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         }
     },
     "links": [ "AB", "BC", "CD", "DA" ],
@@ -74,7 +74,6 @@
             "releaseTime": 0,
             "source": "A"
         }
-
     },
     "events": [
     ]

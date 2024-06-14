@@ -4,49 +4,49 @@
     "duration": 600,
     "routers": {
         "A": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "B": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "C": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "D": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "E": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "F": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "G": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "H": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "I": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "J": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "K": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "L": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "M": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "N": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "O": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         }
     },
     "links": [ "AB", "BC", "CD", "DE", "EF", "FG", "GA", "HI", "IJ", "JK", "KL", "LM", "MN", "NO", "OH"],

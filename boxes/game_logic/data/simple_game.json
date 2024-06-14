@@ -2,13 +2,13 @@
     "round_id": 42,
     "routers": {
         "A": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "B": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "C": {
-            "mac": "xx:xx:xx:xx:xx:xx"
+            "mac": ["xx:xx:xx:xx:xx:xx"]
         }
     },
     "links": [ "AB", "BC", "CA" ],
