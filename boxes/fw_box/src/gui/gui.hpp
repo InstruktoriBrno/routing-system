@@ -88,3 +88,26 @@ public:
         lv_label_set_text(mac_label, text_buffer);
     }
 };
+
+
+class ServiceMenuScreen : public BaseStatusBarScreen {
+    lv_obj_t *text_label = nullptr;
+
+public:
+    ServiceMenuScreen() {
+        lv_obj_set_style_bg_color(screen, lv_color_hex(0x004ac2), LV_PART_MAIN);
+
+        text_label = lv_label_create(screen);
+        lv_obj_set_width(text_label, LV_SIZE_CONTENT);
+        lv_obj_set_height(text_label, LV_SIZE_CONTENT);
+        lv_obj_center(text_label);
+
+        lv_label_set_text(text_label, "");
+        lv_obj_set_style_text_color(text_label, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+        lv_obj_set_style_text_font(text_label, &lv_font_montserrat_22, LV_PART_MAIN);
+    }
+
+    void set_label(const char *text) {
+        lv_label_set_text(text_label, text);
+    }
+};

@@ -191,6 +191,10 @@ public:
         return _logical_id.seq;
     }
 
+    int get_round_id() {
+        return _round_id;
+    }
+
     int visit_count() override {
         return _visit_count;
     }

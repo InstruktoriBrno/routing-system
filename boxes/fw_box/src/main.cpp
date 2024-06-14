@@ -22,12 +22,13 @@
 #include "logging.hpp"
 #include "sys.hpp"
 #include "game.hpp"
+#include "service_interface.hpp"
 
 static const char *TAG = "main";
 
 std::unique_ptr<MainScreen> main_screen;
 
-SET_LOOP_TASK_STACK_SIZE(5 * 1024);
+SET_LOOP_TASK_STACK_SIZE(4 * 1024);
 
 CardReader card_reader({
     .miso = 19, // 35,
@@ -171,6 +172,8 @@ Game game;
 GameUpdater game_updater;
 BoxMessageHandler msg_handler(game, game_updater);
 
+ServiceInterface service_interface(card_reader);
+
 void game_step() {
     if (game_updater.is_update_in_progress()) {
         static UpdateScreen update_screen;
@@ -221,6 +224,16 @@ void game_step() {
 
 void loop() {
     lv_timer_handler();
+
+    service_interface.update();
+    if (service_interface.is_active()) {
+        static ServiceMenuScreen service_menu_screen;
+        service_menu_screen.set_label(service_interface.display_message());
+        service_menu_screen.set_online_status(is_mesh_connected());
+        service_menu_screen.set_mac_address(my_mac_address());
+        service_menu_screen.activate();
+        return;
+    }
 
     handle_incoming_messages(msg_handler);
 

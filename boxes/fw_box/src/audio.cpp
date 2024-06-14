@@ -8,6 +8,7 @@
 #include <freertos/ringbuf.h>
 #include <driver/i2s.h>
 #include <fstream>
+#include "logging.hpp"
 
 static constexpr int WAV_SAMPLE_RATE = 11025;
 static constexpr int BLOCK_SIZE = 128;
@@ -50,7 +51,7 @@ void i2s_init() {
 void play_wav_routine() {
     File file = SPIFFS.open(file_path);
     if (!file) {
-        log_e("Failed to open file for reading");
+        rg_log_e("Audio", "Failed to open file for reading");
         vTaskDelete(nullptr);
         is_playing = false;
         return;
@@ -83,7 +84,7 @@ void play_wav_routine() {
             if (i2s_write_expand(I2S_NUM_0, block_buffer, bytes_read, 8, 16, &bytes_written, 100) == ESP_OK) {
                 break;
             }
-            vTaskDelay(1);
+            vTaskDelay(10);
         }
         success++;
     }
@@ -101,8 +102,9 @@ void play_wav_routine() {
 void play_wav(const char* path) {
     request_stop = true;
     dac_output_voltage(DAC_CHANNEL, 0);
-    while (is_playing)
+    while (is_playing) {
         vTaskDelay(1);
+    }
     request_stop = false;
 
     strcpy(file_path, path);
@@ -110,7 +112,7 @@ void play_wav(const char* path) {
     xTaskCreate([](void *) {
         play_wav_routine();
         vTaskDelete(nullptr);
-    }, "ReadWAVTask", 4096, nullptr, 4, nullptr);
+    }, "ReadWAVTask", 2048, nullptr, configMAX_PRIORITIES - 2, nullptr);
 }
 
 void setup_audio() {
