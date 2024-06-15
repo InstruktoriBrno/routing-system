@@ -5,6 +5,7 @@ namespace App\Domain\Game;
 class PacketInstruction
 {
     public string $cardNum;
+    public string $cardType;
     public string $routerIdent;
     public ?int $releaseTime;
 }

@@ -91,15 +91,15 @@ SQL
     {
         $this->db->connect();
 
-        $rel = $this->db->query(
-            <<<'SQL'
-        SELECT
-            card_num,
-            attr->>'source' AS router_ident,
-            CAST(attr->>'releaseTime' AS INT) AS release_time
-        FROM game_round, json_each(spec->'packets') p (card_num, attr)
-        WHERE id = %int
-        ORDER BY release_time ASC NULLS FIRST, card_num, router_ident
+        $rel = $this->db->query(<<<'SQL'
+            SELECT
+                card_num,
+                attr->>'type' AS card_type,
+                attr->>'source' AS router_ident,
+                CAST(attr->>'releaseTime' AS INT) AS release_time
+            FROM game_round, json_each(spec->'packets') p (card_num, attr)
+            WHERE id = %int
+            ORDER BY release_time ASC NULLS FIRST, card_num, router_ident
 SQL
             ,
             $roundId
@@ -109,6 +109,7 @@ SQL
         foreach ($rel as $t) {
             $pi = new PacketInstruction();
             $pi->cardNum = $t->card_num;
+            $pi->cardType = $t->card_type;
             $pi->routerIdent = $t->router_ident;
             $pi->releaseTime = $t->release_time;
             $result[] = $pi;

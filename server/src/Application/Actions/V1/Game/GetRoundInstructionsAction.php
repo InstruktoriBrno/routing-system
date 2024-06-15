@@ -23,7 +23,7 @@ class GetRoundInstructionsAction extends GameAction
         $result = '';
         foreach ($instructions as $inst) {
             assert($inst instanceof PacketInstruction);
-            $result .= sprintf("%s: %s, %s%s", $inst->cardNum, ($inst->routerIdent ?? '-'), $this->formatReleaseTime($inst->releaseTime), PHP_EOL);
+            $result .= sprintf("%s: %s, %s, %s%s", $inst->cardNum, ($inst->routerIdent ?? '-'), $this->formatReleaseTime($inst->releaseTime), $inst->cardType, PHP_EOL);
         }
 
         return $result;
