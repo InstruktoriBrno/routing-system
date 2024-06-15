@@ -33,10 +33,37 @@ class GameRoundRepository
         return new GameRound($t->id, $t->game_id, $t->name, $t->spec->getValue(), $t->api_ident, $t->api_password);
     }
 
-    public function logRouterEvents(int $roundId, string $routerIdent, string $routerMac, string $eventSource, array $eventData): void
+    public function logRouterEvents(int $roundId, string $routerIdent, string $routerMac, string $eventSource, array $eventData): int
     {
         $this->db->connect();
-        // TODO: insert in a transaction; assume $eventData is a correct list of JSON data
+
+        $tx = $this->db->startAutoTransaction();
+        $cnt = 0;
+        foreach ($eventData as $event) {
+            $teamIdent = $event->card[0];
+            $res = $this->db->command(<<<'SQL'
+                INSERT INTO game_round_event
+                    (
+                        game_round_id, event, source, team_ident, router_ident, router_mac_address, round_time, score
+                    )
+                    VALUES
+                        (%int, %json, %event_source, %s, %s, %macaddr, %int, %int)
+                    ON CONFLICT DO NOTHING
+SQL
+                ,
+                $roundId,
+                $event,
+                $eventSource,
+                $teamIdent,
+                $routerIdent,
+                $routerMac,
+                $event->time,
+                $event->score ?? null
+            );
+            $cnt += $res->getAffectedRows();
+        }
+        $tx->commit();
+        return $cnt;
     }
 
     public function awardAdHocPoints(int $roundId, string $teamIdent, string $source, \stdClass $event): void

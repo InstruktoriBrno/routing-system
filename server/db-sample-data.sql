@@ -76,14 +76,14 @@ INSERT INTO round_spec_lib (name, is_deleted, spec) VALUES
                 "009": { "type": "locator", "releaseTime": 0, "source": "I" },
                 "010": { "type": "locator", "releaseTime": 0, "source": "J" },
                 "020": { "type": "standard", "releaseTime": 60, "source": "A", "destination": "B", "points": 10 },
-                "021": { "type": "standard", "releastTime": 120, "source": "A", "destination": "C", "points": 20 },
-                "022": { "type": "standard", "releastTime": 180, "source": "A", "destination": "D", "points": 30 },
-                "023": { "type": "standard", "releastTime": 240, "source": "A", "destination": "E", "points": 40 },
-                "024": { "type": "standard", "releastTime": 300, "source": "A", "destination": "F", "points": 50 },
-                "025": { "type": "standard", "releastTime": 360, "source": "A", "destination": "G", "points": 60 },
-                "026": { "type": "standard", "releastTime": 420, "source": "A", "destination": "H", "points": 70 },
-                "027": { "type": "standard", "releastTime": 480, "source": "A", "destination": "I", "points": 80 },
-                "028": { "type": "standard", "releastTime": 540, "source": "A", "destination": "J", "points": 90 }
+                "021": { "type": "standard", "releaseTime": 120, "source": "A", "destination": "C", "points": 20 },
+                "022": { "type": "standard", "releaseTime": 180, "source": "A", "destination": "D", "points": 30 },
+                "023": { "type": "standard", "releaseTime": 240, "source": "A", "destination": "E", "points": 40 },
+                "024": { "type": "standard", "releaseTime": 300, "source": "A", "destination": "F", "points": 50 },
+                "025": { "type": "standard", "releaseTime": 360, "source": "A", "destination": "G", "points": 60 },
+                "026": { "type": "standard", "releaseTime": 420, "source": "A", "destination": "H", "points": 70 },
+                "027": { "type": "standard", "releaseTime": 480, "source": "A", "destination": "I", "points": 80 },
+                "028": { "type": "standard", "releaseTime": 540, "source": "A", "destination": "J", "points": 90 }
             },
             "events": [
                 { "type": "linkup", "time": 60, "link": "AF" },

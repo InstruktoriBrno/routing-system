@@ -56,7 +56,7 @@ JSON;
         $body = $this->getValidatedBody(self::REQUEST_PAYLOAD_SCHEMA);
 
         $round = $this->gameRoundRepository->findByApiIdent($roundIdent);
-        $this->gameRoundRepository->logRouterEvents(
+        $cnt = $this->gameRoundRepository->logRouterEvents(
             $round->getId(),
             $routerIdent,
             $body->routerMac,
@@ -64,6 +64,6 @@ JSON;
             $body->events
         );
 
-        return $this->respondWithJsonData();
+        return $this->respondWithJsonData(['insertCnt' => $cnt]);
     }
 }

@@ -82,4 +82,4 @@ COMMENT ON COLUMN game_round_event.router_ident IS 'Router which emitted the eve
 COMMENT ON COLUMN game_round_event.router_mac_address IS 'Physical address of the box representing the router which emitted the event. For diagnostic purposes only.';
 COMMENT ON COLUMN game_round_event.round_time IS 'At what time of the round (relative to the round start) the event happened. NULL represents pre- or post-round events (e.g., check-in to routers before start, or ad hoc points awarded or special packet logic evaluation). Used for validating whether the event occurred while the game round was still running (vs. card beeps after the round ended).';
 COMMENT ON COLUMN game_round_event.score IS 'How many points the team scored for this event';
-CREATE UNIQUE INDEX ON game_round_event (game_round_id, round_time, (event->>'card'));
+CREATE UNIQUE INDEX idx_game_round_unique_round_time_card ON game_round_event (game_round_id, round_time, (event->>'card'));

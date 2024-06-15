@@ -118,7 +118,7 @@ abstract class Action
             // NOTE: Catching the generic JsonSchemaException which might be thrown by
             //       \Swaggest\JsonSchema\RefResolver::preProcessReferences() despite
             //       \Swaggest\JsonSchema\SchemaContract::in() declares throwing just \Swaggest\JsonSchema\InvalidValue
-            throw new HttpBadRequestException($this->request, 'Invalid payload', $e);
+            throw new HttpBadRequestException($this->request, 'Invalid payload: ' . $e->getMessage(), $e);
         }
 
         return $bodyObject;
