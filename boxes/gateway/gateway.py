@@ -112,7 +112,7 @@ def handles(message_name):
 
 
 class Network(Thread):
-    def __init__(self, port):
+    def __init__(self, port, on_card_visit):
         super().__init__()
         self.daemon = True
         self._port = Serial(port, 921600, timeout=1)
@@ -120,7 +120,7 @@ class Network(Thread):
         self._boxes = {}
         self._write_lock = Lock()
 
-        self.on_card_visit = None
+        self.on_card_visit = on_card_visit
         self._port.read_all()
 
     def run(self):
@@ -204,8 +204,8 @@ class Network(Thread):
             "bearer": physical_card_id,
         }
 
+        self.on_card_visit(box_id, event)
         print("Packet visit: ", box_id, event)
-        # TBA send card visit to the server
 
     def network_time(self):
         """
