@@ -330,7 +330,7 @@ Request body:
 ```
 * `score`: points awarded to the team
     * integer (even negative to award a penalty, or to correct previous mistake awarding extra points)
-* `reason`: why the points were awareded
+* `reason`: why the points were awarded
     * optional string
 
 ## Game round setup instructions

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Application\Actions\NotImplementedAction;
+use App\Application\Actions\V1\Game\AwardAdHocPointsAction;
 use App\Application\Actions\V1\Game\GetRoundInstructionsAction;
 use App\Application\Actions\V1\Game\GetRouterCheckInStatusAction;
 use App\Application\Actions\V1\Game\LogRouterEventsAction;
@@ -29,7 +30,7 @@ return function (App $app) {
 
     $app->group('/v1/game', function (Group $group) {
         $group->post('/round/{roundId}/router/{routerId}', LogRouterEventsAction::class);
-        $group->post('/round/{roundId}/team/{teamId}', NotImplementedAction::class);
+        $group->post('/round/{roundId}/team/{teamId}', AwardAdHocPointsAction::class);
         $group->get('/round/{roundId}/instructions', GetRoundInstructionsAction::class);
         $group->get('/round/{roundId}/checkin', GetRouterCheckInStatusAction::class);
     });

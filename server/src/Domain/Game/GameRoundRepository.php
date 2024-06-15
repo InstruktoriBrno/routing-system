@@ -39,6 +39,23 @@ class GameRoundRepository
         // TODO: insert in a transaction; assume $eventData is a correct list of JSON data
     }
 
+    public function awardAdHocPoints(int $roundId, string $teamIdent, string $source, \stdClass $event): void
+    {
+        $this->db->connect();
+
+        $this->db->command(<<<'SQL'
+            INSERT INTO game_round_event (game_round_id, event, source, team_ident, score)
+                VALUES (%int, %json, %s, %s, %int)
+SQL
+            ,
+            $roundId,
+            $event,
+            $source,
+            $teamIdent,
+            $event->score
+        );
+    }
+
     /**
      * @param int $roundId
      * @return PacketInstruction[]
