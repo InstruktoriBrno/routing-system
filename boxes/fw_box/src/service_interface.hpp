@@ -3,6 +3,7 @@
 #include "cards.hpp"
 #include "audio.hpp"
 #include "routing_game.hpp"
+#include "span.hpp"
 #include <string>
 
 class ServiceInterface {
@@ -119,6 +120,21 @@ class ServiceInterface {
                 game_interface.finish_transaction();
 
                 _display_message = "Karta zapsana";
+                play_wav("/beep.wav");
+
+                Serial.println("OK");
+                _command_finished();
+                delay(500);
+            }
+        } else if (_command.startsWith("clear_card")) {
+            _display_message = "Cekam na prilozeni karty";
+            if (_card_reader.has_new_card()) {
+                delay(300); // Wait for the card to be fully inserted
+                auto game_interface = _card_reader.game_card_interface();
+                game_interface.reset_for_round(0);
+                game_interface.finish_transaction();
+
+                _display_message = "Karta vymyzana";
                 play_wav("/beep.wav");
 
                 Serial.println("OK");

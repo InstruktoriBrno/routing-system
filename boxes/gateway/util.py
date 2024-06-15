@@ -4,7 +4,7 @@ import serial
 @click.command()
 @click.option("--port", type=click.Path())
 def read_cards(port):
-    with serial.Serial(port, 921600, timeout=30) as ser:
+    with serial.Serial(port, 115200, timeout=30) as ser:
         try:
             ser.write("q\nactivate\n".encode("utf-8"))
             ser.readline()
@@ -23,10 +23,30 @@ def read_cards(port):
 
 @click.command()
 @click.option("--port", type=click.Path())
+def clear_cards(port):
+    with serial.Serial(port, 115200, timeout=30) as ser:
+        try:
+            ser.write("q\nactivate\n".encode("utf-8"))
+            ser.readline()
+            ser.read_all()
+            while True:
+                ser.read_all()
+                ser.write("clear_card\n".encode("utf-8"))
+                while True:
+                    line = ser.readline().decode("utf-8").strip()
+                    if line == "OK":
+                        break
+                    print(line)
+                print("")
+        finally:
+            ser.write("q\ndeactivate\n".encode("utf-8"))
+
+@click.command()
+@click.option("--port", type=click.Path())
 @click.option("--team", type=int, help="Team number")
 @click.option("--start-idx", type=int, default=0, help="Start index for cards")
 def write_cards(port, team, start_idx):
-    with serial.Serial(port, 921600, timeout=30) as ser:
+    with serial.Serial(port, 115200, timeout=30) as ser:
         try:
             ser.write("activate\n".encode("utf-8"))
             ser.readline()
@@ -50,6 +70,7 @@ def cli():
 
 cli.add_command(read_cards)
 cli.add_command(write_cards)
+cli.add_command(clear_cards)
 
 if __name__ == "__main__":
     cli()
