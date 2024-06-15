@@ -82,7 +82,7 @@ void rg_serial_log_handler(void *arg, const char* tag, uint32_t timestamp, Sever
 
     print_column(severity_to_string(severity), SEVERITY_WIDTH);
 
-    char message[256];
+    static char message[512];
     vsnprintf(message, sizeof(message), fmt, args);
     Serial.println(message);
 }

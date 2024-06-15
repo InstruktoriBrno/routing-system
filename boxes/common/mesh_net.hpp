@@ -150,7 +150,38 @@ struct GameStateMessage {
     }
 };
 
+struct PacketVisitMessage {
+    static constexpr uint8_t MESSAGE_TYPE = 9;
 
+    std::array<uint8_t, 7> physical_card_id;
+    uint8_t team_id;
+    uint8_t seq_num;
+    uint8_t router_id;
+    uint8_t score;
+    uint16_t time;
+
+    template <typename Archive>
+    void serialize(Archive& archive) const {
+        archive.push(physical_card_id);
+        archive.push(team_id);
+        archive.push(seq_num);
+        archive.push(router_id);
+        archive.push(score);
+        archive.push(time);
+    }
+
+    template <typename Archive>
+    static PacketVisitMessage deserialize(Archive& archive) {
+        PacketVisitMessage msg;
+        archive.pop(msg.physical_card_id);
+        archive.pop(msg.team_id);
+        archive.pop(msg.seq_num);
+        archive.pop(msg.router_id);
+        archive.pop(msg.score);
+        archive.pop(msg.time);
+        return msg;
+    }
+};
 
 class MessageHandler {
 public:
@@ -162,6 +193,7 @@ public:
     virtual void operator()(MacAddress source, const EventDefinitionMessage& msg) {};
     virtual void operator()(MacAddress source, const PrepareGameMessage& msg) {};
     virtual void operator()(MacAddress source, const GameStateMessage& msg) {};
+    virtual void operator()(MacAddress source, const PacketVisitMessage& msg) {};
 };
 
 void initialize_mesh_network_as_peer();
@@ -181,6 +213,7 @@ void report_box_status(int active_round_id, const Sha256& active_round_hash,
     uint8_t round_download_progress, uint8_t game_state, uint16_t game_time, int8_t router_id);
 bool broadcast_raw_message(tcb::span<uint8_t> message);
 bool send_message(const MacAddress& recipient, tcb::span<uint8_t> message);
+bool send_packet_visit(std::array<uint8_t, 7> physical_card_id, uint8_t team_id, uint8_t seq_num, uint8_t router_id, uint8_t score, uint16_t time);
 
 
 

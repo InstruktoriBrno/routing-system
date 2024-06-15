@@ -10,6 +10,7 @@
 #include <fstream>
 #include "logging.hpp"
 
+static constexpr int STACK_SIZE = 4096;
 static constexpr int WAV_SAMPLE_RATE = 11025;
 static constexpr int BLOCK_SIZE = 128;
 static constexpr dac_channel_t DAC_CHANNEL = DAC_CHANNEL_2;
@@ -20,7 +21,8 @@ uint8_t block_buffer[BLOCK_SIZE];
 std::atomic<bool> request_stop = false;
 std::atomic<bool> is_playing = false;
 
-RingbufHandle_t ring_buffer;
+static StaticTask_t xTaskBuffer;
+static StackType_t xStack[STACK_SIZE];
 
 void i2s_init() {
     i2s_config_t i2s_config = {
@@ -29,7 +31,7 @@ void i2s_init() {
         .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
         .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,
         .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
-        .dma_buf_count = 16,
+        .dma_buf_count = 32,
         .dma_buf_len = BLOCK_SIZE,
         .use_apll = false,
         .tx_desc_auto_clear = true,
@@ -109,10 +111,10 @@ void play_wav(const char* path) {
 
     strcpy(file_path, path);
 
-    xTaskCreate([](void *) {
+    xTaskCreateStatic([](void *) {
         play_wav_routine();
         vTaskDelete(nullptr);
-    }, "ReadWAVTask", 2048, nullptr, configMAX_PRIORITIES - 2, nullptr);
+    }, "ReadWAVTask", STACK_SIZE, nullptr, configMAX_PRIORITIES - 2, xStack, &xTaskBuffer);
 }
 
 void setup_audio() {

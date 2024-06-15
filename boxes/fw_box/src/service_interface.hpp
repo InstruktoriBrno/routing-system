@@ -114,7 +114,7 @@ class ServiceInterface {
             if (_card_reader.has_new_card()) {
                 delay(300); // Wait for the card to be fully inserted
                 auto game_interface = _card_reader.game_card_interface();
-                game_interface.write_logic_id({.team_id = team_id, .seq = card_id});
+                game_interface.write_logic_id({.team_id = rg::TeamId(team_id), .seq = rg::TeamId(card_id)});
                 game_interface.reset_for_round(0);
                 game_interface.finish_transaction();
 

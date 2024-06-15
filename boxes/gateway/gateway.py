@@ -26,7 +26,7 @@ def json_minify(source):
     return json.dumps(source, separators=(',', ':'))
 
 class RoundDefinition:
-    MTU = 1400
+    MTU = 250
 
     def __init__(self, source_json):
         self._source_json = source_json
@@ -72,7 +72,8 @@ class NetworkMessages(IntEnum):
     PACKET_DEFINITION = 5
     EVENT_DEFINITION = 6
     PREPARE_GAME = 7,
-    GAME_STATE = 8
+    GAME_STATE = 8,
+    PACKET_VISIT = 9
 
 class NodeType(IntEnum):
     ROOT = 0
@@ -187,6 +188,25 @@ class Network(Thread):
         print("Box status: ", box_id, status)
         self._boxes[box_id] = status
 
+    @handles(NetworkMessages.PACKET_VISIT)
+    def _handle_packet_visit(self, box_id, data):
+        physical_card_id = data[0:7].hex()
+        team_id = data[7]
+        seq_num = data[8]
+        router_id = data[9]
+        score = data[10]
+        time = int.from_bytes(data[11:13], "little")
+        event = {
+            "card": f"{chr(team_id)}{seq_num:03d}",
+            "router": chr(router_id),
+            "score": score,
+            "time": time,
+            "bearer": physical_card_id,
+        }
+
+        print("Packet visit: ", box_id, event)
+        # TBA send card visit to the server
+
     def network_time(self):
         """
         Return the current network timestamp (ms)
@@ -198,6 +218,7 @@ class Network(Thread):
         return self._boxes
 
     def _send_round_definition(self, command, round_definition):
+        print("Sending command: ", command)
         with self._write_lock:
             round_header = bytes([NetworkMessages.ROUND_HEADER])
             round_header += round_definition.id.to_bytes(4, "little")
@@ -215,15 +236,18 @@ class Network(Thread):
             }
 
             for message_type, item_packs in messages.items():
+                print("Pack")
                 defs_seen = 0
                 for item_pack in item_packs:
                     payload = bytes()
                     if len(item_pack) > 0:
                         if isinstance(item_pack[0], tuple):
                             for item_id, item_def in item_pack:
+                                print("Item def: ", item_def)
                                 payload += int(item_id).to_bytes(1, "little") + item_def.encode("utf-8") + b'\00'
                         else:
                             for item_def in item_pack:
+                                print("Item def: ", item_def)
                                 payload += item_def.encode("utf-8") + b'\00'
 
                     initial_index = defs_seen
@@ -240,7 +264,7 @@ class Network(Thread):
                     self._port.write(command)
                     self._port.write(base64.b64encode(packet))
                     self._port.write(b'\n')
-                    time.sleep(0.05) # Nasty hack, let FW process the data, don't care about flow control
+                    time.sleep(0.2) # Nasty hack, let FW process the data, don't care about flow control
 
     def broadcast_round_definition(self, round_definition):
         return self._send_round_definition("B:".encode("utf-8"), round_definition)

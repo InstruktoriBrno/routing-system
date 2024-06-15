@@ -131,6 +131,8 @@ class GameCardInterface: public rg::CardCommInterface {
     // - 4 bits: flags
     // - 8 bits: points
 
+    bool _successfully_read = false;
+
     rg::CardLogicalId _logical_id;
     int _round_id;
     int _visit_count;
@@ -172,7 +174,15 @@ public:
                 continue;
             }
             _metadata = buffer[3] << 24 | buffer[2] << 16 | buffer[1] << 8 | buffer[0];
+
+            _successfully_read = true;
+            return;
         }
+        _successfully_read = false;
+    }
+
+    bool is_correctly_initialized() {
+        return _successfully_read;
     }
 
     rg::CardPhysicalId get_physical_id() {
@@ -200,9 +210,11 @@ public:
     }
 
     rg::PacketVisit get_visit(int idx) override {
+        rg_log_i("GameCardInterface", "Reading visit %d", idx);
         if (idx < 0) {
-            idx = _visit_count - idx;
+            idx = _visit_count + idx;
         }
+        rg_log_i("GameCardInterface", "Transformed visit %d/%d", idx, _visit_count);
         if (idx < 0 || idx >= _visit_count || idx >= 100) {
             return rg::PacketVisit{
                 .where = rg::RouterId(-1),
@@ -381,6 +393,14 @@ public:
         }
         return false;
     }
+
+    bool had_new_visit() {
+        return _new_visit.has_value();
+    }
+
+    rg::PacketVisit get_new_visit() {
+        return _new_visit.value();
+    }
 };
 
 
@@ -477,79 +497,6 @@ public:
         }
         Serial.print("Took: ");
         Serial.println(millis() - time);
-    }
-
-    void test_write2() {
-        uint32_t start_t = millis();
-        for (int i = 4; i != 129; i++) {
-            uint8_t data[] = {i, 0x01, 0x02, 0x03};
-            auto resp = mfrc522.MIFARE_Ultralight_Write(i, data, 4);
-            if (resp != MFRC522Constants::STATUS_OK) {
-                Serial.print("Failed to write ");
-                Serial.print(i);
-                Serial.print(" with status ");
-                Serial.println(MFRC522Debug::GetStatusCodeName(resp));
-
-                delay(2000);
-                return;
-            }
-        }
-        mfrc522.PICC_HaltA();
-        Serial.print("Write took: ");
-        Serial.println(millis() - start_t);
-        mfrc522.PICC_ReadCardSerial();
-    }
-
-    void test_read_write() {
-        uint32_t start_t = millis();
-
-        MFRC522::MIFARE_Key key;
-        for (int i = 0; i < 6; i++)
-            key.keyByte[i] = 0xFF;
-
-        byte sector         = 1;
-        byte blockAddr      = 4;
-        byte dataBlock[]    = {
-            0x01, 0x02, 0x03, 0x04, //  1,  2,   3,  4,
-            0x05, 0x06, 0x07, 0x08, //  5,  6,   7,  8,
-            0x09, 0x0a, 0xff, 0x0b, //  9, 10, 255, 11,
-            0x0c, 0x0d, 0x0e, 0x0f  // 12, 13, 14, 15
-        };
-        byte trailerBlock   = 7;
-        byte buffer[18];
-        byte size = sizeof(buffer);
-        MFRC522Constants::StatusCode status;
-
-        status = mfrc522.PCD_Authenticate(MFRC522Constants::PICC_CMD_MF_AUTH_KEY_A, trailerBlock, &key, &(mfrc522.uid));
-        if (status != MFRC522Constants::STATUS_OK) {
-            log_e("PCD_Authenticate() failed: %d", status);
-            return;
-        }
-
-        uint32_t auth_done_t = millis();
-
-        status = mfrc522.MIFARE_Write(blockAddr, dataBlock, 16);
-        if (status != MFRC522Constants::STATUS_OK) {
-            log_e("MIFARE_Write() failed: %d", status);
-            return;
-        }
-
-        uint32_t write_done_t = millis();
-
-        status = mfrc522.MIFARE_Read(blockAddr, buffer, &size);
-        if (status != MFRC522Constants::STATUS_OK) {
-            log_e("MIFARE_Read() failed: %d", status);
-            return;
-        }
-
-        uint32_t read_done_t = millis();
-
-        mfrc522.PICC_HaltA();
-        mfrc522.PCD_StopCrypto1();
-
-        uint32_t done_t = millis();
-
-        log_i("Auth: %lu, Write: %lu, Read: %lu, Total: %lu", auth_done_t - start_t, write_done_t - auth_done_t, read_done_t - write_done_t, done_t - start_t);
     }
 };
 

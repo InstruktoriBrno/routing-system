@@ -12,6 +12,27 @@
 #include <sys.hpp>
 #include <mesh_net.hpp>
 
+struct BigRamAllocator: ArduinoJson::Allocator {
+    void* allocate(size_t size) override {
+        return heap_caps_malloc(size, MALLOC_CAP_8BIT);
+    }
+    void deallocate(void* pointer) override {
+        heap_caps_free(pointer);
+    }
+
+    void* reallocate(void* ptr, size_t new_size) override {
+    return heap_caps_realloc(ptr, new_size, MALLOC_CAP_8BIT);
+  }
+
+  static BigRamAllocator* instance() {
+    static BigRamAllocator instance;
+    return &instance;
+  }
+};
+
+
+
+
 inline MacAddress parseMAC(const char *macStr) {
     MacAddress mac;
     char buf[3] = {0};
@@ -28,14 +49,18 @@ inline MacAddress parseMAC(const char *macStr) {
 inline rg::PacketType packet_type_from_str(const char* s) {
     using namespace std::literals;
 
+    if (s == "admin"sv)
+        return rg::PacketType::Admin;
     if (s == "standard"sv)
         return rg::PacketType::Standard;
     if (s == "priority"sv)
         return rg::PacketType::Priority;
     if (s == "hopper"sv)
         return rg::PacketType::Hopper;
-    if (s == "visit_all"sv)
+    if (s == "visitall"sv)
         return rg::PacketType::VisitAll;
+    if (s == "locator"sv)
+        return rg::PacketType::Locator;
 
     system_trap((std::string("Unknown packet type: ") + s).c_str());
 }
@@ -193,8 +218,7 @@ public:
             while (end_it != data.end() && *end_it != 0)
                 ++end_it;
 
-            rg_log_d("game", "Start: %x,  %d, End: %d", int(router_id), data_it - data.begin(), end_it - data.begin());
-            JsonDocument doc;
+            JsonDocument doc(BigRamAllocator::instance());
             DeserializationError error = deserializeJson(doc, reinterpret_cast<char*>(&*data_it), end_it - data_it);
             if (error) {
                 rg_log_e("game", "Failed to deserialize router packet definition: %s, %s", error.c_str(), reinterpret_cast<char*>(&*data_it));
@@ -204,8 +228,6 @@ public:
             JsonObject object = doc.as<JsonObject>();
             for (JsonVariant item : object["mac"].as<JsonArray>()) {
                 auto mac = parseMAC(item.as<const char*>());
-                rg_log_d("game", "%s parsed: %02x:%02x:%02x:%02x:%02x:%02x", item.as<const char*>(),  mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-                rg_log_d("game", "My MAC: %02x:%02x:%02x:%02x:%02x:%02x", my_mac_address()[0], my_mac_address()[1], my_mac_address()[2], my_mac_address()[3], my_mac_address()[4], my_mac_address()[5]);
                 if (parseMAC(item.as<const char*>()) == my_mac_address()) {
                     _who_am_i = router_id;
                     rg_log_d("game", "I am %d", _who_am_i);
@@ -214,6 +236,7 @@ public:
             }
 
             _routers.add_item(idx_to_add, router_id);
+            rg_log_i("LOAD", "Router %d", router_id);
 
             data_it = ++end_it;
             idx_to_add++;
@@ -232,7 +255,7 @@ public:
             while (end_it != data.end() && *end_it != 0)
                 ++end_it;
 
-            JsonDocument doc;
+            JsonDocument doc(BigRamAllocator::instance());
             DeserializationError error = deserializeJson(doc, reinterpret_cast<char*>(&*data_it), end_it - data_it);
             if (error) {
                 rg_log_e("game", "Failed to deserialize link definition: %s", error.c_str());
@@ -245,6 +268,7 @@ public:
             rg::RouterId to = link[1];
 
             _links.add_item(idx_to_add, {from, to});
+            rg_log_i("LOAD", "Link %d -> %d", from, to);
 
             idx_to_add++;
             data_it = ++end_it;
@@ -266,8 +290,8 @@ public:
             while (end_it != data.end() && *end_it != 0)
                 ++end_it;
 
-            rg_log_d("game", "Start: %d, End: %d", data_it - data.begin(), end_it - data.begin());
-            JsonDocument doc;
+            rg_log_d("game", "Pdef: %s", reinterpret_cast<char*>(&*data_it));
+            JsonDocument doc(BigRamAllocator::instance());
             DeserializationError error = deserializeJson(doc, reinterpret_cast<char*>(&*data_it), end_it - data_it);
             if (error) {
                 rg_log_e("game", "Failed to deserialize router packet definition: %s, %s", error.c_str(), reinterpret_cast<char*>(&*data_it));
@@ -279,18 +303,18 @@ public:
             rg::PacketInfo packet_info;
 
             packet_info.type = packet_type_from_str(object["type"].as<const char*>());
-            packet_info.destination = object["destination"].as<int>();
+            packet_info.source = object["source"].as<const char*>()[0];
 
             if (object.containsKey("destination"))
-                packet_info.destination = object["destination"].as<int>();
+                packet_info.destination = object["destination"].as<const char*>()[0];
             if (object.containsKey("points"))
                 packet_info.points = object["points"].as<int>();
-            if (object.containsKey("points_per_minute_left"))
-                packet_info.pointsPerMinuteLeft = object["points_per_minute_left"].as<int>();
-            if (object.containsKey("minutes_to_deliver"))
-                packet_info.minutesToDeliver = object["minutes_to_deliver"].as<int>();
-            if (object.containsKey("points_per_hop"))
-                packet_info.pointsPerHop = object["points_per_hop"].as<int>();
+            if (object.containsKey("pointsPerMinute_left"))
+                packet_info.pointsPerMinuteLeft = object["pointsPerMinute_left"].as<int>();
+            if (object.containsKey("minutesToDeliver"))
+                packet_info.minutesToDeliver = object["minutesToDeliver"].as<int>();
+            if (object.containsKey("pointsPerHop"))
+                packet_info.pointsPerHop = object["pointsPerHop"].as<int>();
 
             _packets.add_item(idx_to_add, {packet_id, packet_info});
 
@@ -311,7 +335,7 @@ public:
             while (end_it != data.end() && *end_it != 0)
                 ++end_it;
 
-            JsonDocument doc;
+            JsonDocument doc(BigRamAllocator::instance());
             DeserializationError error = deserializeJson(doc, reinterpret_cast<char*>(&*data_it), end_it - data_it);
             if (error) {
                 rg_log_e("game", "Failed to deserialize topology event definition: %s", error.c_str());
@@ -350,6 +374,9 @@ public:
     }
 
     rg::RoundSetup build_round_setup() const {
+        rg_log_i("G", "Free heap: %d", ESP.getFreeHeap());
+        rg_log_i("G", "Biggest memory chunk: %d", heap_caps_get_largest_free_block(MALLOC_CAP_32BIT));
+
         rg::Network network;
         for (rg::RouterId router_id : _routers.items())
             network.add_router(router_id);
@@ -359,6 +386,8 @@ public:
         std::map<rg::CardSeqNum, rg::PacketInfo> packets;
         for (const auto& [seq, info] : _packets.items())
             packets[seq] = info;
+
+        rg_log_i("game", "Who am I: %d", _who_am_i);
 
         return rg::RoundSetup(
             _who_am_i,
@@ -457,6 +486,28 @@ public:
             return 0;
         return (_current_time - _time_offset) / 1000;
     }
+
+    rg::UiAction handle_packet_visit(rg::CardCommInterface& card) {
+        if (!_round_setup) {
+            rg_log_w("game", "Cannot handle packet visit without round setup");
+            return {
+                .result = rg::PacketVisitResult::Invalid
+            };
+        }
+
+        rg_log_i("HANDLE", "Who am I: %d", _round_setup->who_am_i());
+        return rg::handle_packet_visit(*_round_setup, card);
+    }
+
+    rg::RouterId who_am_i() const {
+        if (!_round_setup) {
+            rg_log_w("game", "Cannot get who am I without round setup");
+            return -1;
+        }
+
+        return _round_setup->who_am_i();
+    }
+
 };
 
 

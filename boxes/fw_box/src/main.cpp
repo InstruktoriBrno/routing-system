@@ -28,7 +28,7 @@ static const char *TAG = "main";
 
 std::unique_ptr<MainScreen> main_screen;
 
-SET_LOOP_TASK_STACK_SIZE(4 * 1024);
+SET_LOOP_TASK_STACK_SIZE(10 * 1024);
 
 CardReader card_reader({
     .miso = 19, // 35,
@@ -39,10 +39,15 @@ CardReader card_reader({
 
 void setup()
 {
-    Serial.begin(921600);
+    Serial.begin(115200);
 
     rg_set_log_handler(rg_serial_log_handler, nullptr);
     rg_set_log_severity(Severity::DEBUG);
+    rg::set_log_sink([](const char* fmt, va_list args) {
+        static char buffer[512];
+        vsnprintf(buffer, sizeof(buffer), fmt, args);
+        Serial.println(buffer);
+    });
 
     smartdisplay_init();
     setup_gui();
@@ -75,7 +80,6 @@ void setup()
     main_screen->activate();
 
     rg_log_i(TAG, "Free heap after setup: %d", ESP.getFreeHeap());
-    delay(1000);
 }
 
 class BoxMessageHandler: public MessageHandler {
@@ -167,6 +171,7 @@ public:
 PeriodicTimer status_timer(1000);
 PeriodicTimer screen_timer(50);
 PeriodicTimer card_clear_timer(2000);
+OneShotTimer packet_screen_clear_timer(2000);
 
 Game game;
 GameUpdater game_updater;
@@ -175,6 +180,8 @@ BoxMessageHandler msg_handler(game, game_updater);
 ServiceInterface service_interface(card_reader);
 
 void game_step() {
+    static std::unique_ptr<GameScreen> packet_screen;
+
     if (game_updater.is_update_in_progress()) {
         static UpdateScreen update_screen;
 
@@ -188,6 +195,7 @@ void game_step() {
 
     if (game.has_old_round_setup(game_updater.round_hash())) {
         game.update_round_setup(game_updater.build_round_setup(), game_updater.round_hash());
+        rg_log_i("MAIN", "Who am I: %d", game.who_am_i());
     }
 
     game.update(network_millis());
@@ -203,6 +211,61 @@ void game_step() {
     }
     if (game.state() == GameState::Running) {
         static RunningGameScreen running_screen;
+
+        if (card_reader.has_new_card()) {
+            auto card_interface = card_reader.game_card_interface();
+            if (card_interface.is_correctly_initialized()) {
+                if (card_interface.get_round_id() != game_updater.round_id()) {
+                    // There is a card from another round, clear it
+                    rg_log_i(TAG, "Card from another round detected, clearing");
+                    card_interface.reset_for_round(game_updater.round_id());
+                }
+
+                auto result = game.handle_packet_visit(card_interface);
+                rg_log_i(TAG, "Game logic log: %s", result.log.c_str());
+
+                card_interface.finish_transaction();
+
+                if (card_interface.had_new_visit()) {
+                    auto visit = card_interface.get_new_visit();
+                    send_packet_visit(
+                        card_interface.get_physical_id(),
+                        card_interface.get_id().team_id,
+                        card_interface.get_id().seq,
+                        visit.where,
+                        visit.points,
+                        visit.time);
+                }
+
+                std::unique_ptr<GameScreen> new_packet_screen;
+                if (result.result == rg::PacketVisitResult::Finished) {
+                    play_wav("/finished.wav");
+                    if (result.points) {
+                        new_packet_screen = std::make_unique<PacketFinishWithPoints>(*result.points);
+                    } else {
+                        new_packet_screen = std::make_unique<PacketFinishNoPoints>();
+
+                    }
+                }
+                if (result.result == rg::PacketVisitResult::Continue) {
+                    play_wav("/accept.wav");
+                    if (result.points) {
+                        new_packet_screen = std::make_unique<PacketContinueWithPoints>((*result.instructions).c_str(), *result.points);
+                    } else {
+                        new_packet_screen = std::make_unique<PacketContinueNoPoints>((*result.instructions).c_str());
+                    }
+                }
+                if (result.result == rg::PacketVisitResult::Invalid) {
+                    play_wav("/error.wav");
+                    new_packet_screen = std::make_unique<PacketFailScreen>();
+                }
+
+                new_packet_screen->activate();
+                packet_screen = std::move(new_packet_screen);
+                packet_screen_clear_timer.arm();
+            }
+        }
+
         activated_game_screen = &running_screen;
     }
     if (game.state() == GameState::Paused) {
@@ -214,12 +277,20 @@ void game_step() {
         activated_game_screen = &finished_screen;
     }
 
+    if (packet_screen_clear_timer.elapsed()) {
+        activated_game_screen->activate();
+        packet_screen = nullptr;
+        rg_log_i(TAG, "Clearing screen ");
+    }
+    if (packet_screen) {
+        activated_game_screen = packet_screen.get();
+    }
+
     activated_game_screen->set_online_status(is_mesh_connected());
     activated_game_screen->set_mac_address(my_mac_address());
+    activated_game_screen->set_game_time(game.game_time());
+    activated_game_screen->set_identity(game.who_am_i());
     activated_game_screen->activate();
-
-    // TBA handle cards
-
 }
 
 void loop() {
@@ -239,143 +310,12 @@ void loop() {
 
     if (status_timer.elapsed()) {
         rg_log_i(TAG, "Free heap: %d", ESP.getFreeHeap());
+        rg_log_i(TAG, "Biggest memory chunk: %d", heap_caps_get_largest_free_block(MALLOC_CAP_32BIT));
         report_box_status(game_updater.round_id(), game_updater.round_hash(),
                 game_updater.update_percents(), uint8_t(game.state()), game.game_time(),
                 game_updater.who_am_i());
     }
 
     game_step();
-
-    return;
-
-
-
-
-
-    // if (screen_timer.elapsed()) {
-    //     main_screen->update();
-    //     main_screen->set_online_status(is_mesh_connected());
-    //     main_screen->set_mac_address(my_mac_address());
-    // }
-
-
-
-    // if (card_reader.has_new_card() && clear_card_at == -1)
-    // {
-    //     auto start = millis();
-    //     auto game_interface = card_reader.game_card_interface();
-    //     Serial.println("Card detected");
-    //     Serial.print("Card logical id: ");
-    //     Serial.print(game_interface.get_id().team_id);
-    //     Serial.print(":");
-    //     Serial.println(game_interface.get_id().seq);
-    //     Serial.print("Card metadata: ");
-    //     Serial.println(game_interface.get_metadata().to_ulong());
-    //     Serial.println("Visits:");
-    //     for (int i = 0; i < game_interface.visit_count(); i++) {
-    //         auto visit = game_interface.get_visit(i);
-    //         Serial.print("  ");
-    //         Serial.print(visit.where);
-    //         Serial.print(" at ");
-    //         Serial.print(visit.time);
-    //         Serial.print(" points ");
-    //         Serial.print(visit.points);
-    //         Serial.println();
-    //     }
-
-    //     // if (!game_interface.reset_for_round(42)) {
-    //     //     rg_log_e(TAG, "Failed to reset card for round");
-    //     // }
-    //     // if (!game_interface.write_logic_id({.team_id = 10, .seq = 11})) {
-    //     //     rg_log_e(TAG, "Failed to write logic ID");
-    //     // }
-    //     // game_interface.mark_visit({
-    //     //     .where = 13,
-    //     //     .time = 42,
-    //     //     .points_awarded = true,
-    //     //     .points = 10
-    //     // });
-    //     // if (!game_interface.finish_transaction()) {
-    //     //     rg_log_e(TAG, "Failed to finish transaction");
-    //     // }
-    //     auto end = millis();
-    //     rg_log_i(TAG, "Card reset and written in %d ms", end - start);
-    //     play_wav("/success.wav");
-
-    //     delay(2000);
-
-    //     main_screen->set_card_id(card_reader.card_uid_str());
-    //     card_clear_timer.reset();
-    // }
-
-    // if (clear_card_at != -1 && card_clear_timer.elapsed())
-    // {
-    //     clear_card_at = -1;
-    //     main_screen->set_card_id(nullptr);
-    // }
-
-    // card_reader.debug();
-
-    // if (am_i_root()) {
-    //     main_screen->set_network_message("Network status:\n  Role: root");
-    // } else {
-    //     main_screen->set_network_message("Network status:\n  Role: node\n  Root: %02x:%02x:%02x:%02x:%02x:%02x\n  Last ping ID: %d, %d ms, %d ms ago",
-    //         root_address()->addr[0], root_address()->addr[1], root_address()->addr[2], root_address()->addr[3], root_address()->addr[4], root_address()->addr[5],
-    //         last_received_ping_id, last_received_ping_duration, (now - last_received_ping_ts));
-    // }
-
-    // if (!am_i_root()) {
-    //     if (now > next_ping) {
-    //         next_ping = now + PING_INTERVAL;
-    //         ping_id_counter++;
-
-    //         uint8_t tx_buffer[8];
-    //         memcpy(tx_buffer, &ping_id_counter, sizeof(ping_id_counter));
-    //         auto ping_send_time = millis();
-    //         memcpy(tx_buffer + 4, &ping_send_time, sizeof(ping_send_time));
-
-    //         mesh_data_t data = {
-    //             .data = tx_buffer,
-    //             .size = sizeof(tx_buffer),
-    //             .proto = MESH_PROTO_BIN,
-    //             .tos = MESH_TOS_P2P
-    //         };
-    //         rg_log_i(TAG, "About to send ping %d to root", ping_id_counter);
-    //         auto ret = esp_mesh_send(root_address(), &data, MESH_DATA_P2P | MESH_DATA_NONBLOCK, nullptr, 0);
-    //         rg_log_i(TAG, "Sent ping %d to root, ret: %s", ping_id_counter, esp_err_to_name(ret));
-    //     }
-    // }
-
-    // mesh_addr_t from;
-    // uint8_t recv_buffer[128];
-    // mesh_data_t data {
-    //     .data = recv_buffer,
-    //     .size = sizeof(recv_buffer)
-    // };
-    // int flag;
-    // auto resp = esp_mesh_recv(&from, &data, 0, &flag, nullptr, 0);
-    // if (resp == ESP_OK) {
-    //     if (am_i_root()) {
-    //         rg_log_i(TAG, "Received data from %02x:%02x:%02x:%02x:%02x:%02x", from.addr[0], from.addr[1], from.addr[2], from.addr[3], from.addr[4], from.addr[5]);
-    //         esp_mesh_send(&from, &data, MESH_DATA_P2P, nullptr, 0);
-    //     } else {
-    //         rg_log_i(TAG, "Received data from %02x:%02x:%02x:%02x:%02x:%02x", from.addr[0], from.addr[1], from.addr[2], from.addr[3], from.addr[4], from.addr[5]);
-    //         if (std::memcmp(from.addr, root_address()->addr, 5) == 0) {
-    //             rg_log_i(TAG, "Updating ping", from.addr[0], from.addr[1], from.addr[2], from.addr[3], from.addr[4], from.addr[5]);
-
-    //             uint32_t received_ping_id;
-    //             uint32_t received_ping_time;
-    //             memcpy(&received_ping_id, data.data, sizeof(received_ping_id));
-    //             memcpy(&received_ping_time, data.data + 4, sizeof(received_ping_time));
-
-    //             if (received_ping_id > last_received_ping_id) {
-    //                 last_received_ping_id = received_ping_id;
-    //                 last_received_ping_duration = now - received_ping_time;
-    //                 last_received_ping_ts = millis();
-    //             }
-    //         }
-    //     }
-    // }
-
-    // lv_timer_handler();
 }
+

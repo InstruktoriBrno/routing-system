@@ -4,13 +4,13 @@
     "duration": 1200,
     "routers": {
         "A": {
-            "mac": ["E4:65:B8:76:B6:CC"]
+            "mac": ["E4:65:B8:76:B6:CD"]
         },
         "B": {
             "mac": ["xx:xx:xx:xx:xx:xx"]
         },
         "C": {
-            "mac": ["xx:xx:xx:xx:xx:xx"]
+            "mac": ["E4:65:B8:76:B6:CC"]
         },
         "D": {
             "mac": ["xx:xx:xx:xx:xx:xx"]

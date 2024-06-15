@@ -245,11 +245,11 @@ static void ip_event_handler(void *arg, esp_event_base_t event_base,
 static void initialize_mesh_network() {
     ESP_ERROR_CHECK(nvs_flash_init());
     /*  tcpip initialization */
-    ESP_ERROR_CHECK(esp_netif_init());
+    esp_netif_init();
     /*  event initialization */
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
+    esp_event_loop_create_default();
     /*  create network interfaces for mesh (only station instance saved for further manipulation, soft AP instance ignored */
-    ESP_ERROR_CHECK(esp_netif_create_default_wifi_mesh_netifs(&netif_sta, NULL));
+    esp_netif_create_default_wifi_mesh_netifs(&netif_sta, NULL);
     /*  wifi initialization */
     wifi_init_config_t config = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&config));
@@ -275,7 +275,7 @@ static void initialize_mesh_network() {
 #else
     /* Disable mesh PS function */
     ESP_ERROR_CHECK(esp_mesh_disable_ps());
-    ESP_ERROR_CHECK(esp_mesh_set_ap_assoc_expire(120));
+    ESP_ERROR_CHECK(esp_mesh_set_ap_assoc_expire(1000));
 #endif
     mesh_cfg_t cfg = MESH_INIT_CONFIG_DEFAULT();
     /* mesh ID */
@@ -420,6 +420,31 @@ void report_box_status(int active_round_id, const Sha256& active_round_hash,
     send_raw_to_root(ser_buffer.span());
 }
 
+bool send_packet_visit(std::array<uint8_t, 7> physical_card_id, uint8_t team_id, uint8_t seq_num, uint8_t router_id, uint8_t score, uint16_t time) {
+    assert(!am_i_root());
+    if (!is_mesh_connected_flag) {
+        rg_log_w(TAG, "Not connected to mesh network, not sending packet visit");
+        return false;
+    }
+
+    PacketVisitMessage msg = {
+        .physical_card_id = physical_card_id,
+        .team_id = team_id,
+        .seq_num = seq_num,
+        .router_id = router_id,
+        .score = score,
+        .time = time
+    };
+
+    static uint8_t tx_buffer[sizeof(msg) + 1];
+    SerializationBuffer ser_buffer(tcb::span<uint8_t>(tx_buffer, sizeof(tx_buffer)));
+    ser_buffer.push<uint8_t>(PacketVisitMessage::MESSAGE_TYPE);
+    msg.serialize(ser_buffer);
+
+    return send_raw_to_root(ser_buffer.span());
+
+}
+
 bool send_message(const MacAddress& recipient, tcb::span<uint8_t> message) {
     assert(message.size() <= MESH_MTU);
 
@@ -492,7 +517,8 @@ void handle_incoming_messages(MessageHandler &handler) {
         EventDefinitionMessage,
         PrepareGameMessage,
         GameStateMessage,
-        PrepareGameMessage>(std::move(handle_message));
+        PrepareGameMessage,
+        PacketVisitMessage>(std::move(handle_message));
 
     if (!handled) {
         rg_log_w(TAG, "Received unknown message type: %d", message_type);
