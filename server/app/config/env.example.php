@@ -10,3 +10,5 @@ $settings['db'][ConnectionParameters::HOST] = 'localhost';
 $settings['db'][ConnectionParameters::USER] = 'user';
 $settings['db'][ConnectionParameters::PASSWORD] = 'password';
 $settings['db'][ConnectionParameters::DBNAME] = 'db_prod';
+
+$settings['gateway']['base_uri'] = 'http://1.2.3.4:5678';
