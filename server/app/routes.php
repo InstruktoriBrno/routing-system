@@ -7,6 +7,7 @@ use App\Application\Actions\V1\Game\AwardAdHocPointsAction;
 use App\Application\Actions\V1\Game\GetRoundInstructionsAction;
 use App\Application\Actions\V1\Game\GetRouterCheckInStatusAction;
 use App\Application\Actions\V1\Game\LogRouterEventsAction;
+use App\Application\Actions\V1\Score\GetTeamScoreboardAction;
 use App\Application\Actions\V1\Status\StatusAction;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -36,7 +37,7 @@ return function (App $app) {
     });
 
     $app->group('/v1/score', function (Group $group) {
-        $group->get('/round/{roundId}/team/{teamId}', NotImplementedAction::class);
+        $group->get('/round/{roundId}/team/{teamId}', GetTeamScoreboardAction::class);
         $group->get('/round/{roundId}/overall', NotImplementedAction::class);
     });
 };

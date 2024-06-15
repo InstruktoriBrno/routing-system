@@ -12,13 +12,6 @@ use Tests\TestCase;
 
 class LogRouterEventsActionTest extends TestCase
 {
-    private function mockGameRoundRepository(ObjectProphecy $gameRoundRepositoryProphecy): void
-    {
-        $container = $this->app->getContainer();
-        assert($container instanceof Container);
-        $container->set(GameRoundRepository::class, $gameRoundRepositoryProphecy->reveal());
-    }
-
     public function testAction(): void
     {
         $gameRoundRepositoryProphecy = $this->prophesize(GameRoundRepository::class);
@@ -107,5 +100,12 @@ class LogRouterEventsActionTest extends TestCase
         $response = $this->app->handle($request);
 
         $this->assertEquals(400, $response->getStatusCode());
+    }
+
+    private function mockGameRoundRepository(ObjectProphecy $gameRoundRepositoryProphecy): void
+    {
+        $container = $this->app->getContainer();
+        assert($container instanceof Container);
+        $container->set(GameRoundRepository::class, $gameRoundRepositoryProphecy->reveal());
     }
 }

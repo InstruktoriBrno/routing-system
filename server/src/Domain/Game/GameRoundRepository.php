@@ -45,7 +45,7 @@ class GameRoundRepository
 
         $this->db->command(<<<'SQL'
             INSERT INTO game_round_event (game_round_id, event, source, team_ident, score)
-                VALUES (%int, %json, %s, %s, %int)
+                VALUES (%int, %json, %event_source, %s, %int)
 SQL
             ,
             $roundId,
