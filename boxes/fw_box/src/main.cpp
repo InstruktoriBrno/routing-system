@@ -294,6 +294,7 @@ void game_step() {
 }
 
 void loop() {
+    delay(1);
     lv_timer_handler();
 
     service_interface.update();
