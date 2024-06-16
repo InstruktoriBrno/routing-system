@@ -157,36 +157,43 @@ class Network(Thread):
         self._last_timestamp = (timestamp, int(time.time() * 1000))
 
     def _handle_data(self, data_message):
-        data = base64.b64decode(data_message)
-        author = data[0:6].hex(":")
-        message_type = NetworkMessages(data[7])
-        for method in dir(self):
-            if hasattr(getattr(self, method), "_message_type"):
-                if getattr(self, method)._message_type == message_type:
-                    getattr(self, method)(author, data[7:])
-                    return
-        raise ValueError("Unknown message type:", message_type)
+        try:
+            data = base64.b64decode(data_message)
+            author = data[0:6].hex(":")
+            message_type = NetworkMessages(data[6])
+            for method in dir(self):
+                if hasattr(getattr(self, method), "_message_type"):
+                    if getattr(self, method)._message_type == message_type:
+                        getattr(self, method)(author, data[7:])
+                        return
+            print("Unknown message type:", message_type)
+            print(author, data.hex())
+        except Exception as e:
+            print(e)
 
     @handles(NetworkMessages.NODE_STATUS)
     def _handle_box_status(self, box_id, data):
-        router_id_num = data[47]
-        if router_id_num == -1 or router_id_num == 255:
-            router_id_str = "N/A"
-        else:
-            router_id_str = chr(router_id_num)
-        status = NodeStatus(
-            node_type=NodeType(data[0]),
-            parent=data[1:7].hex(":"),
-            active_round_id=int.from_bytes(data[7:11], "little"),
-            active_round_hash=data[11:43].hex(),
-            round_download_progress=data[43],
-            game_state=GameState(data[44]).name,
-            game_time=int.from_bytes(data[45:47], "little"),
-            router_id=router_id_str,
-            last_seen=time.time()
-        )
-        print("Box status: ", box_id, status)
-        self._boxes[box_id] = status
+        try:
+            router_id_num = data[47]
+            if router_id_num == -1 or router_id_num == 255:
+                router_id_str = "N/A"
+            else:
+                router_id_str = chr(router_id_num)
+            status = NodeStatus(
+                node_type=NodeType(data[0]),
+                parent=data[1:7].hex(":"),
+                active_round_id=int.from_bytes(data[7:11], "little"),
+                active_round_hash=data[11:43].hex(),
+                round_download_progress=data[43],
+                game_state=GameState(data[44]).name,
+                game_time=int.from_bytes(data[45:47], "little"),
+                router_id=router_id_str,
+                last_seen=time.time()
+            )
+            print("Box status: ", box_id, status)
+            self._boxes[box_id] = status
+        except Exception as e:
+            print(e)
 
     @handles(NetworkMessages.PACKET_VISIT)
     def _handle_packet_visit(self, box_id, data):
@@ -218,7 +225,6 @@ class Network(Thread):
         return self._boxes
 
     def _send_round_definition(self, command, round_definition):
-        print("Sending command: ", command)
         with self._write_lock:
             round_header = bytes([NetworkMessages.ROUND_HEADER])
             round_header += round_definition.id.to_bytes(4, "little")
@@ -227,6 +233,7 @@ class Network(Thread):
             self._port.write(command)
             self._port.write(base64.b64encode(round_header))
             self._port.write(b'\n')
+            time.sleep(0.2)
 
             messages = {
                 NetworkMessages.ROUTER_DEFINITION: round_definition.network_router_defs,
@@ -236,7 +243,6 @@ class Network(Thread):
             }
 
             for message_type, item_packs in messages.items():
-                print("Pack")
                 defs_seen = 0
                 for item_pack in item_packs:
                     payload = bytes()
@@ -279,4 +285,4 @@ class Network(Thread):
             self._port.write(f"S:{recipient}".encode("utf-8"))
             self._port.write(base64.b64encode(packet))
             self._port.write(b'\n')
-            time.sleep(0.05)
+            time.sleep(0.2)
