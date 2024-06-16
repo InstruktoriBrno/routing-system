@@ -335,21 +335,25 @@ Request body:
 
 ## Game round setup instructions
 
-`GET` at `/v1/game/round/<round-id>/instructions`, using HTTP Basic auth.
+1. `GET` at `/v1/game/round/<round-id>/instructions`, using HTTP Basic auth.
+2. `GET` at `/v1/game/round/<round-id>/instructions/<router-id-list>`, using HTTP Basic auth.
 
 Provides instructions on how to organize the round.
+* `<router-id-list>`: if provided, only instructions for the listed routers are produced
+    * optional string - concatenation of router IDs
+    * example: `ADGHI` for instructions involving only these 5 routers
 
 Response body (plaintext):
 ```
-<card-number>: <router-id>, <time>
+<card-number>: <router-id>, <time>, <packet-type>
 ...
 ```
 
 Response body example:
 ```
-001: A, min 2
-005: C, min 3
-014: H, min 8 sec 30
+001: A, min 2, standard
+005: C, min 3, standard
+014: H, min 8 sec 30, hopper
 ```
 
 

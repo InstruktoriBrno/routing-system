@@ -33,6 +33,7 @@ return function (App $app) {
         $group->post('/round/{roundId}/router/{routerId}', LogRouterEventsAction::class);
         $group->post('/round/{roundId}/team/{teamId}', AwardAdHocPointsAction::class);
         $group->get('/round/{roundId}/instructions', GetRoundInstructionsAction::class);
+        $group->get('/round/{roundId}/instructions/{routerIds}', GetRoundInstructionsAction::class);
         $group->get('/round/{roundId}/checkin', GetRouterCheckInStatusAction::class);
     });
 
