@@ -1,3 +1,4 @@
+import json
 from threading import Lock, Thread
 import time
 import traceback
@@ -9,6 +10,15 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 DATABASE = 'db.sqlite3'
+
+empty_round_def = {
+    "duration": 0,
+    "roundId": 0,
+    "routers": {},
+    "links": [],
+    "packets": {},
+    "events": []
+}
 
 app = Flask("rg_gateway")
 
@@ -35,24 +45,25 @@ def init_db():
                               password TEXT,
                               game_state INTEGER,
                               round_start_time INTEGER,
-                              round_pause_time INTEGER)''')
+                              round_pause_time INTEGER,
+                              round_def TEXT)''')
             db.commit()
             # Insert a single row if the table is empty
             cursor.execute('SELECT COUNT(*) FROM game')
             if cursor.fetchone()[0] == 0:
-                cursor.execute('''INSERT INTO game (address, id, password, game_state, round_start_time, round_pause_time)
-                                  VALUES (?, ?, ?, ?, ?, ?)''',
-                               ('', '', '', 0, 0, 0))
+                cursor.execute('''INSERT INTO game (address, id, password, game_state, round_start_time, round_pause_time, round_def)
+                                  VALUES (?, ?, ?, ?, ?, ?, ?)''',
+                               ('', '', '', 0, 0, 0, json.dumps(empty_round_def)))
                 db.commit()
 
 init_db()
 
-def set_game_params(address, id, password, game_state, round_start_time, round_pause_time):
+def set_game_params(address, id, password, game_state, round_start_time, round_pause_time, round_def):
     with app.app_context():
         db = get_db()
         cursor = db.cursor()
-        cursor.execute('''UPDATE game SET address = ?, id = ?, password = ?, game_state = ?, round_start_time = ?, round_pause_time = ?
-                          WHERE rowid = 1''', (address, id, password, game_state, round_start_time, round_pause_time))
+        cursor.execute('''UPDATE game SET address = ?, id = ?, password = ?, game_state = ?, round_start_time = ?, round_pause_time = ?, round_def = ?
+                          WHERE rowid = 1''', (address, id, password, game_state, round_start_time, round_pause_time, round_def))
         db.commit()
     return "Parameters set successfully!"
 
@@ -69,33 +80,26 @@ def get_game_params():
                 "password": row[2],
                 "game_state": row[3],
                 "round_start_time": row[4],
-                "round_pause_time": row[5]
+                "round_pause_time": row[5],
+                "round_def": row[6]
             }
 
 
-empty_round_def = {
-    "duration": 0,
-    "roundId": 0,
-    "routers": {},
-    "links": [],
-    "packets": {},
-    "events": []
-}
-
 def submit_card_visit_to_server(box_id, event):
-    payload = {
-        {
-            "routerMac": box_id,
-            "source": "online",
-            "events": [event]
-        }
-    }
-
     game = get_game_params()
 
+    payload = {
+        "routerMac": box_id,
+        "source": "online",
+        "events": [event]
+    }
+
+    url = "http://" + game["address"] + f"/v1/game/round/{game['id']}/router/{event['router']}"
+    print("Submitting card visit to server:", payload, url)
+
     response = requests.post(
-        url = game["address"] + f"/v1/game/round/{game['id']}/router/{event['router']}",
-        json=payload, auth=HTTPBasicAuth(game["id"], game["password"]))
+        url = url,
+        json=payload)
 
     if response.status_code == 200:
         print('Request was successful!')
@@ -127,11 +131,9 @@ def round_refresh_routine():
 def round_refresh_routine_targeted():
     while True:
         game = get_game_params()
-        for id, box in app.network.list_boxes().items():
+        app.current_round = RoundDefinition(json.loads(game["round_def"]))
+        for id, box in list(app.network.list_boxes().items()):
             try:
-                with app.current_round_lock:
-                    if box.active_round_id != app.current_round.id or box.active_round_hash != app.current_round.hash.hex() or box.round_download_progress < 100:
-                        app.network.send_round_definition(id, app.current_round)
                 game_time_offset = 0
                 if game["game_state"] == GameState.RUNNING:
                     game_time_offset = game["round_start_time"]
@@ -139,7 +141,14 @@ def round_refresh_routine_targeted():
             except Exception as e:
                 print(traceback.format_exc())
                 print(f"Error while broadcasting round definition: {e}")
-        time.sleep(1)
+        for id, box in list(app.network.list_boxes().items()):
+            try:
+                if box.active_round_id != app.current_round.id or box.active_round_hash != app.current_round.hash.hex() or box.round_download_progress < 100:
+                    app.network.send_round_definition(id, app.current_round)
+            except Exception as e:
+                print(traceback.format_exc())
+                print(f"Error while broadcasting round definition: {e}")
+        time.sleep(0.5)
 
 Thread(target=round_refresh_routine_targeted, daemon=True).start()
 
@@ -182,10 +191,11 @@ def boxes_as_dot():
 
 @app.route("/v1/game/round", methods=["PUT"])
 def set_round():
-    with app.current_round_lock:
-        new_round = RoundDefinition(request.json)
-        app.current_round = new_round
-        return {}
+    game = get_game_params()
+    new_round = RoundDefinition(request.json)
+    game["round_def"] = json.dumps(request.json)
+    set_game_params(**game)
+    return {}
 
 @app.route("/v1/game/prepare", methods=["POST"])
 def prepare_game():
@@ -196,6 +206,7 @@ def prepare_game():
 
 @app.route("/v1/game/start", methods=["POST"])
 def start():
+    print("Starting game with params:", request.json)
     game = get_game_params()
     game["round_start_time"] = app.network.network_time()
     game["round_pause_time"] = None
@@ -230,18 +241,19 @@ def stop_game():
     set_game_params(**game)
     return {}
 
-@app.route("/v1/game/status")
+@app.route("/v1/status")
 def game_status():
+    game = get_game_params()
     game_time = 0
-    if app.game_state == GameState.RUNNING:
-        game_time = app.network.network_time() - app.round_start_time
+    if game["game_state"] == GameState.RUNNING:
+        game_time = app.network.network_time() - game["round_start_time"]
     elif app.game_state == GameState.PAUSED:
-        game_time = app.round_pause_time - app.round_start_time
+        game_time = game["round_pause_time"] - game["round_start_time"]
 
     return {
         "gateway": {
             "time": time.time(),
-            "game_state": app.game_state.name,
+            "game_state": GameState(game["game_state"]).name,
             "game_time": int(game_time / 1000),
             "round": app.current_round.id,
             "round_hash": app.current_round.hash.hex(),

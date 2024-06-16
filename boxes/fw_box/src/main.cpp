@@ -215,6 +215,7 @@ void game_step() {
         if (card_reader.has_new_card()) {
             auto card_interface = card_reader.game_card_interface();
             if (card_interface.is_correctly_initialized()) {
+                rg_log_i(TAG, "Card round ID %d, game round ID %d", card_interface.get_round_id(), game_updater.round_id());
                 if (card_interface.get_round_id() != game_updater.round_id()) {
                     // There is a card from another round, clear it
                     rg_log_i(TAG, "Card from another round detected, clearing");
@@ -222,19 +223,28 @@ void game_step() {
                 }
 
                 auto result = game.handle_packet_visit(card_interface);
-                rg_log_i(TAG, "Game logic log: %s", result.log.c_str());
-
                 card_interface.finish_transaction();
+
+                rg_log_i(TAG, "Game logic log: %s", result.log.c_str());
+                rg_log_i(TAG, "Game logic result: %d", result.result);
+                rg_log_i(TAG, "Was visited: %d", card_interface.had_new_visit());
 
                 if (card_interface.had_new_visit()) {
                     auto visit = card_interface.get_new_visit();
-                    send_packet_visit(
-                        card_interface.get_physical_id(),
-                        card_interface.get_id().team_id,
-                        card_interface.get_id().seq,
-                        visit.where,
-                        visit.points,
-                        visit.time);
+                    rg_log_i(TAG, "Sending log to the network");
+
+                    for (int i = 0; i != 4; i++) {
+                        bool result = send_packet_visit(
+                            card_interface.get_physical_id(),
+                            card_interface.get_id().team_id,
+                            card_interface.get_id().seq,
+                            visit.where,
+                            visit.points,
+                            visit.time);
+                        rg_log_i(TAG, "Send result: %d", result);
+                        if (result)
+                            break;
+                    }
                 }
 
                 std::unique_ptr<GameScreen> new_packet_screen;
@@ -310,8 +320,6 @@ void loop() {
     handle_incoming_messages(msg_handler);
 
     if (status_timer.elapsed()) {
-        rg_log_i(TAG, "Free heap: %d", ESP.getFreeHeap());
-        rg_log_i(TAG, "Biggest memory chunk: %d", heap_caps_get_largest_free_block(MALLOC_CAP_32BIT));
         report_box_status(game_updater.round_id(), game_updater.round_hash(),
                 game_updater.update_percents(), uint8_t(game.state()), game.game_time(),
                 game_updater.who_am_i());

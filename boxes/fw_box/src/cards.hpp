@@ -164,8 +164,8 @@ public:
                 // rg_log_e(TAG, "Failed to read round ID and visit count: %s", MFRC522Debug::GetStatusCodeName(status));
                 continue;
             }
-            _round_id = buffer[1] << 8 | buffer[0];
-            _visit_count = buffer[3] << 8 | buffer[2];
+            _round_id = (buffer[1] << 8) | buffer[0];
+            _visit_count = (buffer[3] << 8) | buffer[2];
 
             buffer_size = sizeof(buffer);
             status = mfrc522.MIFARE_Read(6, buffer, &buffer_size);
@@ -264,6 +264,7 @@ public:
     }
 
     void set_metadata(std::bitset<32> metadata) override {
+        _metadata = metadata;
         _new_metadata = metadata;
     }
 
