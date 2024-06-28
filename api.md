@@ -317,6 +317,15 @@ Uniqueness: there can only be one event per (`<round-id>`, `time`, `card`) combi
 * Only the first such event will be processed, the rest will get skipped.
 * Why: protects from the same events being accidentally posted repeatedly, e.g., in case of manual logs upload.
 
+Response body:
+```
+{
+    "insertCnt": <cnt>
+}
+```
+* `<cnt>`: number of records actually inserted into the database
+    * integer
+
 ## Ad hoc points awarded to a team
 
 `POST` at `/v1/game/round/<round-id>/team/<team-id>`, using HTTP Basic auth.
