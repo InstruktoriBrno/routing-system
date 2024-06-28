@@ -24,15 +24,17 @@ class LogRouterEventsActionTest extends TestCase
             ->shouldBeCalledOnce();
         $this->mockGameRoundRepository($gameRoundRepositoryProphecy);
 
-        $request = $this->createRequest('POST', '/v1/game/round/1/router/C')
-            ->withParsedBody((object)[
-                'routerMac' => 'fe:d3:4c:aa:72:11',
-                'source' => 'online',
-                'events' => [
-                    (object)['time' => 15, 'card' => 'A015', 'bearer' => 'fe:d3:4c:aa:72:11:23'],
-                    (object)['time' => 25, 'card' => 'Z999', 'bearer' => 'fe:de:33:ab:cd:ef:00', 'score' => 10],
-                ],
-            ]);
+        $request = $this->createRequestWithBody('POST', '/v1/game/round/1/router/C', <<<'JSON'
+{
+    "routerMac": "fe:d3:4c:aa:72:11",
+    "source": "online",
+    "events": [
+        { "time": 15, "card": "A015", "bearer": "fe:d3:4c:aa:72:11:23" },
+        { "time": 25, "card": "Z999", "bearer": "fe:de:33:ab:cd:ef:00", "score": 10 }
+    ]
+}
+JSON
+        );
         $response = $this->app->handle($request);
 
         $this->assertEquals(200, $response->getStatusCode());
@@ -50,12 +52,14 @@ class LogRouterEventsActionTest extends TestCase
             ->shouldBeCalledOnce();
         $this->mockGameRoundRepository($gameRoundRepositoryProphecy);
 
-        $request = $this->createRequest('POST', '/v1/game/round/1/router/C')
-            ->withParsedBody((object)[
-                'routerMac' => 'fe:d3:4c:aa:72:11',
-                'source' => 'online',
-                'events' => [],
-            ]);
+        $request = $this->createRequestWithBody('POST', '/v1/game/round/1/router/C', <<<'JSON'
+{
+    "routerMac": "fe:d3:4c:aa:72:11",
+    "source": "online",
+    "events": []
+}
+JSON
+        );
         $response = $this->app->handle($request);
 
         $this->assertEquals(200, $response->getStatusCode(), 'Response body: ' . $response->getBody()->getContents());
@@ -70,14 +74,16 @@ class LogRouterEventsActionTest extends TestCase
             ->shouldBeCalledOnce();
         $this->mockGameRoundRepository($gameRoundRepositoryProphecy);
 
-        $request = $this->createRequest('POST', '/v1/game/round/2/router/C')
-            ->withParsedBody((object)[
-                'routerMac' => 'fe:d3:4c:aa:72:11',
-                'source' => 'online',
-                'events' => [
-                    (object)['time' => 15, 'card' => 'A015', 'bearer' => 'fe:d3:4c:aa:72:11:23'],
-                ],
-            ]);
+        $request = $this->createRequestWithBody('POST', '/v1/game/round/2/router/C', <<<'JSON'
+{
+    "routerMac": "fe:d3:4c:aa:72:11",
+    "source": "online",
+    "events": [
+        { "time": 15, "card": "A015", "bearer": "fe:d3:4c:aa:72:11:23" }
+    ]
+}
+JSON
+        );
         $response = $this->app->handle($request);
 
         $this->assertEquals(404, $response->getStatusCode());
@@ -88,15 +94,17 @@ class LogRouterEventsActionTest extends TestCase
         $gameRoundRepositoryProphecy = $this->prophesize(GameRoundRepository::class);
         $this->mockGameRoundRepository($gameRoundRepositoryProphecy);
 
-        $request = $this->createRequest('POST', '/v1/game/round/1/router/C')
-            ->withParsedBody((object)[
-                'routerMac' => 'fe:d3:4c:aa:72:11',
-                'source' => 'online',
-                'events' => [
-                    (object)['time' => 15, 'card' => 'A015', 'bearer' => 'fe:d3:4c:aa:72:11:23'],
-                    (object)['time' => 'foo', 'card' => 'Z999', 'bearer' => 'fe:de:33:ab:cd:ef:00', 'score' => 10],
-                ],
-            ]);
+        $request = $this->createRequestWithBody('POST', '/v1/game/round/1/router/C', <<<'JSON'
+{
+    "routerMac": "fe:d3:4c:aa:72:11",
+    "source": "online",
+    "events": [
+        { "time": 15, "card": "A015", "bearer": "fe:d3:4c:aa:72:11:23" },
+        { "time": "foo", "card": "Z999", "bearer": "fe:de:33:ab:cd:ef:00", "score": 10 }
+    ]
+}
+JSON
+        );
         $response = $this->app->handle($request);
 
         $this->assertEquals(400, $response->getStatusCode());

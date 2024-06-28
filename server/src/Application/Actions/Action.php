@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Actions;
 
 use App\Domain\DomainException\DomainRecordNotFoundException;
+use JsonException;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
@@ -112,8 +113,11 @@ abstract class Action
         }
 
         try {
-            $bodyObject = (object)($this->request->getParsedBody());
+            $body = $this->request->getBody();
+            $bodyObject = json_decode($body->getContents(), null, 512, JSON_THROW_ON_ERROR);
             $schema->in($bodyObject);
+        } catch (JsonException $e) {
+            throw new HttpBadRequestException($this->request, 'Invalid payload - not a valid JSON: ' . $e->getMessage(), $e);
         } catch (JsonSchemaException $e) {
             // NOTE: Catching the generic JsonSchemaException which might be thrown by
             //       \Swaggest\JsonSchema\RefResolver::preProcessReferences() despite

@@ -101,4 +101,17 @@ class TestCase extends PHPUnit_TestCase
 
         return new SlimRequest($method, $uri, $h, $cookies, $serverParams, $stream);
     }
+
+    protected function createRequestWithBody(
+        string $method,
+        string $path,
+        string $body,
+        array $headers = ['HTTP_ACCEPT' => 'application/json'],
+        array $cookies = [],
+        array $serverParams = []
+    ): Request {
+        $stream = (new StreamFactory())->createStream($body);
+        return $this->createRequest($method, $path, $headers, $cookies, $serverParams)
+            ->withBody($stream);
+    }
 }
