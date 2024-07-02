@@ -4,7 +4,7 @@ namespace Tests\Application\Actions\V1\Game;
 
 use Tests\TestCase;
 
-class GetRoundInstructionsActionTest extends TestCase
+class GetRoundInstructionsActionTest extends TestCase // TODO: fix to inherit from EndToEndTest - uses the sample database
 {
     public function testAction(): void
     {
@@ -29,6 +29,7 @@ TXT
         );
 
 
+        // TODO: split into a separate test method
         $request = $this->createRequest('GET', '/v1/game/round/4/instructions');
         $response = $this->app->handle($request);
 

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Game;
 
+use App\Domain\Card\CardType;
 use App\Domain\DomainException\DomainRecordNotFoundException;
 use Ivory\Connection\IConnection;
 use Ivory\Data\Map\IValueMap;
@@ -164,7 +165,7 @@ SQL
                     json_each(spec->'packets') e (card_num, def)
                 WHERE
                     id = %int AND
-                    def->>'type' = 'locator'
+                    def->>'type' = %s
             )
             SELECT
                 gre.router_ident,
@@ -179,6 +180,7 @@ SQL
 SQL
             ,
             $roundId,
+            CardType::Locator->value,
             $roundId
         );
 

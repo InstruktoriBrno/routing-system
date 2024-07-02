@@ -4,7 +4,7 @@ namespace Tests\Application\Actions\V1\Game;
 
 use Tests\TestCase;
 
-class GetRouterCheckInStatusActionTest extends TestCase
+class GetRouterCheckInStatusActionTest extends TestCase // TODO: fix to inherit from EndToEndTest - uses the sample database
 {
     public function testAction(): void
     {

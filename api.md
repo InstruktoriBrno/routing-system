@@ -342,6 +342,16 @@ Request body:
 * `reason`: why the points were awarded
     * optional string
 
+## Game round setup validation
+
+`GET` at `/v1/game/round/<round-id>/validate-setup`, using HTTP Basic auth.
+
+Validates the setup for a game round.
+
+Response body:
+* If no errors are found, response is just `OK`.
+* If errors are found, response contains the list of errors, each on a new line.
+
 ## Game round setup instructions
 
 1. `GET` at `/v1/game/round/<round-id>/instructions`, using HTTP Basic auth.

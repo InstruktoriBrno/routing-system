@@ -7,6 +7,7 @@ use App\Application\Actions\V1\Game\AwardAdHocPointsAction;
 use App\Application\Actions\V1\Game\GetRoundInstructionsAction;
 use App\Application\Actions\V1\Game\GetRouterCheckInStatusAction;
 use App\Application\Actions\V1\Game\LogRouterEventsAction;
+use App\Application\Actions\V1\Game\ValidateRoundSpecAction;
 use App\Application\Actions\V1\Score\GetTeamScoreboardAction;
 use App\Application\Actions\V1\Status\StatusAction;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -32,6 +33,7 @@ return function (App $app) {
     $app->group('/v1/game', function (Group $group) {
         $group->post('/round/{roundId}/router/{routerId}', LogRouterEventsAction::class);
         $group->post('/round/{roundId}/team/{teamId}', AwardAdHocPointsAction::class);
+        $group->get('/round/{roundId}/validate-setup', ValidateRoundSpecAction::class);
         $group->get('/round/{roundId}/instructions', GetRoundInstructionsAction::class);
         $group->get('/round/{roundId}/instructions/{routerIds}', GetRoundInstructionsAction::class);
         $group->get('/round/{roundId}/checkin', GetRouterCheckInStatusAction::class);

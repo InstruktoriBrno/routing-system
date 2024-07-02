@@ -3,10 +3,14 @@ declare(strict_types=1);
 namespace Tests;
 
 use App\Application\Handlers\HttpErrorHandler;
+use App\Domain\Game\GameRound;
+use App\Domain\Game\GameRoundRepository;
+use DI\Container;
 use DI\ContainerBuilder;
 use Exception;
 use PHPUnit\Framework\TestCase as PHPUnit_TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
+use Prophecy\Prophecy\ObjectProphecy;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
 use Slim\Factory\AppFactory;
@@ -15,6 +19,7 @@ use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Headers;
 use Slim\Psr7\Request as SlimRequest;
 use Slim\Psr7\Uri;
+use stdClass;
 
 class TestCase extends PHPUnit_TestCase
 {
@@ -113,5 +118,27 @@ class TestCase extends PHPUnit_TestCase
         $stream = (new StreamFactory())->createStream($body);
         return $this->createRequest($method, $path, $headers, $cookies, $serverParams)
             ->withBody($stream);
+    }
+
+    protected function setupGameRoundMock(int $roundId, stdClass $spec): ObjectProphecy
+    {
+        $gameRoundRepositoryProphecy = $this->prophesize(GameRoundRepository::class);
+        $gameRoundRepositoryProphecy
+            ->findByApiIdent(1)
+            ->willReturn(new GameRound($roundId, 1, 'Test game', $spec, $roundId, 'pwd'))
+            ->shouldBeCalledOnce();
+
+        $this->mockGameRoundRepository($gameRoundRepositoryProphecy);
+        
+        return $gameRoundRepositoryProphecy;
+    }
+
+    protected function mockGameRoundRepository(ObjectProphecy $gameRoundRepositoryProphecy): ObjectProphecy
+    {
+        $container = $this->app->getContainer();
+        assert($container instanceof Container);
+        $container->set(GameRoundRepository::class, $gameRoundRepositoryProphecy->reveal());
+
+        return $gameRoundRepositoryProphecy;
     }
 }
