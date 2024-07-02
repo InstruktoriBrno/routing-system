@@ -2,9 +2,9 @@
 declare(strict_types=1);
 namespace Tests\Application\Actions\V1\Game;
 
-use Tests\TestCase;
+use Tests\Application\e2e\EndToEndTest;
 
-class GetRoundInstructionsActionTest extends TestCase // TODO: fix to inherit from EndToEndTest - uses the sample database
+class GetRoundInstructionsActionTest extends EndToEndTest
 {
     public function testAction(): void
     {
