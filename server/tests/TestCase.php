@@ -32,15 +32,6 @@ class TestCase extends PHPUnit_TestCase
         parent::setUp();
 
         $this->app = $this->createAppInstance();
-
-        $callableResolver = $this->app->getCallableResolver();
-        $responseFactory = $this->app->getResponseFactory();
-
-        $errorHandler = new HttpErrorHandler($callableResolver, $responseFactory);
-        $errorMiddleware = new ErrorMiddleware($callableResolver, $responseFactory, true, false, false);
-        $errorMiddleware->setDefaultErrorHandler($errorHandler);
-
-        $this->app->add($errorMiddleware);
     }
 
     /**
@@ -76,6 +67,15 @@ class TestCase extends PHPUnit_TestCase
         // Register routes
         $routes = require __DIR__ . '/../app/routes.php';
         $routes($app);
+
+        $callableResolver = $app->getCallableResolver();
+        $responseFactory = $app->getResponseFactory();
+
+        $errorHandler = new HttpErrorHandler($callableResolver, $responseFactory);
+        $errorMiddleware = new ErrorMiddleware($callableResolver, $responseFactory, true, false, false);
+        $errorMiddleware->setDefaultErrorHandler($errorHandler);
+
+        $app->add($errorMiddleware);
 
         return $app;
     }
@@ -129,7 +129,7 @@ class TestCase extends PHPUnit_TestCase
             ->shouldBeCalledOnce();
 
         $this->mockGameRoundRepository($gameRoundRepositoryProphecy);
-        
+
         return $gameRoundRepositoryProphecy;
     }
 

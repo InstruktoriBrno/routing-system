@@ -2,12 +2,6 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "properties": {
-        "roundId": {
-            "type": "integer"
-        },
-        "roundName": {
-            "type": "string"
-        },
         "duration": {
             "type": "integer"
         },
@@ -87,27 +81,30 @@
                 {
                     "type": "object",
                     "properties": {
-                        "category": {
+                        "type": {
                             "enum": [
-                                "linkDown"
+                                "linkdown",
+                                "linkup"
                             ]
                         },
-                        "relativeTimestamp": {
-                            "type": "number",
+                        "time": {
+                            "type": "integer",
                             "description": "When should the event take place, in seconds from game start"
+                        },
+                        "link": {
+                            "type": "string"
                         }
                     },
                     "required": [
-                        "category",
-                        "relativeTimestamp"
+                        "type",
+                        "time",
+                        "link"
                     ]
                 }
             ]
         }
     },
     "required": [
-        "roundId",
-        "roundName",
         "duration",
         "routers",
         "links",
