@@ -86,14 +86,17 @@ Request body:
 * `<packet-type>`: type of the packet the card represents:
     * `"admin"`: Administrator packet - shows current router ID, even outside round
         * by convention, packet `"000"` is always an admin packet
-    * `"standard"`: packet to be delivered from one router to another
-        * score defined by the `"points"` attribute (usually based on shortest path length)
-    * `"priority"`:
-        * Similar to standard packet, only the reward is based on the delivery time. Upon delivery, the point reward is  `pointsPerMinutesLeft * (minutesToDeliver-<timeSpent>+1)`, minimum is `0`.
+    * ~~`"standard"`: packet to be delivered from one router to another~~
+        * ~~score defined by the `"points"` attribute (usually based on shortest path length)~~
+        * (deprecated)
+    * `"return"`: Packet to be delivered to a destination, then back to the source
+        * score: the `points`
+    * `"priority"`: Similar to standard packet, only the reward is based on the delivery time. Upon delivery, the point reward is  `pointsPerMinutesLeft * (minutesToDeliver-<timeSpent>+1)`, minimum is `0`.
         * **Label**: Na doručení tohoto paketu máte 5 minut. Čím rychleji doručíte, tím víc bodů.
-    * `"hopper"`:
-        * This packet awards points for every successful hop it takes.
-        * **Label**: Za každý hop vám tento paket dá 1 bod.  
+    * ~~`"hopper"`:~~
+        * ~~This packet awards points for every successful hop it takes.~~
+        * ~~**Label**: Za každý hop vám tento paket dá 1 bod.~~
+        * (deprecated, unless we find this useful again)
     * `"visitall"`:
         * Points are awarded once this packet has visited every single router in the network.
         * **Label**: Jakmile tento paketnavštíví všechy routery, dostanete 50 bodů.
@@ -102,7 +105,7 @@ Request body:
         * Never awards points
 * `...packet-params`: attributes according to the packet type:
     * mandatory attributes:
-        * `"releaseTime"`: <number>
+        * `"releaseTime"`: integer
             * Time when the packet should be delivered to the Router box by organisers
             * Not enforced by the game. This is for the game itinerary automation tool
         * `"source": "<router-id>"`
@@ -110,12 +113,28 @@ Request body:
             * ID of router where the packet gets added to the network
     * `"admin"`:
         * No optional properties
-    * `"standard"`:
+    * `"return"`:
         * `"destination": "<router-id>"`
             * ID of router where the packet is to be delivered
-        * `"points": <number> (optional)`
-            * Reward for successful delivery
-            * Default = 10
+        * `"points": <number>`
+            * Base for points awarded for successful delivery
+            * For delivering from `source` to `destination`, (`points` - 2x`hops` - `deliveryMinutes`) points are awarded, where:
+                * `hops` is the number of routers the packet gets beeped (excluding source, including destination; each beep counted even when on a router already visited while delivering)
+                * `deliveryMinutes` is the number of whole minutes it takes to delivery the packet to `destination` from `deliveryStartTime`
+                * `deliveryStartTime` is either time of the first beep of the packet at `source`, or `releaseTime`+30, whichever happens first
+            * For delivering back from `destination` to `source`, (`points` - 2x`hops` - `deliveryMinutes`) points are awarded (on top of the points for `source` -> `destination` delivery), where:
+                * `hops` and `deliveryMinutes` are analogous to `source` -> `destination` delivery
+                * `deliveryStartTime` is the time of the first beep of the packet at `destination`
+            * Points must be explicitly specified.
+            * Intent is for `points` to typically be 5x`optimalHops`, where `optimalHops` is the length of the optimal path from `source` to `destination` on the topology at `releaseTime`
+    * `"chat"`:
+        * same parameters as for type `"return'`
+            * for subsequent `source` -> `destination` deliveries, `deliveryStartTime` is the time of the beep at `source` concluding the preceding `destination` -> `source` delivery)
+        * `"roundTripCount"`: integer
+            * Number of `source` -> `destination` -> `source` deliveries the packet supports until it declares it's done
+        * `"messages"`: array of strings
+            * Messages to show on the box display (a conversation, a joke, ...)
+            * Contains 2x`roundTripCount` strings, each corresponding to one supported delivery.
     * `"priority"`:
         * `"destination": "<router-id>"`
             * ID of router where the packet is to be delivered
