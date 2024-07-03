@@ -22,10 +22,12 @@ class GameRoundRepository
         $this->db->connect();
 
         $t = $this->db->querySingleTuple(
-            'SELECT *
-             FROM game_round
-             WHERE api_ident = %int',
-             $roundApiIdent
+            <<<'SQL'
+                SELECT *
+                FROM game_round
+                WHERE api_ident = %int
+            SQL,
+            $roundApiIdent
         );
         if ($t === null) {
             throw new DomainRecordNotFoundException("No game round `$roundApiIdent` found");
@@ -42,16 +44,16 @@ class GameRoundRepository
         $cnt = 0;
         foreach ($eventData as $event) {
             $teamIdent = $event->card[0];
-            $res = $this->db->command(<<<'SQL'
-                INSERT INTO game_round_event
-                    (
-                        game_round_id, event, source, team_ident, router_ident, router_mac_address, round_time, score
-                    )
-                    VALUES
-                        (%int, %json, %event_source, %s, %s, %macaddr, %int, %int)
-                    ON CONFLICT DO NOTHING
-SQL
-                ,
+            $res = $this->db->command(
+                <<<'SQL'
+                    INSERT INTO game_round_event
+                        (
+                            game_round_id, event, source, team_ident, router_ident, router_mac_address, round_time, score
+                        )
+                        VALUES
+                            (%int, %json, %event_source, %s, %s, %macaddr, %int, %int)
+                        ON CONFLICT DO NOTHING
+                SQL,
                 $roundId,
                 $event,
                 $eventSource,
@@ -71,11 +73,11 @@ SQL
     {
         $this->db->connect();
 
-        $this->db->command(<<<'SQL'
-            INSERT INTO game_round_event (game_round_id, event, source, team_ident, score)
-                VALUES (%int, %json, %event_source, %s, %int)
-SQL
-            ,
+        $this->db->command(
+            <<<'SQL'
+                INSERT INTO game_round_event (game_round_id, event, source, team_ident, score)
+                    VALUES (%int, %json, %event_source, %s, %int)
+            SQL,
             $roundId,
             $event,
             $source,
@@ -92,17 +94,17 @@ SQL
     {
         $this->db->connect();
 
-        $rel = $this->db->query(<<<'SQL'
-            SELECT
-                card_num,
-                attr->>'type' AS card_type,
-                attr->>'source' AS router_ident,
-                CAST(attr->>'releaseTime' AS INT) AS release_time
-            FROM game_round, json_each(spec->'packets') p (card_num, attr)
-            WHERE id = %int
-            ORDER BY release_time ASC NULLS FIRST, card_num, router_ident
-SQL
-            ,
+        $rel = $this->db->query(
+            <<<'SQL'
+                SELECT
+                    card_num,
+                    attr->>'type' AS card_type,
+                    attr->>'source' AS router_ident,
+                    CAST(attr->>'releaseTime' AS INT) AS release_time
+                FROM game_round, json_each(spec->'packets') p (card_num, attr)
+                WHERE id = %int
+                ORDER BY release_time ASC NULLS FIRST, card_num, router_ident
+            SQL,
             $roundId
         );
 
@@ -155,20 +157,20 @@ SQL
     {
         $this->db->connect();
 
-        $rel = $this->db->query(<<<'SQL'
-            SELECT
-                grt.team_ident,
-                s.name AS subteam_name
-            FROM
-                game_round_team grt
-                JOIN subteam s ON s.id = grt.subteam_id
-            WHERE
-                grt.game_round_id = %int
-            ORDER BY
-                team_ident,
-                subteam_name
-SQL
-            ,
+        $rel = $this->db->query(
+            <<<'SQL'
+                SELECT
+                    grt.team_ident,
+                    s.name AS subteam_name
+                FROM
+                    game_round_team grt
+                    JOIN subteam s ON s.id = grt.subteam_id
+                WHERE
+                    grt.game_round_id = %int
+                ORDER BY
+                    team_ident,
+                    subteam_name
+            SQL,
             $roundId
         );
 
@@ -187,30 +189,30 @@ SQL
     {
         $this->db->connect();
 
-        $rel = $this->db->query(<<<'SQL'
-            WITH locator_cards (card_num, router_ident) AS (
+        $rel = $this->db->query(
+            <<<'SQL'
+                WITH locator_cards (card_num, router_ident) AS (
+                    SELECT
+                        card_num,
+                        def->>'source'
+                    FROM
+                        game_round,
+                        json_each(spec->'packets') e (card_num, def)
+                    WHERE
+                        id = %int AND
+                        def->>'type' = %s
+                )
                 SELECT
-                    card_num,
-                    def->>'source'
+                    gre.router_ident,
+                    gre.team_ident,
+                    gre.event->>'card' AS card
                 FROM
-                    game_round,
-                    json_each(spec->'packets') e (card_num, def)
+                    game_round_event gre
+                    JOIN locator_cards ON gre.event->>'card' = gre.team_ident || locator_cards.card_num
                 WHERE
-                    id = %int AND
-                    def->>'type' = %s
-            )
-            SELECT
-                gre.router_ident,
-                gre.team_ident,
-                gre.event->>'card' AS card
-            FROM
-                game_round_event gre
-                JOIN locator_cards ON gre.event->>'card' = gre.team_ident || locator_cards.card_num
-            WHERE
-                gre.game_round_id = %int AND
-                gre.router_ident = locator_cards.router_ident
-SQL
-            ,
+                    gre.game_round_id = %int AND
+                    gre.router_ident = locator_cards.router_ident
+            SQL,
             $roundId,
             CardType::Locator->value,
             $roundId

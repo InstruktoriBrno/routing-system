@@ -73,5 +73,8 @@ class ValidateRoundSpecActionTest extends EndToEndTest
         $this->assertStringContainsStringIgnoringCase('routers', (string)$response->getBody());
     }
 
-    // TODO: test higher-level validations: validate router keys, links, packet types + properties, etc.
+    // TODO: validate router keys
+    // TODO: validate links
+    // TODO: validate packet types + properties, timing within game round range
+    // TODO: validate game events (type, properties, timing within game round range)
 }
