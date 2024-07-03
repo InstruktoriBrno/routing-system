@@ -371,12 +371,12 @@ Response body:
 * If no errors are found, response is just `OK`.
 * If errors are found, response contains the list of errors, each on a new line.
 
-## Game round setup instructions
+## Game round setup instructions for packets
 
-1. `GET` at `/v1/game/round/<round-id>/instructions`, using HTTP Basic auth.
-2. `GET` at `/v1/game/round/<round-id>/instructions/<router-id-list>`, using HTTP Basic auth.
+1. `GET` at `/v1/game/round/<round-id>/instructions/packets`, using HTTP Basic auth.
+2. `GET` at `/v1/game/round/<round-id>/instructions/packets/<router-id-list>`, using HTTP Basic auth.
 
-Provides instructions on how to organize the round.
+Provides instructions on which packets to drop where at what time.
 * `<router-id-list>`: if provided, only instructions for the listed routers are produced
     * optional string - concatenation of router IDs
     * example: `ADGHI` for instructions involving only these 5 routers

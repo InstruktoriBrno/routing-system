@@ -5,7 +5,7 @@ namespace App\Application\Actions\V1\Game;
 use App\Domain\Game\PacketInstruction;
 use Psr\Http\Message\ResponseInterface as Response;
 
-class GetRoundInstructionsAction extends GameAction
+class GetRoundPacketInstructionsAction extends GameAction
 {
     protected function action(): Response
     {

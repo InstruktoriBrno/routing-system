@@ -4,11 +4,11 @@ namespace Tests\Application\Actions\V1\Game;
 
 use Tests\Application\e2e\EndToEndTest;
 
-class GetRoundInstructionsActionTest extends EndToEndTest
+class GetRoundPacketInstructionsActionTest extends EndToEndTest
 {
     public function testAction(): void
     {
-        $request = $this->createRequest('GET', '/v1/game/round/1/instructions');
+        $request = $this->createRequest('GET', '/v1/game/round/1/instructions/packets');
         $response = $this->app->handle($request);
 
         $this->assertEquals(200, $response->getStatusCode());
@@ -30,7 +30,7 @@ TXT
 
 
         // TODO: split into a separate test method
-        $request = $this->createRequest('GET', '/v1/game/round/4/instructions');
+        $request = $this->createRequest('GET', '/v1/game/round/4/instructions/packets');
         $response = $this->app->handle($request);
 
         $this->assertEquals(200, $response->getStatusCode());

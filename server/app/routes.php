@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Application\Actions\NotImplementedAction;
 use App\Application\Actions\V1\Game\AwardAdHocPointsAction;
-use App\Application\Actions\V1\Game\GetRoundInstructionsAction;
+use App\Application\Actions\V1\Game\GetRoundPacketInstructionsAction;
 use App\Application\Actions\V1\Game\GetRouterCheckInStatusAction;
 use App\Application\Actions\V1\Game\LogRouterEventsAction;
 use App\Application\Actions\V1\Game\ValidateRoundSpecAction;
@@ -34,8 +34,8 @@ return function (App $app) {
         $group->post('/round/{roundId}/router/{routerId}', LogRouterEventsAction::class);
         $group->post('/round/{roundId}/team/{teamId}', AwardAdHocPointsAction::class);
         $group->get('/round/{roundId}/validate-setup', ValidateRoundSpecAction::class);
-        $group->get('/round/{roundId}/instructions', GetRoundInstructionsAction::class);
-        $group->get('/round/{roundId}/instructions/{routerIds}', GetRoundInstructionsAction::class);
+        $group->get('/round/{roundId}/instructions/packets', GetRoundPacketInstructionsAction::class);
+        $group->get('/round/{roundId}/instructions/packets/{routerIds}', GetRoundPacketInstructionsAction::class);
         $group->get('/round/{roundId}/checkin', GetRouterCheckInStatusAction::class);
     });
 
