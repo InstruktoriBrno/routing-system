@@ -119,6 +119,38 @@ SQL
         return $result;
     }
 
+    /**
+     * @param int $roundId
+     * @return EventInstruction[]
+     */
+    public function fetchEventInstructions(int $roundId): array
+    {
+        $this->db->connect();
+
+        $rel = $this->db->query(
+            <<<'SQL'
+                SELECT
+                    (event->>'time')::SMALLINT AS event_time,
+                    event->>'type' AS event_type,
+                    event->>'link' AS parameter
+                FROM game_round, json_array_elements(spec->'events') e (event)
+                WHERE id = %int
+                ORDER BY event_time ASC NULLS FIRST, event_type, parameter
+            SQL,
+            $roundId
+        );
+
+        $result = [];
+        foreach ($rel as $t) {
+            $ei = new EventInstruction();
+            $ei->time = $t->event_time;
+            $ei->type = GameRoundEventType::from($t->event_type);
+            $ei->parameter = $t->parameter;
+            $result[] = $ei;
+        }
+        return $result;
+    }
+
     public function fetchTeams(int $roundId): array
     {
         $this->db->connect();

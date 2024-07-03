@@ -16,4 +16,15 @@ abstract class GameAction extends Action
         parent::__construct($logger);
         $this->gameRoundRepository = $gameRoundRepository;
     }
+
+    protected function formatInstructionTime(int $time): string
+    {
+        $result = sprintf('min %d', $time / 60);
+
+        if ($time % 60 != 0) {
+            $result .= sprintf(' sec %d', $time % 60);
+        }
+        
+        return $result;
+    }
 }

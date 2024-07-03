@@ -395,6 +395,30 @@ Response body example:
 ```
 
 
+## Game round setup instructions for game events
+
+`GET` at `/v1/game/round/<round-id>/instructions/events`, using HTTP Basic Auth.
+
+Provides instructions on what game event to perform at what time.
+
+Response body (plaintext):
+```
+<time>: <event-type> <event-params>
+...
+```
+or, in case of no game events defined:
+```
+zadne herni udalosti v tomto kole
+```
+
+Response body example:
+```
+min 2: vypnout linku AB
+min 5 sec 30: zapnout linku AB
+min 8: vypnout linku CD
+```
+
+
 ## Router check-in status
 
 `GET` at `/v1/game/round/<round-id>/checkin`
