@@ -107,8 +107,8 @@ JSON
         $this->assertSame('A', $teamAScore->teamId);
         $this->assertSame(55, $teamAScore->overallScore);
         $this->assertSame(5, $teamAScore->adHocScore);
-        $this->assertSame(['standard'], array_keys(get_object_vars($teamAScore->perPacketType)));
-        $this->assertSame(50, $teamAScore->perPacketType->standard->thisTeamScore);
-        $this->assertSame(100, $teamAScore->perPacketType->standard->bestTeamScore);
+        $this->assertSame(['return'], array_keys(get_object_vars($teamAScore->perPacketType)));
+        $this->assertSame(50, $teamAScore->perPacketType->return->thisTeamScore);
+        $this->assertSame(100, $teamAScore->perPacketType->return->bestTeamScore);
     }
 }

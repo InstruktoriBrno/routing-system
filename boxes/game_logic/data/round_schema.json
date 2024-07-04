@@ -3,17 +3,26 @@
     "type": "object",
     "properties": {
         "duration": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 1
         },
         "routers": {
             "type": "object",
-            "additionalProperties": {
-                "type": "object",
-                "description": "Default assignment of pipaky to Router labels. Any pipak can assume any Label (for redundancy purposes). These values are defaults, so we don't need to update each of them manually pre-game.",
-                "properties": {
-                    "mac": {
-                        "type": "array",
-                        "description": "List of MAC addresses of all routers that will assume this logical address"
+            "additionalProperties": false,
+            "patternProperties": {
+                "^[A-Z]$": {
+                    "type": "object",
+                    "description": "Default assignment of pipaky to Router labels. Any pipak can assume any Label (for redundancy purposes). These values are defaults, so we don't need to update each of them manually pre-game.",
+                    "properties": {
+                        "mac": {
+                            "type": "array",
+                            "description": "List of MAC addresses of all routers that will assume this logical address",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "pattern": "^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$"
+                            }
+                        }
                     }
                 }
             }
@@ -21,62 +30,82 @@
         "links": {
             "type": "array",
             "description": "List of all links in the network. The links are bi-directional. Only one of the directions is listed here.",
+            "uniqueItems": true,
             "items": [
                 {
                     "type": "string",
+                    "pattern": "^[A-Z]{2}$",
                     "description": "String of exactly two Router label chars."
                 }
             ]
         },
         "packets": {
             "type": "object",
-            "additionalProperties": {
-                "type": "object",
-                "properties": {
-                    "type": {
-                        "enum": [
-                            "admin",
-                            "standard",
-                            "priority",
-                            "hopper",
-                            "visitall",
-                            "locator"
-                        ]
+            "additionalProperties": false,
+            "patternProperties": {
+                "^[0-9]{3}$": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "enum": [
+                                "admin",
+                                "locator",
+                                "return",
+                                "chat",
+                                "priority",
+                                "visitall"
+                            ]
+                        },
+                        "releaseTime": {
+                            "type": "integer",
+                            "description": "Gametime when this packet should be released. Not enforced, value is for itinerary generator tool"
+                        },
+                        "source": {
+                            "type": "string",
+                            "pattern": "^[A-Z]$"
+                        },
+                        "destination": {
+                            "type": "string",
+                            "pattern": "^[A-Z]$"
+                        },
+                        "points": {
+                            "type": "integer"
+                        },
+                        "roundTripCount": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "description": "Number of source -> destination -> source deliveries the packet supports until it declares it's done"
+                        },
+                        "messages": {
+                            "type": "array",
+                            "description": "Messages to show on the box display (a conversation, a joke, ...)",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "pointsPerMinuteLeft": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "minutesToDeliver": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
                     },
-                    "releaseTime": {
-                        "type": "integer",
-                        "description": "Gametime when this packet should be released. Not enforced, value is for itinerary generator tool"
-                    },
-                    "source": {
-                        "type": "string"
-                    },
-                    "destination": {
-                        "type": "string"
-                    },
-                    "points": {
-                        "type": "integer"
-                    },
-                    "pointsPerMinuteLeft": {
-                        "type": "integer"
-                    },
-                    "minutesToDeliver": {
-                        "type": "integer"
-                    },
-                    "pointsPerHop": {
-                        "type": "integer"
-                    }
-                },
-                "required": [
-                    "type",
-                    "releaseTime",
-                    "source"
-                ],
-                "additionalProperties": false
+                    "required": ["type", "releaseTime", "source"],
+                    "oneOf": [
+                        { "properties": { "type": { "enum": ["admin", "locator", "visitall"] } } },
+                        { "properties": { "type": { "enum": ["return"] } }, "required": ["destination", "points"] },
+                        { "properties": { "type": { "enum": ["chat"] } }, "required": ["destination", "points", "roundTripCount", "messages"] },
+                        { "properties": { "type": { "enum": ["priority"] } }, "required": ["destination"] }
+                    ],
+                    "additionalProperties": false
+                }
             }
         },
         "events": {
             "type": "array",
-            "description": "Pre-planned network events that will happen during game",
+            "description": "Pre-planned network events that will happen during the round",
             "items": [
                 {
                     "type": "object",
@@ -89,17 +118,20 @@
                         },
                         "time": {
                             "type": "integer",
+                            "minimum": 1,
                             "description": "When should the event take place, in seconds from game start"
                         },
                         "link": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^[A-Z]{2}$"
                         }
                     },
                     "required": [
                         "type",
                         "time",
                         "link"
-                    ]
+                    ],
+                    "additionalProperties": false
                 }
             ]
         }
