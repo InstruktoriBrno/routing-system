@@ -389,9 +389,9 @@ Response body (plaintext):
 
 Response body example:
 ```
-001: A, 2:00, standard
-005: C, 3:00, standard
-014: H, 8:30, hopper
+2:00 A 001 standard
+3:00 C 005 standard
+8:30 H 014 hopper
 ```
 
 

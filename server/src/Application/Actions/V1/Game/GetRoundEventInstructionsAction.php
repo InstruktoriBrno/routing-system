@@ -28,7 +28,7 @@ class GetRoundEventInstructionsAction extends GameAction
         $result = '';
         foreach ($instructions as $inst) {
             assert($inst instanceof EventInstruction);
-            $result .= sprintf("%s: %s%s",
+            $result .= sprintf("%s %s%s",
                 $this->formatInstructionTime($inst->time),
                 $this->formatEventDescription($inst->type, $inst->parameter),
                 PHP_EOL

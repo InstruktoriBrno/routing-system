@@ -14,14 +14,14 @@ class GetRoundPacketInstructionsActionTest extends EndToEndTest
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertSame(
             <<<'TXT'
-            001: A, 0:00, locator
-            002: B, 0:00, locator
-            003: C, 0:00, locator
-            011: A, 0:30, return
-            010: A, 1:00, return
-            030: B, 1:00, return
-            012: A, 1:30, return
-            020: B, 3:00, return
+            0:00 A 001 locator
+            0:00 B 002 locator
+            0:00 C 003 locator
+            0:30 A 011 return
+            1:00 A 010 return
+            1:00 B 030 return
+            1:30 A 012 return
+            3:00 B 020 return
 
             TXT,
             (string)$response->getBody()
@@ -36,25 +36,25 @@ class GetRoundPacketInstructionsActionTest extends EndToEndTest
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertSame(
             <<<'TXT'
-            001: A, 0:00, locator
-            002: B, 0:00, locator
-            003: C, 0:00, locator
-            004: D, 0:00, locator
-            005: E, 0:00, locator
-            006: F, 0:00, locator
-            007: G, 0:00, locator
-            008: H, 0:00, locator
-            009: I, 0:00, locator
-            010: J, 0:00, locator
-            020: A, 1:00, return
-            021: A, 2:00, return
-            022: A, 3:00, return
-            023: A, 4:00, return
-            024: A, 5:00, return
-            025: A, 6:00, return
-            026: A, 7:00, return
-            027: A, 8:00, return
-            028: A, 9:00, return
+            0:00 A 001 locator
+            0:00 B 002 locator
+            0:00 C 003 locator
+            0:00 D 004 locator
+            0:00 E 005 locator
+            0:00 F 006 locator
+            0:00 G 007 locator
+            0:00 H 008 locator
+            0:00 I 009 locator
+            0:00 J 010 locator
+            1:00 A 020 return
+            2:00 A 021 return
+            3:00 A 022 return
+            4:00 A 023 return
+            5:00 A 024 return
+            6:00 A 025 return
+            7:00 A 026 return
+            8:00 A 027 return
+            9:00 A 028 return
 
             TXT,
             (string)$response->getBody()
