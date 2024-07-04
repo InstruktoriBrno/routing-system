@@ -58,12 +58,6 @@ class GetRoundPacketInstructionsAction extends GameAction
             return 'check-in';
         }
 
-        $result = sprintf('min %d', $releaseTime / 60);
-
-        if ($releaseTime % 60 != 0) {
-            $result .= sprintf(' sec %d', $releaseTime % 60);
-        }
-        
-        return $result;
+        return $this->formatInstructionTime($releaseTime);
     }
 }

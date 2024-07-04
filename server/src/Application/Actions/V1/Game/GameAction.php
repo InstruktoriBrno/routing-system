@@ -19,12 +19,6 @@ abstract class GameAction extends Action
 
     protected function formatInstructionTime(int $time): string
     {
-        $result = sprintf('min %d', $time / 60);
-
-        if ($time % 60 != 0) {
-            $result .= sprintf(' sec %d', $time % 60);
-        }
-        
-        return $result;
+        return sprintf('%d:%02d', $time / 60, $time % 60);
     }
 }

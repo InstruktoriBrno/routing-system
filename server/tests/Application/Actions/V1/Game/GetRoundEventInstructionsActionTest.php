@@ -29,44 +29,44 @@ class GetRoundEventInstructionsActionTest extends EndToEndTest
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertSame(
             <<<'TXT'
-            min 1: zapnout linku AF
-            min 2: vypnout linku AF
-            min 3: zapnout linku AF
-            min 4: vypnout linku AF
-            min 5: zapnout linku AF
-            min 6: vypnout linku AF
-            min 7: zapnout linku AF
-            min 8: vypnout linku AF
-            min 9: zapnout linku AF
-            min 10: vypnout linku AF
-            min 11: zapnout linku AC
-            min 11: zapnout linku AD
-            min 11: zapnout linku AE
-            min 11: zapnout linku AF
-            min 11: zapnout linku AG
-            min 11: zapnout linku AH
-            min 11: zapnout linku AI
-            min 11: zapnout linku BD
-            min 11: zapnout linku BE
-            min 11: zapnout linku BF
-            min 11: zapnout linku BG
-            min 11: zapnout linku BH
-            min 11: zapnout linku BI
-            min 11: zapnout linku CE
-            min 11: zapnout linku CF
-            min 11: zapnout linku CG
-            min 11: zapnout linku CH
-            min 11: zapnout linku CI
-            min 11: zapnout linku DF
-            min 11: zapnout linku DG
-            min 11: zapnout linku DH
-            min 11: zapnout linku DI
-            min 11: zapnout linku EG
-            min 11: zapnout linku EH
-            min 11: zapnout linku EI
-            min 11: zapnout linku FH
-            min 11: zapnout linku FI
-            min 11: zapnout linku GI
+            1:00: zapnout linku AF
+            2:00: vypnout linku AF
+            3:00: zapnout linku AF
+            4:00: vypnout linku AF
+            5:00: zapnout linku AF
+            6:00: vypnout linku AF
+            7:00: zapnout linku AF
+            8:00: vypnout linku AF
+            9:00: zapnout linku AF
+            10:00: vypnout linku AF
+            11:00: zapnout linku AC
+            11:00: zapnout linku AD
+            11:00: zapnout linku AE
+            11:00: zapnout linku AF
+            11:00: zapnout linku AG
+            11:00: zapnout linku AH
+            11:00: zapnout linku AI
+            11:00: zapnout linku BD
+            11:00: zapnout linku BE
+            11:00: zapnout linku BF
+            11:00: zapnout linku BG
+            11:00: zapnout linku BH
+            11:00: zapnout linku BI
+            11:00: zapnout linku CE
+            11:00: zapnout linku CF
+            11:00: zapnout linku CG
+            11:00: zapnout linku CH
+            11:00: zapnout linku CI
+            11:00: zapnout linku DF
+            11:00: zapnout linku DG
+            11:00: zapnout linku DH
+            11:00: zapnout linku DI
+            11:00: zapnout linku EG
+            11:00: zapnout linku EH
+            11:00: zapnout linku EI
+            11:00: zapnout linku FH
+            11:00: zapnout linku FI
+            11:00: zapnout linku GI
 
             TXT,
             (string)$response->getBody()

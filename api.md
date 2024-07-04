@@ -389,9 +389,9 @@ Response body (plaintext):
 
 Response body example:
 ```
-001: A, min 2, standard
-005: C, min 3, standard
-014: H, min 8 sec 30, hopper
+001: A, 2:00, standard
+005: C, 3:00, standard
+014: H, 8:30, hopper
 ```
 
 
@@ -413,9 +413,9 @@ zadne herni udalosti v tomto kole
 
 Response body example:
 ```
-min 2: vypnout linku AB
-min 5 sec 30: zapnout linku AB
-min 8: vypnout linku CD
+2:00 vypnout linku AB
+5:30 zapnout linku AB
+8:00 vypnout linku CD
 ```
 
 
