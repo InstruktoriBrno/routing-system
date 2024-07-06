@@ -17,13 +17,14 @@
                         "mac": {
                             "type": "array",
                             "description": "List of MAC addresses of all routers that will assume this logical address",
-                            "uniqueItems": true,
                             "items": {
                                 "type": "string",
                                 "pattern": "^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$"
-                            }
+                            },
+                            "uniqueItems": true
                         }
-                    }
+                    },
+                    "required": ["mac"]
                 }
             }
         },

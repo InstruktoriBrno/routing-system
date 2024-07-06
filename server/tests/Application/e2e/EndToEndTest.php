@@ -15,8 +15,8 @@ abstract class EndToEndTest extends TestCase
 
     protected function tearDown(): void
     {
-        parent::tearDown();
         $this->resetSampleData();
+        parent::tearDown();
     }
 
     private function resetSampleData(): void
