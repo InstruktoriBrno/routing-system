@@ -13,13 +13,14 @@
     "require": {
         "php": "^7.4 || ^8.0",
         "ext-json": "*",
+        "guzzlehttp/guzzle": "^7.0",
         "monolog/monolog": "^2.8",
+        "ondrej-bouda/ivory": "~0.2",
         "php-di/php-di": "^6.4",
         "slim/psr7": "^1.5",
         "slim/slim": "^4.10",
         "swaggest/json-schema": "~0.12",
-        "ondrej-bouda/ivory": "~0.2",
-        "guzzlehttp/guzzle": "^7.0"
+        "symfony/console": "^7.1"
     },
     "require-dev": {
         "jangregor/phpstan-prophecy": "^1.0.0",

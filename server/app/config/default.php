@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+use App\Console\ListGamesCommand;
 use Monolog\Logger;
 
 date_default_timezone_set('Europe/Prague');
@@ -15,4 +16,7 @@ return [
         'level' => Logger::DEBUG,
     ],
     'db' => [], // array of parameters for Ivory::setupNewConnection(); must be defined by env.php
+    'commands' => [
+        ListGamesCommand::class,
+    ],
 ];
