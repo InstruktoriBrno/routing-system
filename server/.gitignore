@@ -1,5 +1,4 @@
 .idea/
-.vscode/
 
 /app/config/env.php
 /app/config/env-*.php
