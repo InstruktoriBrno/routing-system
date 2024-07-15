@@ -23,6 +23,8 @@ return [
         'level' => Logger::DEBUG,
     ],
     'db' => [], // array of parameters for Ivory::setupNewConnection(); must be defined by env.php
+    'gateway' => [], // parameters for gateway client; must be defined by env.php
+    'server' => [], // parameters for the server; might be defined in env.php
     'commands' => [
         GetStatusCommand::class,
         ListGamesCommand::class,

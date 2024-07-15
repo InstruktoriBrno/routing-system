@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Console;
 
+use App\Application\Settings\SettingsInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -44,11 +45,22 @@ final class StartGameCommand extends CommandBase
             return 2;
         }
 
+        $startParams = [
+            'roundId' => $roundIdent,
+            'password' => $tuple->api_password,
+        ];
+        
+        $cfg = $this->container->get(SettingsInterface::class)->get('server');
+        if (!empty($cfg['base_uri'])) {
+            $startParams['logRouterEventsEndpointUrl'] = sprintf(
+                '%s/v1/game/round/%d/router/',
+                $cfg['base_uri'],
+                $roundIdent
+            );
+        }
+
         $res = $this->getGatewayClient()->post('/v1/game/start', [
-            'json' => [
-                'roundId' => $roundIdent,
-                'password' => $tuple->api_password
-            ],
+            'json' => $startParams,
         ]);
         return $this->processHttpClientResult($res, $output);
     }

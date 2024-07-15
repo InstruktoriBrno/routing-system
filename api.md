@@ -230,7 +230,8 @@ Request body:
 ```json
 {
     "roundId": <round-id>,
-    "password": "<password>"
+    "password": "<password>",
+    "logRouterEventsEndpointUrl": "<log-endpoint-url>"
 }
 ```
 * `<round-id>`: a unique identifier of the round, decided by the caller
@@ -239,6 +240,10 @@ Request body:
     * needs to be the same as with the prior `POST` to `/v1/game/round`; any box having a different round set will reject to start, and the whole request will fail
 * `<password>` string
     * a password to be used for the HTTP Basic Auth with any subsequent calls from the gateway to the server, together with `<round-id>`
+* `<log-endpoint-url>`: URL of the endpoint where to log router events
+    * string; e.g., "https://192.168.0.5:8000/routing-game/v1/game/round/123/router/"
+    * a complete URL of the endpoint except for the `<router-id>`, which should be appended by the gateway
+    * optional; if not specified, gateway will compose the URL as "http://<host>/v1/game/round/<round-id>/router/"
 
 
 ## Pause the game
