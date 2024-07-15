@@ -61,7 +61,7 @@ final class SetupGameCommand extends CommandBase
             $output->writeln(json_encode($spec, JSON_PRETTY_PRINT));
         }
 
-        $res = $this->getGatewayClient()->put('/v1/game/round', ['json' => $spec]);
+        $res = $this->getGatewayClient($output)->put('/v1/game/round', ['json' => $spec]);
         $setupExitCode = $this->processHttpClientResult($res, $output);
 
         if (!$input->hasOption(self::OPT_START)) {
@@ -73,7 +73,7 @@ final class SetupGameCommand extends CommandBase
         sleep(self::SLEEP_BEFORE_START);
         $output->writeln('');
 
-        $res = $this->getGatewayClient()->post('/v1/game/start', [
+        $res = $this->getGatewayClient($output)->post('/v1/game/start', [
             'json' => [
                 'roundId' => $round->api_ident,
                 'password' => $round->api_password

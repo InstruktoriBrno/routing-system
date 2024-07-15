@@ -20,7 +20,7 @@ final class GetStatusCommand extends CommandBase
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $res = $this->getGatewayClient()->get('/v1/status');
+        $res = $this->getGatewayClient($output)->get('/v1/status');
         return $this->processHttpClientResult($res, $output);
     }
 }
