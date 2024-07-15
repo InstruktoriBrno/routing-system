@@ -16,6 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 abstract class CommandBase extends Command
 {
     protected ContainerInterface $container;
+    private $gatewayClient = null;
 
     public function __construct(ContainerInterface $container, ?string $name = null)
     {
@@ -36,18 +37,13 @@ abstract class CommandBase extends Command
 
     protected function getGatewayClient(OutputInterface $output): \GuzzleHttp\Client
     {
-        $cfg = $this->container->get(SettingsInterface::class)->get('gateway');
-
-        if (!empty($cfg['mock'])) {
-            $handler = new MockHandler([
-                new Response(200, ['Content-Type' => 'application/json'], '<mocked response>'),
-            ]);
-        } else {
-            $handler = null; // let Guzzle select the handler automatically
+        if ($this->gatewayClient !== null) {
+            return $this->gatewayClient;
         }
 
-        $handlerStack = \GuzzleHttp\HandlerStack::create($handler);
-        
+        $handlerStack = $this->container->get(\GuzzleHttp\HandlerStack::class);
+        assert($handlerStack instanceof \GuzzleHttp\HandlerStack);
+
         if ($output->isVerbose() || $output->isVeryVerbose()) {
             $handlerStack->push(\GuzzleHttp\Middleware::mapRequest(function (RequestInterface $request) use ($output) {
                 $output->writeln(sprintf('%s %s', $request->getMethod(), $request->getUri()));
@@ -74,10 +70,8 @@ abstract class CommandBase extends Command
             }));
         }
 
-        return new \GuzzleHttp\Client([
-            'base_uri' => $cfg['base_uri'],
-            'handler' => $handlerStack,
-        ]);
+        $this->gatewayClient = $this->container->get(\GuzzleHttp\Client::class);
+        return $this->gatewayClient;
     }
 
     protected function processHttpClientResult(ResponseInterface $res): int
