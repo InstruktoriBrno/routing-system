@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 use App\Console\GetStatusCommand;
 use App\Console\ListGamesCommand;
+use App\Console\ListRoundsCommand;
 use App\Console\PauseGameCommand;
 use App\Console\ResumeGameCommand;
 use App\Console\SetupGameCommand;
@@ -24,6 +25,7 @@ return [
     'commands' => [
         GetStatusCommand::class,
         ListGamesCommand::class,
+        ListRoundsCommand::class,
         PauseGameCommand::class,
         ResumeGameCommand::class,
         SetupGameCommand::class,
