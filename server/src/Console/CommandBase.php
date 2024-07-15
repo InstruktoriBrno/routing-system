@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace App\Console;
 
 use App\Application\Settings\SettingsInterface;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\Psr7\Response;
 use Ivory\Connection\IConnection;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\RequestInterface;
@@ -36,16 +38,39 @@ abstract class CommandBase extends Command
     {
         $cfg = $this->container->get(SettingsInterface::class)->get('gateway');
 
-        $handlerStack = \GuzzleHttp\HandlerStack::create();
-        if ($output->isVerbose()) {
+        if (!empty($cfg['mock'])) {
+            $handler = new MockHandler([
+                new Response(200, ['Content-Type' => 'application/json'], '<mocked response>'),
+            ]);
+        } else {
+            $handler = null; // let Guzzle select the handler automatically
+        }
+
+        $handlerStack = \GuzzleHttp\HandlerStack::create($handler);
+        
+        if ($output->isVerbose() || $output->isVeryVerbose()) {
             $handlerStack->push(\GuzzleHttp\Middleware::mapRequest(function (RequestInterface $request) use ($output) {
                 $output->writeln(sprintf('%s %s', $request->getMethod(), $request->getUri()));
 
                 $body = $request->getBody()->getContents();
                 $output->writeln('Body:');
-                $output->writeln($this->prettyFormatBody($body));
+
+                $bodyFmt = ($output->isVeryVerbose() ? $this->prettyFormatBody($body) : $body);
+                $output->writeln($bodyFmt);
         
                 return $request;
+            }));
+        }
+
+        if (!$output->isQuiet()) {
+            $handlerStack->push(\GuzzleHttp\Middleware::mapResponse(function (ResponseInterface $response) use ($output) {
+                $output->writeln('Response status code ' . $response->getStatusCode());
+            
+                $body = $response->getBody()->getContents();
+                $output->writeln('Body:');
+                $output->writeln($this->prettyFormatBody($body));
+        
+                return $response;
             }));
         }
 
@@ -55,14 +80,8 @@ abstract class CommandBase extends Command
         ]);
     }
 
-    protected function processHttpClientResult(ResponseInterface $res, OutputInterface $output): int
+    protected function processHttpClientResult(ResponseInterface $res): int
     {
-        $output->writeln('Status code ' . $res->getStatusCode());
-        
-        $body = $res->getBody()->getContents();
-        $output->writeln('Body:');
-        $output->writeln($this->prettyFormatBody($body));
-
         $exitCode = ($res->getStatusCode() >= 200 && $res->getStatusCode() < 300 ? 0 : 2);
         return $exitCode;
     }

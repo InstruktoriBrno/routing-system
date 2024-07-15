@@ -23,8 +23,17 @@ return [
         'level' => Logger::DEBUG,
     ],
     'db' => [], // array of parameters for Ivory::setupNewConnection(); must be defined by env.php
-    'gateway' => [], // parameters for gateway client; must be defined by env.php
-    'server' => [], // parameters for the server; might be defined in env.php
+    'gateway' => [ // parameters for gateway client
+        'mock' => false,    // setting to TRUE mocks the client rather than reaching a real one
+        // URI of the gateway root. E.g., appending "/v1/status" to this should result in the complete status endpoint URL.
+        'base_uri' => null, // must be defined by env.php
+    ],
+    'server' => [ // parameters for the server
+        // URI of the server root. E.g., appending "/v1/status" to this should result in the complete status endpoint URL.
+        // Sent to the gateway for logging router events. If null or unspecified, gateway will automatically infer from source
+        // IP address starting the game.
+        'base_uri' => null, // optionally define in env.php
+    ],
     'commands' => [
         GetStatusCommand::class,
         ListGamesCommand::class,

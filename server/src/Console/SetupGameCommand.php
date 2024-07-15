@@ -55,14 +55,8 @@ final class SetupGameCommand extends CommandBase
         $spec->roundId = $round->api_ident;
         $spec->roundName = $round->name;
 
-        if ($output->isVerbose()) {
-            $output->writeln(json_encode($spec));
-        } elseif ($output->isVeryVerbose()) {
-            $output->writeln(json_encode($spec, JSON_PRETTY_PRINT));
-        }
-
         $res = $this->getGatewayClient($output)->put('/v1/game/round', ['json' => $spec]);
-        $setupExitCode = $this->processHttpClientResult($res, $output);
+        $setupExitCode = $this->processHttpClientResult($res);
 
         if (!$input->hasOption(self::OPT_START)) {
             return $setupExitCode;
@@ -79,6 +73,6 @@ final class SetupGameCommand extends CommandBase
                 'password' => $round->api_password
             ],
         ]);
-        return $this->processHttpClientResult($res, $output);
+        return $this->processHttpClientResult($res);
     }
 }

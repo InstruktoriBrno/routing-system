@@ -62,6 +62,6 @@ final class StartGameCommand extends CommandBase
         $res = $this->getGatewayClient($output)->post('/v1/game/start', [
             'json' => $startParams,
         ]);
-        return $this->processHttpClientResult($res, $output);
+        return $this->processHttpClientResult($res);
     }
 }

@@ -21,6 +21,6 @@ final class ResumeGameCommand extends CommandBase
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $res = $this->getGatewayClient($output)->post('/v1/game/resume');
-        return $this->processHttpClientResult($res, $output);
+        return $this->processHttpClientResult($res);
     }
 }
