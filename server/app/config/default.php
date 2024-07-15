@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+use App\Console\CloneRoundCommand;
 use App\Console\GetStatusCommand;
 use App\Console\ListGamesCommand;
 use App\Console\ListRoundsCommand;
@@ -26,6 +27,7 @@ return [
         GetStatusCommand::class,
         ListGamesCommand::class,
         ListRoundsCommand::class,
+        CloneRoundCommand::class,
         PauseGameCommand::class,
         ResumeGameCommand::class,
         SetupGameCommand::class,
