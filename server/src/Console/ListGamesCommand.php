@@ -22,7 +22,13 @@ final class ListGamesCommand extends CommandBase
     {
         $rel = $this->getDb()->query('SELECT * FROM game ORDER BY game_date DESC, name, id');
         foreach ($rel as $t) {
-            $output->writeln(sprintf("%s\t%s, gateway %s", $t->game_date->format('Y-m-d'), $t->name, $t->gateway_address));
+            $output->writeln(sprintf(
+                "%d\t%s\t%s, gateway %s",
+                $t->id,
+                $t->game_date->format('Y-m-d'),
+                $t->name,
+                $t->gateway_address
+            ));
         }
         return 0;
     }
