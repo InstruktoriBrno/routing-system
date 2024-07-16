@@ -32,7 +32,7 @@ final class ListRoundsCommand extends CommandBase
         );
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function executeImpl(InputInterface $input, OutputInterface $output): void
     {
         $gameIdStr = $input->getArgument(self::ARG_GAME_ID);
         $listAll = (strcasecmp($gameIdStr, self::ARG_VAL_ALL) === 0);
@@ -47,6 +47,5 @@ final class ListRoundsCommand extends CommandBase
         foreach ($rel as $t) {
             $output->writeln(sprintf("%d\t%s", $t->api_ident, $t->name));
         }
-        return 0;
     }
 }

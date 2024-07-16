@@ -3,9 +3,6 @@ declare(strict_types=1);
 
 namespace App\Console;
 
-use App\Application\Settings\SettingsInterface;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\Psr7\Response;
 use Ivory\Connection\IConnection;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\RequestInterface;
@@ -13,6 +10,7 @@ use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
 
 abstract class CommandBase extends Command
 {
@@ -28,6 +26,25 @@ abstract class CommandBase extends Command
     }
 
     abstract protected function define(): void;
+
+    abstract protected function executeImpl(InputInterface $input, OutputInterface $output): void;
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        try {
+            $this->executeImpl($input, $output);
+            return 0;
+        } catch (CommandInputException $e) {
+            $output->writeln('Input error: ' . $e->getMessage());
+            return 1;
+        } catch (CommandRuntimeException $e) {
+            $output->writeln($e->getMessage());
+            return 2;
+        } catch (Throwable $t) {
+            $output->write(sprintf('%s: %s', get_class($t), $t->getMessage()));
+            return 3;
+        }
+    }
 
     protected function getDb(): IConnection
     {
@@ -59,8 +76,8 @@ abstract class CommandBase extends Command
             }));
         }
 
-        if (!$output->isQuiet()) {
-            $handlerStack->push(\GuzzleHttp\Middleware::mapResponse(function (ResponseInterface $response) use ($output) {
+        $handlerStack->push(\GuzzleHttp\Middleware::mapResponse(function (ResponseInterface $response) use ($output) {
+            if (!$output->isQuiet() || !self::isHttpSuccess($response)) {
                 $output->writeln('Response status code ' . $response->getStatusCode());
             
                 $body = $response->getBody()->getContents();
@@ -68,17 +85,23 @@ abstract class CommandBase extends Command
                 $output->writeln($this->prettyFormatBody($body));
         
                 return $response;
-            }));
-        }
+            }
+        }));
 
         $this->gatewayClient = $this->container->get(\GuzzleHttp\Client::class);
         return $this->gatewayClient;
     }
 
-    protected function processHttpClientResult(ResponseInterface $res): int
+    protected function processHttpClientResult(ResponseInterface $res): void
     {
-        $exitCode = ($res->getStatusCode() >= 200 && $res->getStatusCode() < 300 ? 0 : 2);
-        return $exitCode;
+        if (!self::isHttpSuccess($res)) {
+            throw new CommandRuntimeException('Error result');
+        }
+    }
+
+    private static function isHttpSuccess(ResponseInterface $res): bool
+    {
+        return ($res->getStatusCode() >= 200 && $res->getStatusCode() < 300);
     }
 
     private function prettyFormatBody(string $body): string

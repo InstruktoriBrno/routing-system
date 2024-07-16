@@ -29,7 +29,7 @@ final class CloneRoundCommand extends CommandBase
         );
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function executeImpl(InputInterface $input, OutputInterface $output): void
     {
         $roundIdent = $input->getArgument(self::ARG_ROUND_IDENT);
 
@@ -42,11 +42,9 @@ final class CloneRoundCommand extends CommandBase
              $roundIdent
         );
         if ($newRoundIdent === null) {
-            $output->writeln("No game_round found with api_ident = $roundIdent");
-            return 2;
+            throw new CommandRuntimeException("No game_round found with api_ident = $roundIdent");
         }
 
         $output->writeln("Game round cloned, new api_ident = $newRoundIdent");
-        return 0;
     }
 }

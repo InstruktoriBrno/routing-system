@@ -55,7 +55,7 @@ final class AwardPointsCommand extends CommandBase
         );
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function executeImpl(InputInterface $input, OutputInterface $output): void
     {
         $roundIdent = (int)$input->getArgument(self::ARG_ROUND_IDENT);
         $teamIdent = $input->getArgument(self::ARG_TEAM_IDENT);
@@ -78,6 +78,5 @@ final class AwardPointsCommand extends CommandBase
             EventSource::UI->value,
             $event
         );
-        return 0;
     }
 }

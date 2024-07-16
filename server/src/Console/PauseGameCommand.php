@@ -18,9 +18,9 @@ final class PauseGameCommand extends CommandBase
         );
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function executeImpl(InputInterface $input, OutputInterface $output): void
     {
         $res = $this->getGatewayClient($output)->post('/v1/game/pause');
-        return $this->processHttpClientResult($res);
+        $this->processHttpClientResult($res);
     }
 }

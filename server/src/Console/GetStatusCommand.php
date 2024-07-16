@@ -18,9 +18,9 @@ final class GetStatusCommand extends CommandBase
         );
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function executeImpl(InputInterface $input, OutputInterface $output): void
     {
         $res = $this->getGatewayClient($output)->get('/v1/status');
-        return $this->processHttpClientResult($res);
+        $this->processHttpClientResult($res);
     }
 }

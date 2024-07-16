@@ -32,7 +32,7 @@ final class StartGameCommand extends CommandBase
         );
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function executeImpl(InputInterface $input, OutputInterface $output): void
     {
         $roundIdent = $input->getArgument(self::ARG_ROUND_IDENT);
 
@@ -41,8 +41,7 @@ final class StartGameCommand extends CommandBase
             $roundIdent
         );
         if ($tuple === null) {
-            $output->writeln(sprintf('No game round exists with API identifier "%s"', $roundIdent));
-            return 2;
+            throw new CommandRuntimeException(sprintf('No game round exists with API identifier "%s"', $roundIdent));
         }
 
         $startParams = [
@@ -62,6 +61,6 @@ final class StartGameCommand extends CommandBase
         $res = $this->getGatewayClient($output)->post('/v1/game/start', [
             'json' => $startParams,
         ]);
-        return $this->processHttpClientResult($res);
+        $this->processHttpClientResult($res);
     }
 }

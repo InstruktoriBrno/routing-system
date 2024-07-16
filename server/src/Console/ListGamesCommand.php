@@ -18,7 +18,7 @@ final class ListGamesCommand extends CommandBase
         );
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function executeImpl(InputInterface $input, OutputInterface $output): void
     {
         $rel = $this->getDb()->query('SELECT * FROM game ORDER BY game_date DESC, name, id');
         foreach ($rel as $t) {
@@ -30,6 +30,5 @@ final class ListGamesCommand extends CommandBase
                 $t->gateway_address
             ));
         }
-        return 0;
     }
 }

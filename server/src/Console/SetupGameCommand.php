@@ -38,7 +38,7 @@ final class SetupGameCommand extends CommandBase
         );
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function executeImpl(InputInterface $input, OutputInterface $output): void
     {
         $roundIdent = $input->getArgument(self::ARG_ROUND_IDENT);
 
@@ -47,8 +47,7 @@ final class SetupGameCommand extends CommandBase
             $roundIdent
         );
         if ($round === null) {
-            $output->writeln(sprintf('No game round exists with API identifier "%s"', $roundIdent));
-            return 2;
+            throw new CommandRuntimeException(sprintf('No game round exists with API identifier "%s"', $roundIdent));
         }
 
         $spec = $round->spec->getValue();
@@ -56,10 +55,10 @@ final class SetupGameCommand extends CommandBase
         $spec->roundName = $round->name;
 
         $res = $this->getGatewayClient($output)->put('/v1/game/round', ['json' => $spec]);
-        $setupExitCode = $this->processHttpClientResult($res);
+        $this->processHttpClientResult($res);
 
         if (!$input->hasOption(self::OPT_START)) {
-            return $setupExitCode;
+            return;
         }
 
         $output->writeln('');
@@ -73,6 +72,6 @@ final class SetupGameCommand extends CommandBase
                 'password' => $round->api_password
             ],
         ]);
-        return $this->processHttpClientResult($res);
+        $this->processHttpClientResult($res);
     }
 }
