@@ -31,7 +31,6 @@ return function (ContainerBuilder $containerBuilder) {
         },
 
         IConnection::class => function (ContainerInterface $c) {
-            // TODO: cache
             $settings = $c->get(SettingsInterface::class);
             return Ivory::setupNewConnection($settings->get('db'));
         },
