@@ -544,16 +544,16 @@ INSERT INTO game (name, game_date, gateway_address) VALUES
 INSERT INTO game (name, game_date, gateway_address) VALUES
     ('Test game', '2024-06-15', NULL);
 
-INSERT INTO game_round (game_id, name, spec, server_start_time, api_password)
-    SELECT game.id, round_spec_lib.name, round_spec_lib.spec, '2024-06-15 12:30:00', 'Baz'
+INSERT INTO game_round (game_id, name, spec, api_password)
+    SELECT game.id, round_spec_lib.name, round_spec_lib.spec, 'Baz'
     FROM game, round_spec_lib
     WHERE game.name = 'Debug game' AND round_spec_lib.name IN (
         'Test: Warmup', 'Test: Round 1', 'Test: Round 2', 'Test: Round 3'
     )
     ;
 
-INSERT INTO game_round (game_id, name, spec, server_start_time, api_password)
-    SELECT game.id, 'Debug round', round_spec_lib.spec, '2024-06-15 12:30:00', 'Baz'
+INSERT INTO game_round (game_id, name, spec, api_password)
+    SELECT game.id, 'Debug round', round_spec_lib.spec, 'Baz'
     FROM game, round_spec_lib
     WHERE game.name = 'Debug game' AND round_spec_lib.name = 'Debug round'
     ;

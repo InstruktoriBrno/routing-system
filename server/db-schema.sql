@@ -45,11 +45,9 @@ CREATE TABLE game_round (
     game_id BIGINT NOT NULL REFERENCES game ON DELETE RESTRICT,
     name VARCHAR(50) NOT NULL,
     spec JSON NOT NULL,
-    server_start_time TIMESTAMPTZ,
     api_ident SMALLINT CHECK (api_ident > 0) GENERATED ALWAYS AS IDENTITY,
     api_password VARCHAR(20)
 );
-COMMENT ON COLUMN game_round.server_start_time IS 'Time when the round is supposed to start, as specified to the gateway.';
 COMMENT ON COLUMN game_round.api_ident IS 'Identifier of the round as exchanged through the REST API. Extra column besides id due to limited range supported by the gateway.';
 COMMENT ON COLUMN game_round.api_password IS 'Password to provide with REST API requests';
 CREATE INDEX ON game_round (game_id);

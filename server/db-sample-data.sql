@@ -132,38 +132,38 @@ INSERT INTO game (name, game_date, gateway_address) VALUES
     ('Test game', '2024-06-15', '10.0.0.25'),
     ('Big game', '2024-09-21', '192.168.0.13');
 
-INSERT INTO game_round (game_id, name, spec, server_start_time, api_password)
-    SELECT game.id, '0. tutorial', round_spec_lib.spec, TIMESTAMPTZ '2024-06-15 16:00', 'Foo'
+INSERT INTO game_round (game_id, name, spec, api_password)
+    SELECT game.id, '0. tutorial', round_spec_lib.spec, 'Foo'
     FROM game, round_spec_lib
     WHERE game.name = 'Test game' AND round_spec_lib.name = 'Tutorial'
     
     UNION ALL
 
-    SELECT game.id, '1. round', round_spec_lib.spec, '2024-06-15 16:30', 'WHEEE!'
+    SELECT game.id, '1. round', round_spec_lib.spec, 'WHEEE!'
     FROM game, round_spec_lib
     WHERE game.name = 'Test game' AND round_spec_lib.name = 'Circle round'
     
     UNION ALL
 
-    SELECT game.id, '0. tutorial', round_spec_lib.spec, TIMESTAMPTZ '2024-09-21 15:00', 'Foo'
+    SELECT game.id, '0. tutorial', round_spec_lib.spec, 'Foo'
     FROM game, round_spec_lib
     WHERE game.name = 'Big game' AND round_spec_lib.name = 'Tutorial'
     
     UNION ALL
 
-    SELECT game.id, '1. round', round_spec_lib.spec, '2024-09-21 16:00', 'WHEEE!'
+    SELECT game.id, '1. round', round_spec_lib.spec, 'WHEEE!'
     FROM game, round_spec_lib
     WHERE game.name = 'Big game' AND round_spec_lib.name = 'Circle round'
     
     UNION ALL
 
-    SELECT game.id, '2. round', round_spec_lib.spec, '2024-09-21 17:00', 'Bar'
+    SELECT game.id, '2. round', round_spec_lib.spec, 'Bar'
     FROM game, round_spec_lib
     WHERE game.name = 'Big game' AND round_spec_lib.name = 'Circle round'
     
     UNION ALL
 
-    SELECT game.id, '3. round', round_spec_lib.spec, '2024-09-21 18:00', 'Baz'
+    SELECT game.id, '3. round', round_spec_lib.spec, 'Baz'
     FROM game, round_spec_lib
     WHERE game.name = 'Big game' AND round_spec_lib.name = 'Circle round'
     ;
