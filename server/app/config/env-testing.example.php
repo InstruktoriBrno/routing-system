@@ -10,3 +10,5 @@ $settings['db'][ConnectionParameters::HOST] = 'localhost';
 $settings['db'][ConnectionParameters::USER] = 'user';
 $settings['db'][ConnectionParameters::PASSWORD] = 'password';
 $settings['db'][ConnectionParameters::DBNAME] = 'db_test';
+
+$settings['server']['auth'] = false;

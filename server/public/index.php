@@ -10,21 +10,20 @@ use Slim\Factory\ServerRequestCreatorFactory;
 
 $container = require __DIR__ . '/../app/container.php';
 
+/** @var SettingsInterface $settings */
+$settings = $container->get(SettingsInterface::class);
+
 // Instantiate the app
 AppFactory::setContainer($container);
 $app = AppFactory::create();
-$callableResolver = $app->getCallableResolver();
 
 // Register middleware
 $middleware = require __DIR__ . '/../app/middleware.php';
-$middleware($app);
+$middleware($app, $settings);
 
 // Register routes
 $routes = require __DIR__ . '/../app/routes.php';
 $routes($app);
-
-/** @var SettingsInterface $settings */
-$settings = $container->get(SettingsInterface::class);
 
 $displayErrorDetails = $settings->get('displayErrorDetails');
 $logError = $settings->get('logError');
@@ -35,6 +34,7 @@ $serverRequestCreator = ServerRequestCreatorFactory::create();
 $request = $serverRequestCreator->createServerRequestFromGlobals();
 
 // Create Error Handler
+$callableResolver = $app->getCallableResolver();
 $responseFactory = $app->getResponseFactory();
 $errorHandler = new HttpErrorHandler($callableResolver, $responseFactory);
 

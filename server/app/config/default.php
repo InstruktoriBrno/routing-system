@@ -30,6 +30,7 @@ return [
         'base_uri' => null, // must be defined by env.php
     ],
     'server' => [ // parameters for the server
+        'auth' => true,     // setting to TRUE requires clients to authenticate for select endpoints
         // URI of the server root. E.g., appending "/v1/status" to this should result in the complete status endpoint URL.
         // Sent to the gateway for logging router events. If null or unspecified, gateway will automatically infer from source
         // IP address starting the game.

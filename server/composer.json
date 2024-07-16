@@ -20,7 +20,8 @@
         "slim/psr7": "^1.5",
         "slim/slim": "^4.10",
         "swaggest/json-schema": "~0.12",
-        "symfony/console": "^7.1"
+        "symfony/console": "^7.1",
+        "tuupola/slim-basic-auth": "~3.3"
     },
     "require-dev": {
         "jangregor/phpstan-prophecy": "^1.0.0",
