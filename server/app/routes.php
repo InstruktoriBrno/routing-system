@@ -29,6 +29,7 @@ return function (App $app) {
 
     $app->group('/v1/status', function (Group $group) {
         $group->get('', StatusAction::class);
+        $group->get('/round/{roundId}/checkin', GetRouterCheckInStatusAction::class);
     });
 
     $app->group('/v1/game', function (Group $group) {
@@ -38,7 +39,6 @@ return function (App $app) {
         $group->get('/round/{roundId}/instructions/packets', GetRoundPacketInstructionsAction::class);
         $group->get('/round/{roundId}/instructions/packets/{routerIds}', GetRoundPacketInstructionsAction::class);
         $group->get('/round/{roundId}/instructions/events', GetRoundEventInstructionsAction::class);
-        $group->get('/round/{roundId}/checkin', GetRouterCheckInStatusAction::class);
     });
 
     $app->group('/v1/score', function (Group $group) {

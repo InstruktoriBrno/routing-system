@@ -8,7 +8,7 @@ class GetRouterCheckInStatusActionTest extends EndToEndTest
 {
     public function testAction(): void
     {
-        $request = $this->createRequest('GET', '/v1/game/round/4/checkin');
+        $request = $this->createRequest('GET', '/v1/status/round/4/checkin');
         $response = $this->app->handle($request);
 
         $expectedJson = <<<'JSON'

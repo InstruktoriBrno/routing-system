@@ -426,7 +426,7 @@ Response body example:
 
 ## Router check-in status
 
-`GET` at `/v1/game/round/<round-id>/checkin`
+`GET` at `/v1/status/round/<round-id>/checkin`
 
 Retrieves the status of players checking in to routers before the round is started.
 
