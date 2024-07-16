@@ -40,10 +40,10 @@ final class SetupGameCommand extends CommandBase
 
     protected function executeImpl(InputInterface $input, OutputInterface $output): void
     {
-        $roundIdent = $input->getArgument(self::ARG_ROUND_IDENT);
+        $roundIdent = self::getRoundIdentArgument($input, self::ARG_ROUND_IDENT);
 
         $round = $this->getDb()->querySingleTuple(
-            'SELECT * FROM game_round WHERE api_ident = %int',
+            'SELECT * FROM game_round WHERE api_ident = %i',
             $roundIdent
         );
         if ($round === null) {

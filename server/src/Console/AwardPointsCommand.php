@@ -57,9 +57,9 @@ final class AwardPointsCommand extends CommandBase
 
     protected function executeImpl(InputInterface $input, OutputInterface $output): void
     {
-        $roundIdent = (int)$input->getArgument(self::ARG_ROUND_IDENT);
-        $teamIdent = $input->getArgument(self::ARG_TEAM_IDENT);
-        $score = $input->getArgument(self::ARG_SCORE);
+        $roundIdent = self::getRoundIdentArgument($input, self::ARG_ROUND_IDENT);
+        $teamIdent = self::getStringArgument($input, self::ARG_TEAM_IDENT, '~^[A-Z]$~');
+        $score = self::getIntArgument($input, self::ARG_SCORE);
         $reason = $input->getArgument(self::ARG_REASON);
 
         $event = new \stdClass();

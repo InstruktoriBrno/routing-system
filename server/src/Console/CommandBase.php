@@ -46,6 +46,45 @@ abstract class CommandBase extends Command
         }
     }
 
+    protected static function getStringArgument(InputInterface $input, string $name, string $pregPattern): string
+    {
+        $arg = $input->getArgument($name);
+        if (!preg_match($pregPattern, $arg)) {
+            throw new CommandInputException("Argument `{$name}` is expected to match PCRE `$pregPattern`");
+        }
+        
+        return $arg;
+    }
+
+    protected static function getIntArgument(InputInterface $input, string $name, int $minValue = PHP_INT_MIN, int $maxValue = PHP_INT_MAX): int
+    {
+        $arg = $input->getArgument($name);
+        $int = filter_var($arg, FILTER_VALIDATE_INT, [
+            'options' => [
+                'min_range' => $minValue,
+                'max_range' => $maxValue,
+            ]
+        ]);
+        if ($int === false) {
+            $message = "Argument `{$name}` is expected to be an integer";
+            if ($minValue > PHP_INT_MIN && $maxValue < PHP_INT_MAX) {
+                $message .= " in range [$minValue, $maxValue]";
+            } elseif ($minValue > PHP_INT_MIN) {
+                $message .= " >= $minValue";
+            } elseif ($maxValue < PHP_INT_MAX) {
+                $message .= " <= $maxValue";
+            }
+            throw new CommandInputException($message);
+        }
+
+        return $int;
+    }
+
+    protected static function getRoundIdentArgument(InputInterface $input, string $name): int
+    {
+        return self::getIntArgument($input, $name, 1, 32767);
+    }
+
     protected function getDb(): IConnection
     {
         $db = $this->container->get(IConnection::class);

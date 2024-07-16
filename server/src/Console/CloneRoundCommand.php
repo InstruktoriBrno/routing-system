@@ -31,7 +31,7 @@ final class CloneRoundCommand extends CommandBase
 
     protected function executeImpl(InputInterface $input, OutputInterface $output): void
     {
-        $roundIdent = $input->getArgument(self::ARG_ROUND_IDENT);
+        $roundIdent = self::getRoundIdentArgument($input->getArgument, self::ARG_ROUND_IDENT);
 
         $newRoundIdent = $this->getDb()->querySingleValue(
             'INSERT INTO game_round (game_id, name, spec, api_password)

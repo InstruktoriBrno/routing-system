@@ -37,13 +37,18 @@ final class ListRoundsCommand extends CommandBase
         $gameIdStr = $input->getArgument(self::ARG_GAME_ID);
         $listAll = (strcasecmp($gameIdStr, self::ARG_VAL_ALL) === 0);
 
-        $rel = $this->getDb()->query(
-            'SELECT *
-             FROM game_round
-             WHERE COALESCE(game_id = %i, TRUE)
-             ORDER BY api_ident',
-            ($listAll ? null : $gameIdStr)
-        );
+        if ($listAll) {
+            $rel = $this->getDb()->query(
+                'SELECT * FROM game_round ORDER BY api_ident'
+            );
+        } else {
+            $gameId = self::getIntArgument($input, self::ARG_GAME_ID, 1);
+            $rel = $this->getDb()->query(
+                'SELECT * FROM game_round WHERE game_id = %i ORDER BY api_ident',
+                $gameId
+            );
+        }
+
         foreach ($rel as $t) {
             $output->writeln(sprintf("%d\t%s", $t->api_ident, $t->name));
         }

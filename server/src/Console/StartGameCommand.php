@@ -34,7 +34,7 @@ final class StartGameCommand extends CommandBase
 
     protected function executeImpl(InputInterface $input, OutputInterface $output): void
     {
-        $roundIdent = $input->getArgument(self::ARG_ROUND_IDENT);
+        $roundIdent = self::getRoundIdentArgument($input, self::ARG_ROUND_IDENT);
 
         $tuple = $this->getDb()->querySingleTuple(
             'SELECT api_password FROM game_round WHERE api_ident = %int',
