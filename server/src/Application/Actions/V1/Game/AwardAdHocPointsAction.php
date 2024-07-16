@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace App\Application\Actions\V1\Game;
 
+use App\Domain\Game\EventSource;
 use Psr\Http\Message\ResponseInterface as Response;
 
 class AwardAdHocPointsAction extends GameAction
@@ -33,7 +34,7 @@ JSON;
         $this->gameRoundRepository->awardAdHocPoints(
             $round->getId(),
             $teamIdent,
-            'ui',
+            EventSource::UI->value,
             $body
         );
 

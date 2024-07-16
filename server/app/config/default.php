@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+use App\Console\AwardPointsCommand;
 use App\Console\CloneRoundCommand;
 use App\Console\GetStatusCommand;
 use App\Console\ListGamesCommand;
@@ -43,5 +44,6 @@ return [
         ResumeGameCommand::class,
         SetupGameCommand::class,
         StartGameCommand::class,
+        AwardPointsCommand::class,
     ],
 ];
