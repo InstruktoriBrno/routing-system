@@ -10,14 +10,11 @@ use Ivory\Ivory;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
-use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 
 return function (ContainerBuilder $containerBuilder) {
     $containerBuilder->addDefinitions([
-        LoggerInterface::class => function (ContainerInterface $c): LoggerInterface {
-            $settings = $c->get(SettingsInterface::class);
-
+        LoggerInterface::class => function (SettingsInterface $settings): LoggerInterface {
             $loggerSettings = $settings->get('logger');
             $logger = new Logger($loggerSettings['name']);
 
@@ -30,14 +27,12 @@ return function (ContainerBuilder $containerBuilder) {
             return $logger;
         },
 
-        IConnection::class => function (ContainerInterface $c): IConnection {
-            $settings = $c->get(SettingsInterface::class);
+        IConnection::class => function (SettingsInterface $settings): IConnection {
             return Ivory::setupNewConnection($settings->get('db'));
         },
 
-        \GuzzleHttp\HandlerStack::class => function (ContainerInterface $c): \GuzzleHttp\HandlerStack {
-            $cfg = $c->get(SettingsInterface::class)->get('gateway');
-            if (!empty($cfg['mock'])) {
+        \GuzzleHttp\HandlerStack::class => function (SettingsInterface $settings): \GuzzleHttp\HandlerStack {
+            if (!empty($settings->get('gateway')['mock'])) {
                 $handler = new MockHandler([
                     new Response(200, ['Content-Type' => 'application/json'], '{"res":"<mocked response>"}'),
                     new Response(200, ['Content-Type' => 'application/json'], '{"res":"<mocked response 2>"}'),
@@ -53,11 +48,9 @@ return function (ContainerBuilder $containerBuilder) {
         },
 
         // TODO: refactor: encapsulate the gateway client in a class
-        \GuzzleHttp\Client::class => function (ContainerInterface $c): \GuzzleHttp\Client {
-            $cfg = $c->get(SettingsInterface::class)->get('gateway');
-            $handlerStack = $c->get(\GuzzleHttp\HandlerStack::class);
+        \GuzzleHttp\Client::class => function (SettingsInterface $settings, \GuzzleHttp\HandlerStack $handlerStack): \GuzzleHttp\Client {
             return new \GuzzleHttp\Client([
-                'base_uri' => $cfg['base_uri'],
+                'base_uri' => $settings->get('gateway')['base_uri'],
                 'handler' => $handlerStack,
             ]);
         },
