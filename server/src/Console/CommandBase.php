@@ -11,6 +11,7 @@ use Monolog\Logger;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -37,17 +38,27 @@ abstract class CommandBase extends Command
     {
         try {
             $this->executeImpl($input, $output);
-            return 0;
+            $exitMessage = null;
+            $exitCode = 0;
         } catch (CommandInputException $e) {
-            $output->writeln('Input error: ' . $e->getMessage());
-            return 1;
+            $exitMessage = 'Input error: ' . $e->getMessage();
+            $exitCode = 1;
         } catch (CommandRuntimeException $e) {
-            $output->writeln($e->getMessage());
-            return 2;
+            $exitMessage = $e->getMessage();
+            $exitCode = 2;
         } catch (Throwable $t) {
-            $output->write(sprintf('%s: %s', get_class($t), $t->getMessage()));
-            return 3;
+            $exitMessage = sprintf('%s: %s', get_class($t), $t->getMessage());
+            $exitCode = 3;
         }
+
+        if ($exitMessage !== null) {
+            $output->writeln($exitMessage);
+        }
+
+        $logger = $this->container->get(LoggerInterface::class);
+        $logger->info(sprintf('%s --> %d %s', $input->__toString(), $exitCode, $exitMessage));
+        
+        return $exitCode;
     }
 
     protected static function getStringArgument(InputInterface $input, string $name, string $pregPattern): string

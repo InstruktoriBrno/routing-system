@@ -27,8 +27,9 @@ class LoggerMiddleware implements MiddlewareInterface
                     $this->logger->info(sprintf('%s --> %s', $this->formatRequest($request), $this->formatResponse($response)));
                     return $response;
                 },
-                function ($reason) use ($request) {
-                    $this->logger->info(sprintf('%s --> %s', $this->formatRequest($request), $reason));
+                function ($throwable) use ($request) {
+                    $this->logger->info(sprintf('%s --> %s', $this->formatRequest($request), $throwable));
+                    throw $throwable;
                 }
             );
         };
