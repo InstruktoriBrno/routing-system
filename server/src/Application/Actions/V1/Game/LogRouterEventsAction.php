@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace App\Application\Actions\V1\Game;
 
+use App\Application\Actions\V1\RouteParam;
 use Psr\Http\Message\ResponseInterface as Response;
 
 class LogRouterEventsAction extends GameAction
@@ -50,8 +51,8 @@ JSON;
 
     protected function action(): Response
     {
-        $roundIdent = $this->resolveIntArg('roundId', 1, 32767);
-        $routerIdent = $this->resolveStringArg('routerId', '~^[A-Z]$~');
+        $roundIdent = $this->resolveIntArg(RouteParam::ROUND_ID, 1, 32767);
+        $routerIdent = $this->resolveStringArg(RouteParam::ROUTER_ID, '~^[A-Z]$~');
 
         $body = $this->getValidatedBody(self::REQUEST_PAYLOAD_SCHEMA);
 

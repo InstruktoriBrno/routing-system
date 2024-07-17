@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace App\Application\Actions\V1\Game;
 
+use App\Application\Actions\V1\RouteParam;
 use App\Domain\Game\PacketInstruction;
 use Psr\Http\Message\ResponseInterface as Response;
 
@@ -9,14 +10,14 @@ class GetRoundPacketInstructionsAction extends GameAction
 {
     protected function action(): Response
     {
-        if (isset($this->args['routerIds'])) {
-            $routerIdList = $this->resolveStringArg('routerIds', '~^[A-Z]*$~');
+        if (isset($this->args[RouteParam::ROUTER_IDS])) {
+            $routerIdList = $this->resolveStringArg(RouteParam::ROUTER_IDS, '~^[A-Z]*$~');
             $routerIds = ($routerIdList ? preg_split('~~', $routerIdList) : []);
         } else {
             $routerIds = [];
         }
 
-        $roundIdent = $this->resolveIntArg('roundId', 1, 32767);
+        $roundIdent = $this->resolveIntArg(RouteParam::ROUND_ID, 1, 32767);
         $round = $this->gameRoundRepository->findByApiIdent($roundIdent);
         
         $packetInstructions = $this->gameRoundRepository->fetchPacketInstructions($round->getId());

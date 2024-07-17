@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace App\Application\Actions\V1\Score;
 
+use App\Application\Actions\V1\RouteParam;
 use App\Domain\Game\GameRound;
 use App\Domain\Score\RoundScoreRecord;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -10,9 +11,9 @@ class GetTeamScoreboardAction extends ScoreAction
 {
     protected function action(): Response
     {
-        $teamIdent = $this->resolveStringArg('teamId', '~^[A-Z]$~');
+        $teamIdent = $this->resolveStringArg(RouteParam::TEAM_ID, '~^[A-Z]$~');
 
-        $roundIdent = $this->resolveIntArg('roundId', 1, 32767);
+        $roundIdent = $this->resolveIntArg(RouteParam::ROUND_ID, 1, 32767);
         $round = $this->gameRoundRepository->findByApiIdent($roundIdent);
 
         $scoreByTeam = $this->scoreRepository->fetchRoundScoreByTeam($round->getId());

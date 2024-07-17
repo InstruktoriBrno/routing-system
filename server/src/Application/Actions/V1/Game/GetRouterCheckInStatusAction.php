@@ -2,13 +2,14 @@
 declare(strict_types=1);
 namespace App\Application\Actions\V1\Game;
 
+use App\Application\Actions\V1\RouteParam;
 use Psr\Http\Message\ResponseInterface as Response;
 
 class GetRouterCheckInStatusAction extends GameAction
 {
     protected function action(): Response
     {
-        $roundIdent = $this->resolveIntArg('roundId', 1, 32767);
+        $roundIdent = $this->resolveIntArg(RouteParam::ROUND_ID, 1, 32767);
         $round = $this->gameRoundRepository->findByApiIdent($roundIdent);
 
         $teams = array_keys($this->gameRoundRepository->fetchTeams($round->getId()));

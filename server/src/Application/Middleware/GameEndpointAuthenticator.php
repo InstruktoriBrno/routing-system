@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Application\Middleware;
 
+use App\Application\Actions\V1\RouteParam;
 use App\Application\Settings\SettingsInterface;
 use Ivory\Connection\IConnection;
 use Psr\Http\Message\RequestInterface;
@@ -98,8 +99,8 @@ class GameEndpointAuthenticator implements MiddlewareInterface
             $routingResults = $this->currentRequest->getAttribute(RouteContext::ROUTING_RESULTS);
             if ($routingResults instanceof RoutingResults) {
                 $args = $routingResults->getRouteArguments();
-                if (isset($args['roundId'])) { // TODO: introduce a common constant for route arg names
-                    return $args['roundId'];
+                if (isset($args[RouteParam::ROUND_ID])) {
+                    return $args[RouteParam::ROUND_ID];
                 }
             }
         }

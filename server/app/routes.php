@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 use App\Application\Actions\NotImplementedAction;
@@ -29,6 +28,8 @@ return function (App $app, Container $container) {
         $response->getBody()->write('See https://github.com/InstruktoriBrno/routing-system/blob/master/api.md');
         return $response;
     });
+
+    // NOTE: keep the parameter names in sync with App\Application\Actions\V1\RouteParam
 
     $app->group('/v1/status', function (Group $group) {
         $group->get('', StatusAction::class);
