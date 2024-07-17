@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 use App\Application\Handlers\HttpErrorHandler;
 use App\Application\Handlers\ShutdownHandler;
+use App\Application\Middleware\LoggerMiddleware;
 use App\Application\ResponseEmitter\ResponseEmitter;
 use App\Application\Settings\SettingsInterface;
 use Slim\Factory\AppFactory;
@@ -19,7 +20,7 @@ $app = AppFactory::create();
 
 // Register middleware
 $middleware = require __DIR__ . '/../app/middleware.php';
-$middleware($app, $settings);
+$middleware($app, $container);
 
 // Register routes
 $routes = require __DIR__ . '/../app/routes.php';
@@ -51,6 +52,8 @@ $app->addBodyParsingMiddleware();
 // Add Error Middleware
 $errorMiddleware = $app->addErrorMiddleware($displayErrorDetails, $logError, $logErrorDetails);
 $errorMiddleware->setDefaultErrorHandler($errorHandler);
+
+$app->addMiddleware($container->get(LoggerMiddleware::class));
 
 // Run App & Emit Response
 $response = $app->handle($request);

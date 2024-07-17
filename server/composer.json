@@ -14,7 +14,7 @@
         "php": "^8.3",
         "ext-json": "*",
         "guzzlehttp/guzzle": "^7.0",
-        "monolog/monolog": "^2.8",
+        "monolog/monolog": "^3.7",
         "ondrej-bouda/ivory": "~0.2",
         "php-di/php-di": "^6.4",
         "slim/psr7": "^1.5",

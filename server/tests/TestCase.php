@@ -3,7 +3,6 @@ declare(strict_types=1);
 namespace Tests;
 
 use App\Application\Handlers\HttpErrorHandler;
-use App\Application\Settings\SettingsInterface;
 use App\Domain\Game\GameRound;
 use App\Domain\Game\GameRoundRepository;
 use DI\Container;
@@ -63,7 +62,7 @@ class TestCase extends PHPUnit_TestCase
 
         // Register middleware
         $middleware = require __DIR__ . '/../app/middleware.php';
-        $middleware($app, $container->get(SettingsInterface::class));
+        $middleware($app, $container);
 
         // Register routes
         $routes = require __DIR__ . '/../app/routes.php';
