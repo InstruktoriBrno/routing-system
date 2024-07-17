@@ -57,7 +57,7 @@ final class SetupGameCommand extends CommandBase
         $res = $this->getGatewayClient($output)->put('/v1/game/round', ['json' => $spec]);
         $this->processHttpClientResult($res);
 
-        if (!$input->hasOption(self::OPT_START)) {
+        if (!$input->getOption(self::OPT_START)) {
             return;
         }
 
