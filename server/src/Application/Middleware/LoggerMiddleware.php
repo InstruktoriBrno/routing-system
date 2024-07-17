@@ -17,6 +17,23 @@ class LoggerMiddleware implements MiddlewareInterface
         $this->logger = $logger;
     }
 
+    public function __invoke(callable $handler) // GuzzleHttp\Client middleware "interface"
+    {
+        return function (RequestInterface $request, array $options) use ($handler) {
+            $promise = $handler($request, $options);
+            assert($promise instanceof \GuzzleHttp\Promise\PromiseInterface);
+            return $promise->then(
+                function (ResponseInterface $response) use ($request) {
+                    $this->logger->info(sprintf('%s --> %s', $this->formatRequest($request), $this->formatResponse($response)));
+                    return $response;
+                },
+                function ($reason) use ($request) {
+                    $this->logger->info(sprintf('%s --> %s', $this->formatRequest($request), $reason));
+                }
+            );
+        };
+    }
+
     public function process(RequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         try {

@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 return function (ContainerBuilder $containerBuilder) {
     $containerBuilder->addDefinitions([
         LoggerInterface::class => function (SettingsInterface $settings): LoggerInterface {
-            $cfg = $settings->get('logger');
+            $cfg = $settings->get('app-logger');
             $logger = new Logger($cfg['name']);
             $logger->pushHandler(new StreamHandler($cfg['path'], $cfg['level']));
             return $logger;

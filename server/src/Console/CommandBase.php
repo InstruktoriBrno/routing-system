@@ -3,7 +3,11 @@ declare(strict_types=1);
 
 namespace App\Console;
 
+use App\Application\Middleware\LoggerMiddleware;
+use App\Application\Settings\SettingsInterface;
 use Ivory\Connection\IConnection;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -126,6 +130,11 @@ abstract class CommandBase extends Command
                 return $response;
             }
         }));
+
+        $cfg = $this->container->get(SettingsInterface::class)->get('gateway-client-logger');
+        $logger = new Logger($cfg['name']);
+        $logger->pushHandler(new StreamHandler($cfg['path'], $cfg['level']));
+        $handlerStack->push(new LoggerMiddleware($logger));
 
         $this->gatewayClient = $this->container->get(\GuzzleHttp\Client::class);
         return $this->gatewayClient;

@@ -17,9 +17,14 @@ return [
     'displayErrorDetails' => true, // Should be set to false in production
     'logError'            => true,
     'logErrorDetails'     => true,
-    'logger' => [
+    'app-logger' => [
         'name' => 'app',
         'path' => isset($_ENV['docker']) ? 'php://stdout' : __DIR__ . '/../../logs/app.log',
+        'level' => \Monolog\Level::Debug,
+    ],
+    'gateway-client-logger' => [
+        'name' => 'gateway.client',
+        'path' => isset($_ENV['docker']) ? 'php://stdout' : __DIR__ . '/../../logs/gateway.client.log',
         'level' => \Monolog\Level::Debug,
     ],
     'db' => [], // array of parameters for Ivory::setupNewConnection(); must be defined by env.php

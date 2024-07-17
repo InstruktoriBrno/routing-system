@@ -7,6 +7,7 @@ namespace Tests\Application\Actions;
 use App\Application\Actions\Action;
 use App\Application\Actions\ActionPayload;
 use DateTimeImmutable;
+use Monolog\Logger;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Log\LoggerInterface;
 use Tests\TestCase;
@@ -15,9 +16,7 @@ class ActionTest extends TestCase
 {
     public function testActionSetsHttpCodeInRespond()
     {
-        $app = $this->createAppInstance();
-        $container = $app->getContainer();
-        $logger = $container->get(LoggerInterface::class);
+        $logger = $this->getDummyLogger();
 
         $testAction = new class ($logger) extends Action {
             public function __construct(
@@ -39,6 +38,7 @@ class ActionTest extends TestCase
             }
         };
 
+        $app = $this->createAppInstance();
         $app->get('/test-action-response-code', $testAction);
         $request = $this->createRequest('GET', '/test-action-response-code');
         $response = $app->handle($request);
@@ -48,9 +48,7 @@ class ActionTest extends TestCase
 
     public function testActionSetsHttpCodeRespondData()
     {
-        $app = $this->createAppInstance();
-        $container = $app->getContainer();
-        $logger = $container->get(LoggerInterface::class);
+        $logger = $this->getDummyLogger();
 
         $testAction = new class ($logger) extends Action {
             public function __construct(
@@ -70,10 +68,16 @@ class ActionTest extends TestCase
             }
         };
 
+        $app = $this->createAppInstance();
         $app->get('/test-action-response-code', $testAction);
         $request = $this->createRequest('GET', '/test-action-response-code');
         $response = $app->handle($request);
 
         $this->assertEquals(202, $response->getStatusCode());
+    }
+
+    private function getDummyLogger(): LoggerInterface
+    {
+        return new Logger(__CLASS__);
     }
 }
