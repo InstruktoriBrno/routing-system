@@ -67,7 +67,7 @@ class TestCase extends PHPUnit_TestCase
 
         // Register routes
         $routes = require __DIR__ . '/../app/routes.php';
-        $routes($app);
+        $routes($app, $container);
 
         $callableResolver = $app->getCallableResolver();
         $responseFactory = $app->getResponseFactory();

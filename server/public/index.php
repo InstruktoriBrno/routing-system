@@ -23,7 +23,7 @@ $middleware($app, $settings);
 
 // Register routes
 $routes = require __DIR__ . '/../app/routes.php';
-$routes($app);
+$routes($app, $container);
 
 $displayErrorDetails = $settings->get('displayErrorDetails');
 $logError = $settings->get('logError');
