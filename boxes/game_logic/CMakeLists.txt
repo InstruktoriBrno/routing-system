@@ -21,6 +21,7 @@ FetchContent_Declare(json
 FetchContent_MakeAvailable(doctest json)
 
 # Add test with CTest
+include(CTest)
 enable_testing()
 
 add_subdirectory(src/game)
