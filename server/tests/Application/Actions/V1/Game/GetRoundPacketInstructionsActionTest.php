@@ -17,11 +17,11 @@ class GetRoundPacketInstructionsActionTest extends EndToEndTest
             0:00 A 001 locator
             0:00 B 002 locator
             0:00 C 003 locator
-            0:30 A 011 return
-            1:00 A 010 return
-            1:00 B 030 return
-            1:30 A 012 return
-            3:00 B 020 return
+            0:30 A 011 tcp
+            1:00 A 010 tcp
+            1:00 B 030 tcp
+            1:30 A 012 tcp
+            3:00 B 020 tcp
 
             TXT,
             (string)$response->getBody()
@@ -46,15 +46,15 @@ class GetRoundPacketInstructionsActionTest extends EndToEndTest
             0:00 H 008 locator
             0:00 I 009 locator
             0:00 J 010 locator
-            1:00 A 020 return
-            2:00 A 021 return
-            3:00 A 022 return
-            4:00 A 023 return
-            5:00 A 024 return
-            6:00 A 025 return
-            7:00 A 026 return
-            8:00 A 027 return
-            9:00 A 028 return
+            1:00 A 020 tcp
+            2:00 A 021 tcp
+            3:00 A 022 tcp
+            4:00 A 023 tcp
+            5:00 A 024 tcp
+            6:00 A 025 tcp
+            7:00 A 026 tcp
+            8:00 A 027 tcp
+            9:00 A 028 tcp
 
             TXT,
             (string)$response->getBody()

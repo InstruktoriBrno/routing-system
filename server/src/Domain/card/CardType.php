@@ -6,7 +6,7 @@ enum CardType: string
 {
     case Admin = 'admin';
     case Locator = 'locator';
-    case Return = 'return';
+    case TCP = 'tcp';
     case Chat = 'chat';
     case Priority = 'priority';
     case VisitAll = 'visitall';

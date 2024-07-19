@@ -186,10 +186,10 @@ class ValidateRoundSpecActionTest extends EndToEndTest
         ];
         $spec->packets = (object)[
             '000' => (object)['type' => 'locator', 'releaseTime' => 0, 'source' => 'A'], // "000" reserved for "admin" packets
-            '001' => (object)['type' => 'return', 'releaseTime' => 30, 'source' => 'A', 'destination' => 'B', 'points' => 20],
-            '002' => (object)['type' => 'return', 'releaseTime' => 30, 'source' => 'A', 'destination' => 'D', 'points' => 20], // non-existent destination "D"
-            '003' => (object)['type' => 'return', 'releaseTime' => 30, 'source' => 'D', 'destination' => 'C', 'points' => 20], // non-existent source "D"
-            '004' => (object)['type' => 'return', 'releaseTime' => 300, 'source' => 'A', 'destination' => 'C', 'points' => 20], // releaseTime after round end
+            '001' => (object)['type' => 'tcp', 'releaseTime' => 30, 'source' => 'A', 'destination' => 'B', 'points' => 20],
+            '002' => (object)['type' => 'tcp', 'releaseTime' => 30, 'source' => 'A', 'destination' => 'D', 'points' => 20], // non-existent destination "D"
+            '003' => (object)['type' => 'tcp', 'releaseTime' => 30, 'source' => 'D', 'destination' => 'C', 'points' => 20], // non-existent source "D"
+            '004' => (object)['type' => 'tcp', 'releaseTime' => 300, 'source' => 'A', 'destination' => 'C', 'points' => 20], // releaseTime after round end
             '010' => (object)['type' => 'chat', 'releaseTime' => 60, 'source' => 'B', 'destination' => 'C', 'points' => 10, 'roundTripCount' => 2, 'messages' => ['a', 'b', 'c', 'd']],
             '011' => (object)['type' => 'chat', 'releaseTime' => 60, 'source' => 'B', 'destination' => 'C', 'points' => 10, 'roundTripCount' => 2, 'messages' => ['a', 'b', 'c']], // not enough messages
         ];

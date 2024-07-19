@@ -89,10 +89,10 @@ Request body:
     * ~~`"standard"`: packet to be delivered from one router to another~~
         * ~~score defined by the `"points"` attribute (usually based on shortest path length)~~
         * (deprecated)
-    * `"return"`: Packet to be delivered to a destination, then back to the source
+    * `"tcp"`: Packet to be delivered to a destination, then back to the source
         * score: see the `points` parameter description below
-    * `"chat"`: Similar to `"return"`, but with multiple round-trips and with messages displayed upon delivery.
-        * score: like `"return"`; awarded for each delivery in the same way
+    * `"chat"`: Similar to `"tcp"`, but with multiple round-trips and with messages displayed upon delivery.
+        * score: like `"tcp"`; awarded for each delivery in the same way
     * `"priority"`: Similar to standard packet, only the reward is based on the delivery time.
         * Upon delivery, the point reward is  `pointsPerMinutesLeft * (minutesToDeliver-<timeSpent>+1)`, minimum is `0`.
         * **Label**: Na doručení tohoto paketu máte 5 minut. Čím rychleji doručíte, tím víc bodů.
@@ -116,7 +116,7 @@ Request body:
             * ID of router where the packet gets added to the network
     * `"admin"`:
         * No optional properties
-    * `"return"`:
+    * `"tcp"`:
         * `"destination": "<router-id>"`
             * ID of router where the packet is to be delivered
         * `"points": <number>`
@@ -131,7 +131,7 @@ Request body:
             * Points must be explicitly specified.
             * Intent is for `points` to typically be 5x`optimalHops`, where `optimalHops` is the length of the optimal path from `source` to `destination` on the topology at `releaseTime`
     * `"chat"`:
-        * same parameters as for type `"return'`
+        * same parameters as for type `"tcp"`
             * for subsequent `source` -> `destination` deliveries, `deliveryStartTime` is the time of the beep at `source` concluding the preceding `destination` -> `source` delivery)
         * `"roundTripCount"`: integer
             * Number of `source` -> `destination` -> `source` deliveries the packet supports until it declares it's done

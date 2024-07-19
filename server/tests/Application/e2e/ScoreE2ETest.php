@@ -113,8 +113,8 @@ class ScoreE2ETest extends EndToEndTest
         $this->assertSame('A', $teamAScore->teamId);
         $this->assertSame(55, $teamAScore->overallScore);
         $this->assertSame(5, $teamAScore->adHocScore);
-        $this->assertSame(['return'], array_keys(get_object_vars($teamAScore->perPacketType)));
-        $this->assertSame(50, $teamAScore->perPacketType->return->thisTeamScore);
-        $this->assertSame(100, $teamAScore->perPacketType->return->bestTeamScore);
+        $this->assertSame(['tcp'], array_keys(get_object_vars($teamAScore->perPacketType)));
+        $this->assertSame(50, $teamAScore->perPacketType->tcp->thisTeamScore);
+        $this->assertSame(100, $teamAScore->perPacketType->tcp->bestTeamScore);
     }
 }

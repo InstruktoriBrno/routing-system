@@ -51,7 +51,7 @@
                             "enum": [
                                 "admin",
                                 "locator",
-                                "return",
+                                "tcp",
                                 "chat",
                                 "priority",
                                 "visitall"
@@ -96,7 +96,7 @@
                     "required": ["type", "releaseTime", "source"],
                     "oneOf": [
                         { "properties": { "type": { "enum": ["admin", "locator", "visitall"] } } },
-                        { "properties": { "type": { "enum": ["return"] } }, "required": ["destination", "points"] },
+                        { "properties": { "type": { "enum": ["tcp"] } }, "required": ["destination", "points"] },
                         { "properties": { "type": { "enum": ["chat"] } }, "required": ["destination", "points", "roundTripCount", "messages"] },
                         { "properties": { "type": { "enum": ["priority"] } }, "required": ["destination"] }
                     ],
