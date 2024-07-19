@@ -90,8 +90,11 @@ Request body:
         * ~~score defined by the `"points"` attribute (usually based on shortest path length)~~
         * (deprecated)
     * `"return"`: Packet to be delivered to a destination, then back to the source
-        * score: the `points`
-    * `"priority"`: Similar to standard packet, only the reward is based on the delivery time. Upon delivery, the point reward is  `pointsPerMinutesLeft * (minutesToDeliver-<timeSpent>+1)`, minimum is `0`.
+        * score: see the `points` parameter description below
+    * `"chat"`: Similar to `"return"`, but with multiple round-trips and with messages displayed upon delivery.
+        * score: like `"return"`; awarded for each delivery in the same way
+    * `"priority"`: Similar to standard packet, only the reward is based on the delivery time.
+        * Upon delivery, the point reward is  `pointsPerMinutesLeft * (minutesToDeliver-<timeSpent>+1)`, minimum is `0`.
         * **Label**: Na doručení tohoto paketu máte 5 minut. Čím rychleji doručíte, tím víc bodů.
     * ~~`"hopper"`:~~
         * ~~This packet awards points for every successful hop it takes.~~
