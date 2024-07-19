@@ -47,7 +47,7 @@ struct result_handle_internal {
  * then packet.points are awarded to the team.
  * After the points are awarded, a PacketVisitResult::Finished with no points
  * is returned by all routers.
- * If the points were already awarded, then card_getMetadata()[0] == true is set
+ * If the points were already awarded, then card.getMetadata()[0] == true is set
  * to avoid reading the whole trace.
  */
 result_handle_internal handle_standard_packet(const rg::RoundSetup& setup, rg::CardCommInterface& card) {
@@ -265,6 +265,27 @@ result_handle_internal handle_visitall_packet(const rg::RoundSetup& setup, rg::C
     };
 }
 
+/**
+ * A TCP packet starts at packet.source. When it reaches packet.destination,
+ * then points are awarded to the team. When it reaches packet.source, then,
+ * points are awarded again.
+ * See the API for specification of how points should be calculated.
+ * After the packet reaches packet.source again, a PacketVisitResult::Finished
+ * with no points is returned by all routers.
+ */
+result_handle_internal handle_tcp_packet(const rg::RoundSetup& setup, rg::CardCommInterface& card) {
+    // TODO: TCP packet type
+    return { .action = {.result = PacketVisitResult::Invalid, .log = "Not implemented"} };
+}
+
+/**
+ * A Chat packet is similar to TCP except it round-trips multiple times.
+ */
+result_handle_internal handle_chat_packet(const rg::RoundSetup& setup, rg::CardCommInterface& card) {
+    // TODO: Chat packet type
+    return { .action = {.result = PacketVisitResult::Invalid, .log = "Not implemented"} };
+}
+
 rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommInterface& card) {
     using namespace std::literals;
 
@@ -340,7 +361,14 @@ rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommIn
             break;
         case PacketType::VisitAll:
             result = handle_visitall_packet(setup, card);
-            break;        default:
+            break;
+        case PacketType::TCP:
+            result = handle_tcp_packet(setup, card);
+            break;
+        case PacketType::Chat:
+            result = handle_chat_packet(setup, card);
+            break;
+        default:
             return {
                 .result = PacketVisitResult::Invalid,
                 .log = "Unrecognized packet type: " + std::to_string(static_cast<int>(packet.type)),

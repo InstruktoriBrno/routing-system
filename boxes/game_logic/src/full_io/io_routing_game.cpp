@@ -98,6 +98,8 @@ rg::PacketType rg::io::from_json(const nlohmann::json& json) {
         {"priority"sv, rg::PacketType::Priority},
         {"hopper"sv, rg::PacketType::Hopper},
         {"locator"sv, rg::PacketType::Locator},
+        {"tcp"sv, rg::PacketType::TCP},
+        {"chat"sv, rg::PacketType::Chat},
     };
 
     if (!json.is_string()) {

@@ -75,11 +75,13 @@ public:
 
 enum class PacketType {
     Admin,
-    Standard,
+    Standard, // deprecated
     Priority,
-    Hopper,
+    Hopper, // deprecated
     VisitAll,
     Locator,
+    TCP,
+    Chat,
 };
 
 struct PacketInfo {

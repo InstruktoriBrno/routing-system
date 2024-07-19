@@ -57,6 +57,22 @@ nlohmann::json rg::jsonSquareTopology() {
                     "type": "locator",
                     "releaseTime": 0,
                     "source": "C"
+                },
+                "6": {
+                    "type": "tcp",
+                    "releaseTime": 65,
+                    "source": "A",
+                    "destination": "C",
+                    "points": 10
+                },
+                "7": {
+                    "type": "chat",
+                    "releaseTime": 65,
+                    "source": "A",
+                    "destination": "C",
+                    "points": 10,
+                    "roundTripCount": 3,
+                    "messages": ["SYN", "SYN/ACK", "ACK", "Wazzup!", "Wazzuup!", "Wazzuuup!"]
                 }
             },
             "events": [

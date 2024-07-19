@@ -61,6 +61,10 @@ inline rg::PacketType packet_type_from_str(const char* s) {
         return rg::PacketType::VisitAll;
     if (s == "locator"sv)
         return rg::PacketType::Locator;
+    if (s == "tcp"sv)
+        return rg::PacketType::TCP;
+    if (s == "chat"sv)
+        return rg::PacketType::Chat;
 
     system_trap((std::string("Unknown packet type: ") + s).c_str());
 }
