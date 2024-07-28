@@ -7,8 +7,7 @@
 TEST_CASE("Any packet: Wrong starting point") {
     auto setup = rg::io::round_setup_from_json('B', rg::jsonSquareTopology());
 
-    MockCardInterface card;
-    card.id.seq = 1;
+    MockCardInterface card(1);
     
     auto action = rg::handle_packet_visit(setup, card);
 
@@ -21,11 +20,8 @@ TEST_CASE("Any packet: invalid hop") {
     auto setup = rg::io::round_setup_from_json('C', rg::jsonSquareTopology());
     setup.advance_time_to(12);
 
-    MockCardInterface card;
-    card.id.seq = 1;
-    card.visits.push_back({
-        .where = 'A'
-    });
+    MockCardInterface card(1);
+    card.mark_visit({.where = 'A'});
     
     auto action = rg::handle_packet_visit(setup, card);
 

@@ -8,10 +8,9 @@ TEST_CASE("Priority packet: deliver immediatelly") {
     auto setup = rg::io::round_setup_from_json('C', rg::jsonSquareTopology());
     int pointsExpected = 20;
 
-    MockCardInterface card;
-    card.id.seq = 2;
-    card.visits.push_back({.where = 'A', .time = 1});
-    card.visits.push_back({.where = 'B', .time = 2});
+    MockCardInterface card(2);
+    card.mark_visit({.where = 'A', .time = 1});
+    card.mark_visit({.where = 'B', .time = 2});
 
     setup.advance_time_to(3);
 
@@ -33,10 +32,9 @@ TEST_CASE("Priority packet: deliver on deadline") {
     auto setup = rg::io::round_setup_from_json('C', rg::jsonSquareTopology());
     int pointsExpected = 4;
 
-    MockCardInterface card;
-    card.id.seq = 2;
-    card.visits.push_back({.where = 'A', .time = 8});
-    card.visits.push_back({.where = 'B', .time = 2});
+    MockCardInterface card(2);
+    card.mark_visit({.where = 'A', .time = 8});
+    card.mark_visit({.where = 'B', .time = 2});
 
     setup.advance_time_to(308);
 
@@ -58,10 +56,9 @@ TEST_CASE("Priority packet: deliver after deadline") {
     auto setup = rg::io::round_setup_from_json('C', rg::jsonSquareTopology());
     int pointsExpected = 0;
 
-    MockCardInterface card;
-    card.id.seq = 2;
-    card.visits.push_back({.where = 'A', .time = 8});
-    card.visits.push_back({.where = 'B', .time = 2});
+    MockCardInterface card(2);
+    card.mark_visit({.where = 'A', .time = 8});
+    card.mark_visit({.where = 'B', .time = 2});
 
     setup.advance_time_to(309);
 

@@ -8,8 +8,7 @@ TEST_CASE("Hopper packet: enter game") {
     auto setup = rg::io::round_setup_from_json('A', rg::jsonSquareTopology());
     setup.advance_time_to(1);
 
-    MockCardInterface card;
-    card.id.seq = 3;
+    MockCardInterface card(3);
     
     auto action = rg::handle_packet_visit(setup, card);
 
@@ -27,11 +26,8 @@ TEST_CASE("Hopper packet: enter game") {
 TEST_CASE("Hopper packet: retry initial router") {
     auto setup = rg::io::round_setup_from_json('A', rg::jsonSquareTopology());
 
-    MockCardInterface card;
-    card.id.seq = 3;
-    card.visits.push_back({
-        .where = 'A'
-    });
+    MockCardInterface card(3);
+    card.mark_visit({.where = 'A'});
     
     auto action = rg::handle_packet_visit(setup, card);
 
@@ -45,11 +41,8 @@ TEST_CASE("Hopper packet: first hop") {
     auto setup = rg::io::round_setup_from_json('B', rg::jsonSquareTopology());
     setup.advance_time_to(12);
 
-    MockCardInterface card;
-    card.id.seq = 3;
-    card.visits.push_back({
-        .where = 'A'
-    });
+    MockCardInterface card(3);
+    card.mark_visit({.where = 'A'});
     
     auto action = rg::handle_packet_visit(setup, card);
 
@@ -68,10 +61,9 @@ TEST_CASE("Hopper packet: repeat router") {
     auto setup = rg::io::round_setup_from_json('B', rg::jsonSquareTopology());
     setup.advance_time_to(12);
 
-    MockCardInterface card;
-    card.id.seq = 3;
-    card.visits.push_back({.where = 'A'});
-    card.visits.push_back({.where = 'B'});
+    MockCardInterface card(3);
+    card.mark_visit({.where = 'A'});
+    card.mark_visit({.where = 'B'});
     
     auto action = rg::handle_packet_visit(setup, card);
 
@@ -88,8 +80,7 @@ TEST_CASE("Hopper packet: multihop test") {
     auto setupC = rg::io::round_setup_from_json('C', rg::jsonSquareTopology());
     auto setupD = rg::io::round_setup_from_json('D', rg::jsonSquareTopology());
 
-    MockCardInterface card;
-    card.id.seq = 3;
+    MockCardInterface card(3);
 
     rg::handle_packet_visit(setupB, card); // invalid
     rg::handle_packet_visit(setupA, card); // start

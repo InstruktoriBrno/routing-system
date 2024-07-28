@@ -7,8 +7,7 @@
 TEST_CASE("VisitAll packet: enter game") {
     auto setup = rg::io::round_setup_from_json('A', rg::jsonSquareTopology());
 
-    MockCardInterface card;
-    card.id.seq = 4;
+    MockCardInterface card(4);
     
     auto action = rg::handle_packet_visit(setup, card);
 
@@ -28,11 +27,10 @@ TEST_CASE("VisitAll packet: enter game") {
 TEST_CASE("VisitAll packet: visit last router ") {
     auto setup = rg::io::round_setup_from_json('D', rg::jsonSquareTopology());
 
-    MockCardInterface card;
-    card.id.seq = 4;
-    card.visits.push_back({.where = 'A'});
-    card.visits.push_back({.where = 'B'});
-    card.visits.push_back({.where = 'C'});
+    MockCardInterface card(4);
+    card.mark_visit({.where = 'A'});
+    card.mark_visit({.where = 'B'});
+    card.mark_visit({.where = 'C'});
     card.set_metadata(0x7);
 
     auto action = rg::handle_packet_visit(setup, card);
@@ -54,11 +52,8 @@ TEST_CASE("VisitAll packet: visit last router ") {
 TEST_CASE("VisitAll packet: visit second router") {
     auto setup = rg::io::round_setup_from_json('B', rg::jsonSquareTopology());
 
-    MockCardInterface card;
-    card.id.seq = 4;
-    card.visits.push_back({
-        .where = 'A'
-    });
+    MockCardInterface card(4);
+    card.mark_visit({.where = 'A'});
     card.set_metadata(0x1);
     
     auto action = rg::handle_packet_visit(setup, card);
@@ -73,10 +68,9 @@ TEST_CASE("VisitAll packet: visit second router") {
 TEST_CASE("VisitAll packet: revisit first router") {
     auto setup = rg::io::round_setup_from_json('A', rg::jsonSquareTopology());
 
-    MockCardInterface card;
-    card.id.seq = 4;
-    card.visits.push_back({.where = 'A'});
-    card.visits.push_back({.where = 'B'});
+    MockCardInterface card(4);
+    card.mark_visit({.where = 'A'});
+    card.mark_visit({.where = 'B'});
     card.set_metadata(0x3);
     
     auto action = rg::handle_packet_visit(setup, card);
@@ -95,8 +89,7 @@ TEST_CASE("VisitAll packet: multistep test") {
     auto setupC = rg::io::round_setup_from_json('C', rg::jsonSquareTopology());
     auto setupD = rg::io::round_setup_from_json('D', rg::jsonSquareTopology());
 
-    MockCardInterface card;
-    card.id.seq = 4;
+    MockCardInterface card(4);
 
     rg::handle_packet_visit(setupB, card); // invalid
     rg::handle_packet_visit(setupA, card); // 1

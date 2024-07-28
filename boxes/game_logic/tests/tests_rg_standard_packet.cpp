@@ -8,8 +8,7 @@ TEST_CASE("Standard packet: enter game") {
     auto setup = rg::io::round_setup_from_json('A', rg::jsonSquareTopology());
     setup.advance_time_to(12);
 
-    MockCardInterface card;
-    card.id.seq = 1;
+    MockCardInterface card(1);
     
     auto action = rg::handle_packet_visit(setup, card);
 
@@ -27,11 +26,8 @@ TEST_CASE("Standard packet: enter game") {
 TEST_CASE("Standard packet: retry initial router") {
     auto setup = rg::io::round_setup_from_json('A', rg::jsonSquareTopology());
 
-    MockCardInterface card;
-    card.id.seq = 1;
-    card.visits.push_back({
-        .where = 'A'
-    });
+    MockCardInterface card(1);
+    card.mark_visit({.where = 'A'});
     
     auto action = rg::handle_packet_visit(setup, card);
 
@@ -46,11 +42,8 @@ TEST_CASE("Standard packet: first hop") {
     auto setup = rg::io::round_setup_from_json('B', rg::jsonSquareTopology());
     setup.advance_time_to(12);
 
-    MockCardInterface card;
-    card.id.seq = 1;
-    card.visits.push_back({
-        .where = 'A'
-    });
+    MockCardInterface card(1);
+    card.mark_visit({.where = 'A'});
     
     auto action = rg::handle_packet_visit(setup, card);
 
@@ -71,10 +64,9 @@ TEST_CASE("Standard packet: reach destination") {
     auto setup = rg::io::round_setup_from_json('C', rg::jsonSquareTopology());
     setup.advance_time_to(12);
 
-    MockCardInterface card;
-    card.id.seq = 1;
-    card.visits.push_back({.where = 'A'});
-    card.visits.push_back({.where = 'B'});
+    MockCardInterface card(1);
+    card.mark_visit({.where = 'A'});
+    card.mark_visit({.where = 'B'});
     
     auto action = rg::handle_packet_visit(setup, card);
 
@@ -95,10 +87,9 @@ TEST_CASE("Standard packet: revisit destination") {
     auto setup = rg::io::round_setup_from_json('C', rg::jsonSquareTopology());
     setup.advance_time_to(12);
 
-    MockCardInterface card;
-    card.id.seq = 1;
-    card.visits.push_back({.where = 'A'});
-    card.visits.push_back({.where = 'B'});
+    MockCardInterface card(1);
+    card.mark_visit({.where = 'A'});
+    card.mark_visit({.where = 'B'});
     card.set_metadata(0b1);
 
     auto action = rg::handle_packet_visit(setup, card);

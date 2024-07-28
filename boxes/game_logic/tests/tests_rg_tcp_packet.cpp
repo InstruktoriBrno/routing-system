@@ -7,8 +7,7 @@
 TEST_CASE("TCP packet: quick passthrough") {
     // Fastest delivery possible, both there and back again.
     // Repetitively beeped at router B, which does not count as extra hops.
-    MockCardInterface card;
-    card.id.seq = 6;
+    MockCardInterface card(6);
 
     auto roundSpec = rg::jsonSquareTopology();
     rg::UiAction action;

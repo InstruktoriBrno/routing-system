@@ -4,10 +4,15 @@
 #include <iostream>
 
 class MockCardInterface : public rg::CardCommInterface {
-public:
+private:
     rg::CardLogicalId id;
     std::vector<rg::PacketVisit> visits;
     std::bitset<32> metadata;
+
+public:
+    MockCardInterface(rg::CardSeqNum seq_id) {
+        id.seq = seq_id;
+    }
 
     rg::CardLogicalId get_id() override {
         return id;

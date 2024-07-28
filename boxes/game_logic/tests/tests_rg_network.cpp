@@ -23,8 +23,7 @@ TEST_CASE("Admin packet: check displayed info") {
     auto setup = rg::io::round_setup_from_json('B', rg::jsonSquareTopology());
     setup.advance_time_to(-1);
 
-    MockCardInterface card;
-    card.id.seq = 0;    
+    MockCardInterface card(0);
     auto action = rg::handle_packet_visit(setup, card);
 
     CHECK(action.result == rg::PacketVisitResult::Continue);
@@ -41,8 +40,7 @@ TEST_CASE("Locator packet: pre-game success") {
     auto setup = rg::io::round_setup_from_json('C', rg::jsonSquareTopology());
     setup.advance_time_to(-1);
 
-    MockCardInterface card;
-    card.id.seq = 5;    
+    MockCardInterface card(5);
     auto action = rg::handle_packet_visit(setup, card);
 
     CHECK(action.result == rg::PacketVisitResult::Continue);
@@ -53,8 +51,7 @@ TEST_CASE("Locator packet: pre-game fail") {
     auto setup = rg::io::round_setup_from_json('A', rg::jsonSquareTopology());
     setup.advance_time_to(-1);
 
-    MockCardInterface card;
-    card.id.seq = 5;    
+    MockCardInterface card(5);
     auto action = rg::handle_packet_visit(setup, card);
 
     CHECK(action.result == rg::PacketVisitResult::Invalid);
@@ -65,8 +62,7 @@ TEST_CASE("Locator packet: in-game success") {
     auto setup = rg::io::round_setup_from_json('C', rg::jsonSquareTopology());
     setup.advance_time_to(1);
 
-    MockCardInterface card;
-    card.id.seq = 5;    
+    MockCardInterface card(5);
     auto action = rg::handle_packet_visit(setup, card);
     std::cerr << action.log << "\n\n\n";
 
@@ -78,8 +74,7 @@ TEST_CASE("Locator packet: in-game fail") {
     auto setup = rg::io::round_setup_from_json('B', rg::jsonSquareTopology());
     setup.advance_time_to(1);
 
-    MockCardInterface card;
-    card.id.seq = 5;    
+    MockCardInterface card(5);
     auto action = rg::handle_packet_visit(setup, card);
 
     CHECK(action.result == rg::PacketVisitResult::Invalid);
@@ -92,8 +87,7 @@ TEST_CASE("Arbitrary packet: after game ended") {
     std::cerr << "WTF??? " << setup.time() << " " << setup.duration() << "\n";
     setup.advance_time_to(1500);
 
-    MockCardInterface card;
-    card.id.seq = 1;    
+    MockCardInterface card(1);
     auto action = rg::handle_packet_visit(setup, card);
 
     CHECK(action.result == rg::PacketVisitResult::Finished);
