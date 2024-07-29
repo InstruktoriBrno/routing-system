@@ -86,6 +86,7 @@ enum class PacketType {
 
 struct PacketInfo {
     PacketType type;
+    int releaseTime = -1;
     RouterId source;
 
     std::optional<RouterId> destination = std::nullopt;
@@ -97,7 +98,7 @@ struct PacketInfo {
 
 enum class TopologyEventType {
     LinkDown,
-    LinkUp
+    LinkUp,
 };
 
 struct TopologyEvent {
@@ -133,8 +134,8 @@ private:
     int _duration = 0;
 public:
     RoundSetup(RouterId who_am_i, int duration, const Network& network,
-        const std::vector<TopologyEvent>& events, const std::map<CardSeqNum,
-        PacketInfo> _packet_infos)
+        const std::vector<TopologyEvent>& events,
+        const std::map<CardSeqNum, PacketInfo> _packet_infos)
     : _who_am_i(who_am_i), _initial_network(network), _current_network(_initial_network),
       _topology_events(events), _packet_infos(_packet_infos), _duration(duration)
     {

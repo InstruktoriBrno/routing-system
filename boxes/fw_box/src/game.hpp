@@ -307,6 +307,7 @@ public:
             rg::PacketInfo packet_info;
 
             packet_info.type = packet_type_from_str(object["type"].as<const char*>());
+            packet_info.releaseTime = object["releaseTime"].as<int>();
             packet_info.source = object["source"].as<const char*>()[0];
 
             if (object.containsKey("destination"))

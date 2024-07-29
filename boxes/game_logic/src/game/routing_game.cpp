@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstdarg>
 #include <iostream>
 #include <string_view>
@@ -272,10 +273,105 @@ result_handle_internal handle_visitall_packet(const rg::RoundSetup& setup, rg::C
  * See the API for specification of how points should be calculated.
  * After the packet reaches packet.source again, a PacketVisitResult::Finished
  * with no points is returned by all routers.
+ * 
+ * Card metadata bitset encodes an integer holding the current delivery index,
+ * i.e., zero-based number of the current delivery.
  */
 result_handle_internal handle_tcp_packet(const rg::RoundSetup& setup, rg::CardCommInterface& card) {
-    // TODO: TCP packet type
-    return { .action = {.result = PacketVisitResult::Invalid, .log = "Not implemented"} };
+    rg::PacketInfo packet = setup.packet_info(card.get_seq());
+    assert(packet.destination.has_value());
+
+    int roundTripCount = 1; // prep to generalize for the "chat" packets
+
+    unsigned long currentDeliveryIdx = card.get_metadata().to_ulong();
+
+    rg::RouterId currentSource;
+    rg::RouterId currentDestination;
+
+    if (currentDeliveryIdx % 2 == 0) {
+        currentSource = packet.source;
+        currentDestination = packet.destination.value();
+    } else {
+        currentSource = packet.destination.value();
+        currentDestination = packet.source;
+    }
+
+    auto me = setup.who_am_i();
+    std::string info{currentDestination};
+
+    if (currentDeliveryIdx >= roundTripCount * 2) {
+        return {
+            .action = {.result = PacketVisitResult::Finished, .log = "Deliveries done: " + currentDeliveryIdx}
+        };
+    }
+
+    if (card.visit_count() > 0 && card.get_visit(-1).where == me) {
+        return {
+            .action = {.result = PacketVisitResult::Continue, .instructions = info, .log = "Multibeep"}
+        };
+    }
+
+    if (me != currentDestination) {
+        return {
+            .action = {
+                .result = PacketVisitResult::Continue,
+                .instructions = info,
+                .log = "Packet in transit to " + info,
+            },
+            .log = {
+                {
+                    .where = me,
+                    .time = setup.time(),
+                }
+            },
+        };
+    }
+
+    // just delivered!
+    currentDeliveryIdx++;
+    card.set_metadata(std::bitset<32>(currentDeliveryIdx));
+
+    // calculate points from the points base
+    int hops = 0;
+    do {
+        hops++;
+    } while (hops <= card.visit_count() && card.get_visit(-hops).where != currentSource);
+    if (hops > card.visit_count()) {
+        return {
+            .action = {.result = PacketVisitResult::Invalid, .log = "Source visit not logged"}
+        };
+    }
+    int deliveryStart = card.get_visit(-hops).time;
+    if (currentDeliveryIdx == 1) {
+        deliveryStart = std::min(deliveryStart, packet.releaseTime + 30);
+    }
+    int deliveryMinutes = (setup.time() - deliveryStart) / 60;
+    int points = packet.points - 2 * hops - deliveryMinutes;
+
+    rg::PacketVisit log = {
+        .where = me,
+        .time = setup.time(),
+        .points = points,
+    };
+
+    if (currentDeliveryIdx < roundTripCount * 2) {
+        return {
+            .action = {
+                .result = PacketVisitResult::Continue,
+                .instructions = std::string{currentSource},
+                .points = points,
+            },
+            .log = log,
+        };
+    } else {
+        return {
+            .action = {
+                .result = PacketVisitResult::Finished,
+                .points = points,
+            },
+            .log = log,
+        };
+    }
 }
 
 /**
@@ -313,7 +409,7 @@ rg::UiAction rg::handle_packet_visit(const rg::RoundSetup& setup, rg::CardCommIn
         if (packet.source == me) {
             return {
                 .result = PacketVisitResult::Continue,
-                .log = "Pregame: Successfully located the strting router"
+                .log = "Pregame: Successfully located the starting router"
             };
         } else {
             return {
