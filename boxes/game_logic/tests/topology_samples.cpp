@@ -45,7 +45,7 @@ nlohmann::json rg::jsonSquareTopology() {
                     "type": "hopper",
                     "releaseTime": 0,
                     "source": "A",
-                    "pointsPerHop": 1
+                    "pointsPerHop": 3
                 },
                 "4": {
                     "type": "visitall",
