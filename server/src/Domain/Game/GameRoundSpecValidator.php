@@ -98,6 +98,9 @@ class GameRoundSpecValidator
             if (isset($spec->destination) && !$this->routerDefined($spec->destination)) {
                 $this->packetError($cardNum, "non-existent destination router \"{$spec->destination}\"");
             }
+            if (isset($spec->source, $spec->destination) && $spec->source === $spec->destination) {
+                $this->packetError($cardNum, "source same as destination");
+            }
             if (isset($spec->releaseTime) && $spec->releaseTime >= $this->gameSpec->duration) {
                 $this->packetError($cardNum, "releaseTime beyond the game duration of \"{$this->gameSpec->duration}\"");
             }

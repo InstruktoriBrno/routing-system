@@ -192,6 +192,7 @@ class ValidateRoundSpecActionTest extends EndToEndTest
             '004' => (object)['type' => 'tcp', 'releaseTime' => 300, 'source' => 'A', 'destination' => 'C', 'points' => 20], // releaseTime after round end
             '010' => (object)['type' => 'chat', 'releaseTime' => 60, 'source' => 'B', 'destination' => 'C', 'points' => 10, 'roundTripCount' => 2, 'messages' => ['a', 'b', 'c', 'd']],
             '011' => (object)['type' => 'chat', 'releaseTime' => 60, 'source' => 'B', 'destination' => 'C', 'points' => 10, 'roundTripCount' => 2, 'messages' => ['a', 'b', 'c']], // not enough messages
+            '012' => (object)['type' => 'tcp', 'releaseTime' => 30, 'source' => 'A', 'destination' => 'A', 'points' => 5], // source same as destination
         ];
         $spec->events = [
             (object)['type' => 'linkdown', 'time' => 50, 'link' => 'BA'], // OK despite link written reversely
@@ -228,6 +229,7 @@ class ValidateRoundSpecActionTest extends EndToEndTest
         $this->assertMatchesRegularExpression('/packets\\["004"\\].*releaseTime/i', $responseBody);
         $this->assertStringNotContainsStringIgnoringCase('packets["010"]', $responseBody);
         $this->assertMatchesRegularExpression('/packets\\["011"\\].*messages/i', $responseBody);
+        $this->assertMatchesRegularExpression('/packets\\["012"\\].*source.*destination/i', $responseBody);
 
         $this->assertStringNotContainsStringIgnoringCase('events[0]', $responseBody);
         $this->assertMatchesRegularExpression('/events\\[1\\].*already down/i', $responseBody);
