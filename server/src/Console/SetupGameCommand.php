@@ -40,15 +40,7 @@ final class SetupGameCommand extends CommandBase
 
     protected function executeImpl(InputInterface $input, OutputInterface $output): void
     {
-        $roundIdent = self::getRoundIdentArgument($input, self::ARG_ROUND_IDENT);
-
-        $round = $this->getDb()->querySingleTuple(
-            'SELECT * FROM game_round WHERE api_ident = %i',
-            $roundIdent
-        );
-        if ($round === null) {
-            throw new CommandRuntimeException(sprintf('No game round exists with API identifier "%s"', $roundIdent));
-        }
+        $round = $this->loadRoundFromIdentArgument($input, self::ARG_ROUND_IDENT);
 
         $spec = $round->spec->getValue();
         $spec->roundId = $round->api_ident;

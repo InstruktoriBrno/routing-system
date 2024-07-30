@@ -10,6 +10,7 @@ use App\Console\PauseGameCommand;
 use App\Console\ResumeGameCommand;
 use App\Console\SetupGameCommand;
 use App\Console\StartGameCommand;
+use App\Console\TailEventsCommand;
 
 date_default_timezone_set('Europe/Prague');
 
@@ -50,5 +51,6 @@ return [
         SetupGameCommand::class,
         StartGameCommand::class,
         AwardPointsCommand::class,
+        TailEventsCommand::class,
     ],
 ];

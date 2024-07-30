@@ -35,18 +35,11 @@ final class StartGameCommand extends CommandBase
     protected function executeImpl(InputInterface $input, OutputInterface $output): void
     {
         $roundIdent = self::getRoundIdentArgument($input, self::ARG_ROUND_IDENT);
-
-        $tuple = $this->getDb()->querySingleTuple(
-            'SELECT api_password FROM game_round WHERE api_ident = %int',
-            $roundIdent
-        );
-        if ($tuple === null) {
-            throw new CommandRuntimeException(sprintf('No game round exists with API identifier "%s"', $roundIdent));
-        }
+        $round = $this->loadRoundFromIdentArgument($input, self::ARG_ROUND_IDENT);
 
         $startParams = [
             'roundId' => $roundIdent,
-            'password' => $tuple->api_password,
+            'password' => $round->api_password,
         ];
         
         $cfg = $this->container->get(SettingsInterface::class)->get('server');

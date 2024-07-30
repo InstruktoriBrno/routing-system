@@ -6,6 +6,7 @@ namespace App\Console;
 use App\Application\Middleware\LoggerMiddleware;
 use App\Application\Settings\SettingsInterface;
 use Ivory\Connection\IConnection;
+use Ivory\Relation\ITuple;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Container\ContainerInterface;
@@ -98,6 +99,20 @@ abstract class CommandBase extends Command
     protected static function getRoundIdentArgument(InputInterface $input, string $name): int
     {
         return self::getIntArgument($input, $name, 1, 32767);
+    }
+
+    protected function loadRoundFromIdentArgument(InputInterface $input, string $argName): ITuple
+    {
+        $roundIdent = self::getRoundIdentArgument($input, $argName);
+        $round = $this->getDb()->querySingleTuple(
+            'SELECT * FROM game_round WHERE api_ident = %i',
+            $roundIdent
+        );
+        if ($round === null) {
+            throw new CommandRuntimeException(sprintf('No game round exists with API identifier "%s"', $roundIdent));
+        }
+
+        return $round;
     }
 
     protected function getDb(): IConnection
