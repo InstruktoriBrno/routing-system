@@ -125,12 +125,16 @@ rg::PacketInfo rg::io::from_json(const nlohmann::json& json) {
     if (!json.contains("type")) {
         throw std::invalid_argument("Invalid JSON - expected 'type' key");
     }
+    if (!json.contains("releaseTime") || !json["releaseTime"].is_number_integer()) {
+        throw std::invalid_argument("Invalid JSON - expected 'releaseTime' to be an integer");
+    }
     if (!json.contains("source") || !json["source"].is_string()) {
         throw std::invalid_argument("Invalid JSON - expected 'source' to be a single letter");
     }
 
     rg::PacketInfo info;
     info.type = from_json<rg::PacketType>(json["type"]);
+    info.releaseTime = json["releaseTime"].get<int>();
     info.source = from_json<rg::RouterId>(json["source"]);
 
     if (json.contains("destination")) {
@@ -138,10 +142,31 @@ rg::PacketInfo rg::io::from_json(const nlohmann::json& json) {
     }
 
     if (json.contains("points")) {
-        if (!json["points"].is_number()) {
-            throw std::invalid_argument("Invalid JSON - expected 'points' to be a number");
+        if (!json["points"].is_number_integer()) {
+            throw std::invalid_argument("Invalid JSON - expected 'points' to be an integer");
         }
         info.points = json["points"].get<int>();
+    }
+
+    if (json.contains("pointsPerMinuteLeft")) {
+        if (!json["pointsPerMinuteLeft"].is_number_integer()) {
+            throw std::invalid_argument("Invalid JSON - expected 'pointsPerMinuteLeft' to be an integer");
+        }
+        info.pointsPerMinuteLeft = json["pointsPerMinuteLeft"].get<int>();
+    }
+
+    if (json.contains("minutesToDeliver")) {
+        if (!json["minutesToDeliver"].is_number_integer()) {
+            throw std::invalid_argument("Invalid JSON - expected 'minutesToDeliver' to be an integer");
+        }
+        info.minutesToDeliver = json["minutesToDeliver"].get<int>();
+    }
+
+    if (json.contains("pointsPerHop")) {
+        if (!json["pointsPerHop"].is_number_integer()) {
+            throw std::invalid_argument("Invalid JSON - expected 'pointsPerHop' to be an integer");
+        }
+        info.pointsPerHop = json["pointsPerHop"].get<int>();
     }
 
     return info;

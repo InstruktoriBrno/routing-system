@@ -314,8 +314,8 @@ public:
                 packet_info.destination = object["destination"].as<const char*>()[0];
             if (object.containsKey("points"))
                 packet_info.points = object["points"].as<int>();
-            if (object.containsKey("pointsPerMinute_left"))
-                packet_info.pointsPerMinuteLeft = object["pointsPerMinute_left"].as<int>();
+            if (object.containsKey("pointsPerMinuteLeft"))
+                packet_info.pointsPerMinuteLeft = object["pointsPerMinuteLeft"].as<int>();
             if (object.containsKey("minutesToDeliver"))
                 packet_info.minutesToDeliver = object["minutesToDeliver"].as<int>();
             if (object.containsKey("pointsPerHop"))

@@ -48,13 +48,13 @@ TEST_CASE("Hopper packet: first hop") {
 
     CHECK(action.result == rg::PacketVisitResult::Continue);
     CHECK(action.instructions == "1");
-    CHECK(action.points == 1);
+    CHECK(action.points == 3);
 
     CHECK(card.visit_count() == 2);
     auto visit = card.get_visit(-1);
     CHECK(visit.where == 'B');
     CHECK(visit.time == 12);
-    CHECK(visit.points == 1);
+    CHECK(visit.points == 3);
 }
 
 TEST_CASE("Hopper packet: repeat router") {
@@ -97,7 +97,7 @@ TEST_CASE("Hopper packet: multihop test") {
 
     CHECK(action.result == rg::PacketVisitResult::Continue);
     CHECK(action.instructions == "5");
-    CHECK(action.points == 1);
+    CHECK(action.points == 3);
 
     CHECK(card.visit_count() == 6);
 }
