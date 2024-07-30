@@ -14,6 +14,7 @@ final class TailEventsCommand extends CommandBase
 {
     private const ARG_ROUND_IDENT = 'roundId';
     private const ARG_NUM_EVENTS = 'num';
+    private const OPT_FOLLOW = 'follow';
     private const OPT_WITH_ROUTER_MAC = 'with-router-mac';
 
     private const ARG_NUM_EVENTS_ALL = 'all';
@@ -44,6 +45,14 @@ final class TailEventsCommand extends CommandBase
         );
 
         $this->addOption(
+            self::OPT_FOLLOW,
+            'f',
+            InputOption::VALUE_NONE,
+            <<<'TEXT'
+            Keep running, listening to new events and print them as they come.
+            TEXT
+        );
+        $this->addOption(
             self::OPT_WITH_ROUTER_MAC,
             'm',
             InputOption::VALUE_NONE,
@@ -57,6 +66,7 @@ final class TailEventsCommand extends CommandBase
     {
         $round = $this->loadRoundFromIdentArgument($input, self::ARG_ROUND_IDENT);
         $eventNumStr = self::getStringArgument($input, self::ARG_NUM_EVENTS, '~^\\d+|' . preg_quote(self::ARG_NUM_EVENTS_ALL) . '$~i');
+        $follow = $input->getOption(self::OPT_FOLLOW);
         $withRouterMac = $input->getOption(self::OPT_WITH_ROUTER_MAC);
 
         if (strcasecmp($eventNumStr, self::ARG_NUM_EVENTS_ALL) == 0) {
@@ -93,6 +103,10 @@ final class TailEventsCommand extends CommandBase
             $line .= ' ' . preg_replace('~\\r\\n|\\r|\\n~', ' ', $event->event->getEncoded());
 
             $output->writeln($line);
+        }
+
+        if ($follow) {
+            $output->writeln('FOLLOW NOT IMPLEMENTED YET');
         }
     }
 }
