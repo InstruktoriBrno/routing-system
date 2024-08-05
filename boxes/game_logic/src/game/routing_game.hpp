@@ -64,7 +64,7 @@ public:
         return _edges.find(router_id)->second;
     }
 
-    const bool are_neighbors(RouterId from, RouterId to) const {
+    bool are_neighbors(RouterId from, RouterId to) const {
         rg::log("Checking if %d is neighbor of %d", from, to);
         assert(_routers.count(from));
         assert(_routers.count(to));

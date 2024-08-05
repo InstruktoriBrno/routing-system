@@ -273,7 +273,7 @@ result_handle_internal handle_visitall_packet(const rg::RoundSetup& setup, rg::C
  * See the API for specification of how points should be calculated.
  * After the packet reaches packet.source again, a PacketVisitResult::Finished
  * with no points is returned by all routers.
- * 
+ *
  * Card metadata bitset encodes an integer holding the current delivery index,
  * i.e., zero-based number of the current delivery.
  */
@@ -301,19 +301,19 @@ result_handle_internal handle_tcp_packet(const rg::RoundSetup& setup, rg::CardCo
 
     if (currentDeliveryIdx >= roundTripCount * 2) {
         return {
-            .action = {.result = PacketVisitResult::Finished, .log = "Deliveries done: " + currentDeliveryIdx}
+            .action = UiAction{.result = PacketVisitResult::Finished, .log = "Deliveries done: " + currentDeliveryIdx}
         };
     }
 
     if (card.visit_count() > 0 && card.get_visit(-1).where == me) {
         return {
-            .action = {.result = PacketVisitResult::Continue, .instructions = info, .log = "Multibeep"}
+            .action = UiAction{.result = PacketVisitResult::Continue, .instructions = info, .log = "Multibeep"}
         };
     }
 
     if (me != currentDestination) {
         return {
-            .action = {
+            .action = UiAction{
                 .result = PacketVisitResult::Continue,
                 .instructions = info,
                 .log = "Packet in transit to " + info,
@@ -356,7 +356,7 @@ result_handle_internal handle_tcp_packet(const rg::RoundSetup& setup, rg::CardCo
 
     if (currentDeliveryIdx < roundTripCount * 2) {
         return {
-            .action = {
+            .action = UiAction{
                 .result = PacketVisitResult::Continue,
                 .instructions = std::string{currentSource},
                 .points = points,
@@ -365,7 +365,7 @@ result_handle_internal handle_tcp_packet(const rg::RoundSetup& setup, rg::CardCo
         };
     } else {
         return {
-            .action = {
+            .action = UiAction{
                 .result = PacketVisitResult::Finished,
                 .points = points,
             },
