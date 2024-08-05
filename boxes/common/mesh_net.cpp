@@ -420,7 +420,9 @@ void report_box_status(int active_round_id, const Sha256& active_round_hash,
     send_raw_to_root(ser_buffer.span());
 }
 
-bool send_packet_visit(std::array<uint8_t, 7> physical_card_id, uint8_t team_id, uint8_t seq_num, uint8_t router_id, uint8_t score, uint16_t time) {
+bool send_packet_visit(uint16_t time, std::array<uint8_t, 7> physical_card_id, uint8_t team_id,
+                       uint8_t seq_num, uint8_t router_id, std::optional<uint8_t> score)
+{
     assert(!am_i_root());
     if (!is_mesh_connected_flag) {
         rg_log_w(TAG, "Not connected to mesh network, not sending packet visit");
@@ -428,12 +430,12 @@ bool send_packet_visit(std::array<uint8_t, 7> physical_card_id, uint8_t team_id,
     }
 
     PacketVisitMessage msg = {
+        .time = time,
         .physical_card_id = physical_card_id,
         .team_id = team_id,
         .seq_num = seq_num,
         .router_id = router_id,
-        .score = score,
-        .time = time
+        .score = score
     };
 
     static uint8_t tx_buffer[sizeof(msg) + 1];

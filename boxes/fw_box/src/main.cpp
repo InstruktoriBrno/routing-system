@@ -229,22 +229,30 @@ void game_step() {
                 rg_log_i(TAG, "Game logic result: %d", result.result);
                 rg_log_i(TAG, "Was visited: %d", card_interface.had_new_visit());
 
+                auto visit_time = game.game_time();
+                auto visit_where = game.who_am_i();
+                std::optional<uint8_t> visit_points = std::nullopt;
+
                 if (card_interface.had_new_visit()) {
                     auto visit = card_interface.get_new_visit();
                     rg_log_i(TAG, "Sending log to the network");
+                    // Log the information written to the card
+                    visit_time = visit.time;
+                    visit_where = visit.where;
+                    visit_points = visit.points;
+                }
 
-                    for (int i = 0; i != 4; i++) {
-                        bool result = send_packet_visit(
-                            card_interface.get_physical_id(),
-                            card_interface.get_id().team_id,
-                            card_interface.get_id().seq,
-                            visit.where,
-                            visit.points,
-                            visit.time);
-                        rg_log_i(TAG, "Send result: %d", result);
-                        if (result)
-                            break;
-                    }
+                for (int i = 0; i != 4; i++) {
+                    bool result = send_packet_visit(
+                        visit_time,
+                        card_interface.get_physical_id(),
+                        card_interface.get_id().team_id,
+                        card_interface.get_id().seq,
+                        visit_where,
+                        visit_points);
+                    rg_log_i(TAG, "Send result: %d", result);
+                    if (result)
+                        break;
                 }
 
                 std::unique_ptr<GameScreen> new_packet_screen;

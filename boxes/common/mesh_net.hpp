@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <esp_wifi.h>
 #include <array>
+#include <optional>
 #include <serdes.hpp>
 #include <sys/types.h>
 #include <variant>
@@ -153,32 +154,46 @@ struct GameStateMessage {
 struct PacketVisitMessage {
     static constexpr uint8_t MESSAGE_TYPE = 9;
 
+    uint16_t time;
     std::array<uint8_t, 7> physical_card_id;
     uint8_t team_id;
     uint8_t seq_num;
     uint8_t router_id;
-    uint8_t score;
-    uint16_t time;
+    std::optional<uint8_t> score;
 
     template <typename Archive>
     void serialize(Archive& archive) const {
+        archive.push(time);
         archive.push(physical_card_id);
         archive.push(team_id);
         archive.push(seq_num);
         archive.push(router_id);
+        if (score.has_value()) {
+            archive.push(uint8_t(1));
+            archive.push(score.value());
+        } else {
+            archive.push(uint8_t(0));
+            archive.push(uint8_t(0));
+        }
         archive.push(score);
-        archive.push(time);
     }
 
     template <typename Archive>
     static PacketVisitMessage deserialize(Archive& archive) {
         PacketVisitMessage msg;
+        archive.pop(msg.time);
         archive.pop(msg.physical_card_id);
         archive.pop(msg.team_id);
         archive.pop(msg.seq_num);
         archive.pop(msg.router_id);
-        archive.pop(msg.score);
-        archive.pop(msg.time);
+        uint8_t has_score;
+        archive.pop(has_score);
+        if (has_score) {
+            archive.pop(msg.score);
+        } else {
+            msg.score = std::nullopt;
+        }
+
         return msg;
     }
 };
@@ -213,7 +228,8 @@ void report_box_status(int active_round_id, const Sha256& active_round_hash,
     uint8_t round_download_progress, uint8_t game_state, uint16_t game_time, int8_t router_id);
 bool broadcast_raw_message(tcb::span<uint8_t> message);
 bool send_message(const MacAddress& recipient, tcb::span<uint8_t> message);
-bool send_packet_visit(std::array<uint8_t, 7> physical_card_id, uint8_t team_id, uint8_t seq_num, uint8_t router_id, uint8_t score, uint16_t time);
+bool send_packet_visit(uint16_t time, std::array<uint8_t, 7> physical_card_id, uint8_t team_id,
+                       uint8_t seq_num, uint8_t router_id, std::optional<uint8_t> score);
 
 
 

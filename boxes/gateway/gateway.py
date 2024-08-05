@@ -197,17 +197,18 @@ class Network(Thread):
 
     @handles(NetworkMessages.PACKET_VISIT)
     def _handle_packet_visit(self, box_id, data):
-        physical_card_id = data[0:7].hex()
-        team_id = data[7]
-        seq_num = data[8]
-        router_id = data[9]
-        score = data[10]
-        time = int.from_bytes(data[11:13], "little")
+        time = int.from_bytes(data[0:2], "little")
+        physical_card_id = data[2:9].hex(":")
+        team_id = data[9]
+        seq_num = data[10]
+        router_id = data[11]
+        has_score = data[12]
+        score = data[13]
         event = {
+            "time": time,
             "card": f"{chr(team_id)}{seq_num:03d}",
             "router": chr(router_id),
-            "score": score,
-            "time": time,
+            "score": score if has_score else None,
             "bearer": physical_card_id,
         }
 
